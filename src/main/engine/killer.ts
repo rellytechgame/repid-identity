@@ -1,5 +1,7 @@
 import type { KillOutcome, KillRequest, KillResult, ProcessInfo, Risk } from '../../shared/types'
 import { descendantsOf } from '../../shared/engine/grouping'
+import { run } from './exec'
+import { runElevated } from './privileges'
 
 const GRACE_MS = 2000
 const POLL_MS = 150
@@ -73,6 +75,20 @@ export async function killTrees(req: KillRequest, procs: ProcessInfo[], riskOf: 
     if (failure) pendingStatus.set(p.pid, failure)
   }
   if (waitList().length) await sleep(400)
+
+  // Escalate for processes the current token may not touch (other users, services).
+  const denied = targets.filter((p) => pendingStatus.get(p.pid) === 'denied' && isAlive(p.pid))
+  if (denied.length) {
+    if (process.platform === 'win32') {
+      // taskkill enables SeDebugPrivilege for the admin token, which TerminateProcess from Node does not.
+      await Promise.all(denied.map((p) => run('taskkill.exe', ['/F', '/PID', String(p.pid)])))
+    } else {
+      // Only validated integer pids reach the elevated shell line.
+      await runElevated([`kill -9 ${denied.map((p) => Math.trunc(p.pid)).join(' ')}`])
+    }
+    await sleep(500)
+    for (const p of denied) if (!isAlive(p.pid)) pendingStatus.delete(p.pid)
+  }
 
   let freedMemBytes = 0
   let freedCpu = 0

@@ -70,6 +70,8 @@ RePID (*Re*-identify the *PID*) closes that gap: it **identifies** every process
 | 📈 **Live CPU · RAM · GPU** | Gauges with history, per-application usage and per-process GPU utilization (Windows GPU engine counters, NVIDIA `nvidia-smi` elsewhere). |
 | ⚙️ **Service-aware** | Detects Windows services, systemd units and launchd agents, and **stops** them through their manager instead of killing processes that would come back. |
 | 🛡️ **Safety net** | Three-tier protection (Protected / Caution / Safe) enforced inside the engine, re-checked against fresh data right before every action. |
+| 🧹 **Deep cleanup** | Temp files, system temp, update cache, Recycle Bin/Trash, DNS cache, package-manager caches and the **cache, history and cookies of every browser** (Chrome, Edge, Firefox, Brave, Opera, Opera GX, Vivaldi, Chromium, Safari). Every item says *exactly what will happen* before you delete it; irreversible items need explicit confirmation. Passwords, bookmarks and documents are never touched. |
+| 🔑 **Full privileges** | Windows builds run as administrator (UAC prompt at launch) to end any process, stop services and clean system folders. macOS/Linux ask for your password only for the actions that need it (one prompt per action). Critical processes stay blocked regardless. |
 | 🌍 **Multilingual** | Spanish and English built in. Adding a language is adding **one JSON file** — the UI discovers it automatically. |
 | 🎨 **Polished UX** | Dark/light/system themes, keyboard accessible, reduced-motion aware, native-feeling title bar on every OS. |
 | 🔒 **100% local** | No accounts, no telemetry, no servers. |
@@ -79,8 +81,8 @@ RePID (*Re*-identify the *PID*) closes that gap: it **identifies** every process
 | Understand what a process does | Smart Free suggestions |
 |---|---|
 | <img src="assets/screenshots/identify.png" alt="Process list with detail panel explaining a Python process" /> | <img src="assets/screenshots/smart.png" alt="Smart Free dialog with suggested apps" /> |
-| **Resources reclaimed** | **Your language, your rules** |
-| <img src="assets/screenshots/result.png" alt="Notification with processes ended and memory freed" /> | <img src="assets/screenshots/settings.png" alt="Settings: language, theme, safety and protected processes" /> |
+| **Deep cleanup with clear consequences** | **Your language, your rules** |
+| <img src="assets/screenshots/cleanup.png" alt="Cleanup module listing temp files, recycle bin, DNS and per-browser cache, history and cookies with what happens if deleted" /> | <img src="assets/screenshots/settings.png" alt="Settings: language, theme, safety and protected processes" /> |
 
 ## Download & install
 
@@ -88,7 +90,7 @@ Grab the installer for your system from the [**latest release**](https://github.
 
 | OS | Package | Notes |
 |---|---|---|
-| **Windows 10/11** | `RePID-Identity-x.y.z-win-x64.exe` (installer), `…-portable.exe` | x64 and ARM64. Run as administrator to manage other users' processes and services (or use *Settings → Relaunch as administrator*). |
+| **Windows 10/11** | `RePID-Identity-x.y.z-win-x64.exe` (installer), `…-portable.exe` | x64 and ARM64. Requests administrator rights at launch (UAC) so it can end any process, stop services and clean system folders. |
 | **macOS 12+** | `RePID-Identity-x.y.z-mac-arm64.dmg` / `-x64.dmg` | Apple Silicon and Intel. |
 | **Linux** | `.AppImage`, `.deb`, `.rpm` | System services are stopped through polkit (`pkexec`) when required. |
 
@@ -144,6 +146,22 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for details.
 
 Electron hardening: `contextIsolation`, `sandbox`, no `nodeIntegration`, strict CSP in production, IPC sender verification, schema validation of every IPC payload, external links restricted to fixed URLs, no shell string interpolation (all commands use `execFile` with argument arrays; paths reach PowerShell through environment variables). Report vulnerabilities via [SECURITY.md](SECURITY.md).
 
+## Deep cleanup
+
+| Item | Risk | What happens | Needs admin |
+|---|---|---|---|
+| Temporary files & user caches | 🟢 Safe | Temp files, crash dumps, thumbnail/shader caches. Recreated automatically; files in use are skipped. | No |
+| System temporary files | 🟠 Caution | `C:\Windows\Temp`, Windows Error Reporting archives · `/Library/Caches` · `/var/crash`, old `/var/tmp`, journal vacuum. | Yes |
+| Update download cache | 🟠 Caution | Already-downloaded update installers (Windows Update, Delivery Optimization, apt/dnf/pacman). Installed updates are **not** removed. | Yes |
+| Recycle Bin / Trash | 🔴 Sensitive | **Permanent** deletion. Cannot be undone. Off by default. | No |
+| DNS cache | 🟢 Safe | Flushes name lookups. No downside. | Yes |
+| Package-manager caches | 🟠 Caution | npm, Yarn and pip caches. The next install downloads again. Off by default. | No |
+| Browser cache | 🟢 Safe | Pages load slower the first time. Sessions and passwords are kept. | No |
+| Browser history | 🔴 Sensitive | History, address-bar suggestions, top sites, saved sessions. **Bookmarks and passwords are kept** (Firefox history is removed with SQL because bookmarks share its database). | No |
+| Browser cookies | 🔴 Sensitive | Signs you out of every website; two-step verification may be asked again. | No |
+
+Open browsers lock their files: RePID shows which ones are open and offers to close them (warning about unsaved work) or skips them. Deletion is confined to each target folder, never follows symbolic links or junctions, refuses over-broad roots (a misconfigured `%TEMP%` such as `C:\`) and only accepts target ids from the UI — never paths.
+
 ## Privacy
 
 RePID makes **no network requests** except one optional, anonymous call to the public GitHub API to show the star count on the *About* screen. It has no analytics, no crash reporting service and no accounts. Settings live in the app's local storage.
@@ -181,6 +199,7 @@ repid-identity/
 ├─ src/
 │  ├─ main/                 # Electron main process (privileged)
 │  │  ├─ engine/            # sampling, services, GPU, metadata, killer, privileges
+│  │  ├─ cleaner/           # cleanup targets, safe deletion, Firefox history (+ tests)
 │  │  ├─ ipc.ts             # validated IPC surface
 │  │  └─ index.ts           # window, CSP, lifecycle
 │  ├─ preload/              # contextBridge → window.repid (typed, minimal)
@@ -208,6 +227,7 @@ The website ([repid-identity.vercel.app](https://repid-identity.vercel.app)) is 
 
 ## Roadmap
 
+- [x] Deep cleanup module (v1.1)
 - [ ] Code-signed installers for Windows and macOS (**funded by donations**)
 - [ ] Auto-update through GitHub Releases
 - [ ] Per-process disk and network I/O

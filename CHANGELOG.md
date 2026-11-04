@@ -2,6 +2,21 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [1.1.0] — 2026-11-04
+
+### Added
+- **Deep cleanup** module: user and system temp files, update download cache, Recycle Bin/Trash, DNS cache, package-manager caches, and cache/history/cookies for Chrome, Edge, Firefox, Brave, Opera, Opera GX, Vivaldi, Chromium and Safari.
+- Every cleanup item explains what will happen; sensitive items (recycle bin, history, cookies) are off by default and require explicit acknowledgement.
+- Open browsers are detected; RePID offers to close them before cleaning or skips their items.
+- Firefox history is cleared with SQL so bookmarks in the same database survive.
+
+### Changed
+- Windows builds request administrator rights at launch (`requireAdministrator`).
+- Ending processes escalates automatically when access is denied: `taskkill /F` on Windows, one `pkexec`/administrator prompt on Linux/macOS.
+
+### Security
+- Cleanup accepts target ids only; paths are derived in the main process, confined to each target folder, links/junctions are never followed and over-broad roots are refused.
+
 ## [1.0.0] — 2026-11-04
 
 ### Added
@@ -20,4 +35,5 @@ All notable changes to this project are documented here. The format follows [Kee
 - Supporters wall and donation link.
 - Installers for Windows (NSIS, portable), macOS (DMG) and Linux (AppImage, deb, rpm).
 
+[1.1.0]: https://github.com/rellytechgame/repid-identity/releases/tag/v1.1.0
 [1.0.0]: https://github.com/rellytechgame/repid-identity/releases/tag/v1.0.0

@@ -1,5 +1,6 @@
 import { join } from 'node:path'
 import { app, BrowserWindow, Menu, session, shell } from 'electron'
+import { Cleaner } from './cleaner'
 import { Engine } from './engine'
 import { registerIpc } from './ipc'
 
@@ -93,7 +94,7 @@ if (!app.requestSingleInstanceLock()) {
     session.defaultSession.setPermissionRequestHandler((_wc, _permission, callback) => callback(false))
 
     const engine = new Engine(selfPids)
-    registerIpc(engine, (theme) => {
+    registerIpc(engine, new Cleaner(engine), (theme) => {
       if (!isMac) win?.setTitleBarOverlay(TITLEBAR[theme])
       win?.setBackgroundColor(TITLEBAR[theme].color)
     })

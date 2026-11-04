@@ -17,6 +17,8 @@ publish:
 
 win:
   icon: build/icon.png
+  # Full privileges: the app ends any process, stops services and cleans system folders.
+  requestedExecutionLevel: requireAdministrator
   target:
     - target: nsis
       arch: [x64, arm64]

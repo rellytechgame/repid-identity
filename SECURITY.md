@@ -37,11 +37,13 @@ We'll credit you in the release notes unless you prefer to stay anonymous.
 - Escaping the renderer sandbox or abusing the `window.repid` bridge
 - Privilege escalation through the elevation flow (UAC relaunch, `pkexec`)
 - Loading remote content or navigating the app window to untrusted origins
+- Making the cleanup delete anything outside its target folders (path traversal, link/junction following, over-broad roots)
 
 ## Security design (summary)
 
 - Renderer: `contextIsolation`, `sandbox`, no `nodeIntegration`, strict CSP in production, permission requests denied, navigation and new windows blocked.
 - IPC: sender origin verified; every payload validated (integer pids, bounded arrays, enum-only link targets). External URLs are fixed constants in the main process.
 - Engine: protection is evaluated in the main process from freshly collected data; the UI's view of risk is never trusted.
+- Cleanup: the UI sends target ids only; paths come from fixed templates, deletion is confined to each target folder, links are never followed, drive/home/OS roots are refused; elevated shell lines on macOS/Linux are constants (plus validated integer pids for kills).
 - Commands: `execFile` with argument arrays only; dynamic values reach PowerShell via environment variables; service names are taken from the engine's own lookup and validated against a strict pattern.
 - Supply chain: lockfile committed, Dependabot, `npm audit` and CodeQL in CI.

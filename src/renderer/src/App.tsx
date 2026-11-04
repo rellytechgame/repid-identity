@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { AppGroup, KillResult } from '@shared/types'
+import type { AppGroup, CleanResult, KillResult } from '@shared/types'
 import { suggestTargets } from '@shared/engine/smart'
 import { api, isDemo } from './api'
 import { formatBytes, formatPercent } from './format'
@@ -13,14 +13,16 @@ import { About } from './views/About'
 import { Dashboard } from './views/Dashboard'
 import { DetailPanel } from './views/DetailPanel'
 import { ConfirmKill, SmartFree, type KillOptions } from './views/Dialogs'
+import { CleanerView } from './views/CleanerView'
 import { Processes } from './views/Processes'
 import { SettingsView } from './views/SettingsView'
 
-type View = 'dashboard' | 'processes' | 'settings' | 'about'
+type View = 'dashboard' | 'processes' | 'cleaner' | 'settings' | 'about'
 
 const NAV: Array<{ id: View; icon: IconName }> = [
   { id: 'dashboard', icon: 'dashboard' },
   { id: 'processes', icon: 'list' },
+  { id: 'cleaner', icon: 'broom' },
   { id: 'settings', icon: 'settings' },
   { id: 'about', icon: 'info' }
 ]
@@ -80,6 +82,21 @@ export function App() {
         ? t('toast.freed', { count: killed, mem: formatBytes(result.freedMemBytes, lng), cpu: formatPercent(result.freedCpu, lng) })
         : t('toast.nothingEnded'),
       body: extra.join(' ') || undefined
+    })
+  }
+
+  const reportClean = (result: CleanResult) => {
+    const count = (s: string) => result.outcomes.filter((o) => o.status === s).length
+    const notes = [
+      count('skipped-running') ? t('cleaner.toast.skippedRunning', { count: count('skipped-running') }) : '',
+      count('needs-admin') ? t('cleaner.toast.needsAdmin', { count: count('needs-admin') }) : '',
+      count('partial') ? t('cleaner.toast.partial', { count: count('partial') }) : '',
+      count('failed') ? t('cleaner.toast.failed', { count: count('failed') }) : ''
+    ].filter(Boolean)
+    pushToast({
+      tone: notes.length ? 'warning' : 'success',
+      title: t('cleaner.toast.done', { size: formatBytes(result.freedBytes, i18n.language) }),
+      body: notes.join(' ') || undefined
     })
   }
 
@@ -203,6 +220,7 @@ export function App() {
                 onKill={requestKill}
               />
             )}
+            {view === 'cleaner' && <CleanerView onResult={(result) => reportClean(result)} />}
             {view === 'settings' && <SettingsView settings={settings} update={update} snapshot={snapshot} />}
             {view === 'about' && <About />}
           </main>

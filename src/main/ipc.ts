@@ -1,6 +1,7 @@
 import { app, ipcMain, shell, type IpcMainInvokeEvent } from 'electron'
 import type { EngineSettings, KillRequest, RepoPath } from '../shared/types'
 import { DONATE_URL, REPO_URL } from '../shared/constants'
+import type { Cleaner } from './cleaner'
 import type { Engine } from './engine'
 import { relaunchElevated } from './engine/privileges'
 
@@ -44,7 +45,7 @@ function parseSettings(raw: unknown): EngineSettings {
   }
 }
 
-export function registerIpc(engine: Engine, onTheme: (theme: 'dark' | 'light') => void): void {
+export function registerIpc(engine: Engine, cleaner: Cleaner, onTheme: (theme: 'dark' | 'light') => void): void {
   const handle = (channel: string, fn: (event: IpcMainInvokeEvent, arg: unknown) => unknown) =>
     ipcMain.handle(channel, (event, arg) => {
       assertTrustedSender(event)
@@ -67,6 +68,9 @@ export function registerIpc(engine: Engine, onTheme: (theme: 'dark' | 'light') =
     if (suffix === undefined) throw new Error('Invalid link')
     return shell.openExternal(REPO_URL + suffix)
   })
+  handle('repid:cleaner-scan', () => cleaner.scan())
+  // Payload validated in Cleaner.clean (parseCleanRequest): ids only, never paths.
+  handle('repid:cleaner-clean', (_e, req) => cleaner.clean(req))
   handle('repid:open-donate', () => shell.openExternal(DONATE_URL))
   handle('repid:relaunch-elevated', async () => {
     const ok = await relaunchElevated(process.execPath, app.isPackaged ? [] : process.argv.slice(1))

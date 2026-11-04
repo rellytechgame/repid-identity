@@ -8,7 +8,8 @@
     "dashboard": "Overview",
     "processes": "Processes",
     "settings": "Settings",
-    "about": "About"
+    "about": "About",
+    "cleaner": "Cleanup"
   },
   "common": {
     "close": "Close",
@@ -278,5 +279,110 @@
     "displayserver": "Linux display server or desktop shell.",
     "audio": "System audio engine.",
     "repid": "RePID Identity itself."
+  },
+  "cleaner": {
+    "title": "Deep cleanup",
+    "scanning": "Scanning…",
+    "recoverable": "Up to {{size}} can be reclaimed. Review what each item does before cleaning.",
+    "rescan": "Scan again",
+    "cleaning": "Cleaning…",
+    "cleanSelected": "Clean selected ({{size}})",
+    "preserved": "Never touched: your documents, passwords, bookmarks, extensions, browser settings and installed programs.",
+    "notElevatedWin": "RePID is not running as administrator, so system-level items (Windows temp, update cache) will be skipped.",
+    "notElevatedUnix": "System-level items will ask for your password once when you clean.",
+    "groups": {
+      "system": "System",
+      "browsers": "Browsers",
+      "apps": "Developer tools"
+    },
+    "browsersFound_one": "{{count}} browser found",
+    "browsersFound_other": "{{count}} browsers found",
+    "open": "Open now",
+    "risk": {
+      "safe": "Safe",
+      "caution": "Caution",
+      "sensitive": "Sensitive"
+    },
+    "admin": "Admin",
+    "adminHint": "Requires administrator / root privileges",
+    "whatHappens": "What happens:",
+    "unavailable": {
+      "not-found": "Nothing to clean here right now.",
+      "needs-full-disk-access": "macOS blocks access. Grant RePID \"Full Disk Access\" in System Settings → Privacy & Security, then scan again.",
+      "unsupported": "Not available on this operating system."
+    },
+    "blockedBy": "{{names}} is open. It must close to clean this — you will be asked first.",
+    "needsAdminNote": "Will be skipped without administrator rights.",
+    "notMeasurable": "Instant",
+    "items_count_one": "{{count}} item",
+    "items_count_other": "{{count}} items",
+    "status": {
+      "cleaned": "✓ Cleaned · {{size}} freed",
+      "partial": "Partly cleaned · {{size}} freed · {{skipped}} in use or protected",
+      "skipped-running": "Skipped: the app was still open",
+      "needs-admin": "Skipped: administrator rights required",
+      "not-acknowledged": "Skipped: not confirmed",
+      "failed": "Could not be cleaned"
+    },
+    "items": {
+      "user-temp": {
+        "title": "Temporary files & user caches",
+        "effect": "Deletes temporary files, crash reports and thumbnail/shader caches. Apps recreate them when needed; the first launch of some games or apps may be a little slower. Files currently in use are skipped."
+      },
+      "system-temp": {
+        "title": "System temporary files",
+        "effect": "Deletes system-wide temporary files and old error reports. Your documents are not affected; files in use are skipped. Needs administrator rights."
+      },
+      "update-cache": {
+        "title": "Update download cache",
+        "effect": "Deletes already-downloaded update installers. Installed updates are NOT removed; if an update is still pending, the system will download it again."
+      },
+      "recycle-bin": {
+        "title": "Recycle Bin / Trash",
+        "effect": "PERMANENTLY deletes everything in the recycle bin. This cannot be undone and the files cannot be recovered."
+      },
+      "dns-cache": {
+        "title": "DNS cache",
+        "effect": "Flushes cached domain-name lookups. Helps when a site fails to load after a network change. No downside: the next visits simply resolve names again."
+      },
+      "dev-caches": {
+        "title": "Package manager caches (npm, Yarn, pip)",
+        "effect": "Deletes downloaded package caches. Your projects are untouched, but the next install will download packages again (slower and needs internet)."
+      },
+      "browser-cache": {
+        "title": "Cache",
+        "effect": "Deletes images, scripts and files saved from websites. Pages load a little slower the first time. You stay signed in and passwords are kept."
+      },
+      "browser-history": {
+        "title": "Browsing history",
+        "effect": "Deletes visited pages, address-bar suggestions, most-visited tiles and the tabs saved for \"restore session\". Cannot be undone. Bookmarks and passwords are kept."
+      },
+      "browser-cookies": {
+        "title": "Cookies & sign-ins",
+        "effect": "Signs you out of EVERY website (email, social networks, banking) and erases site preferences. You will need to sign in again and may have to repeat two-step verification."
+      }
+    },
+    "confirm": {
+      "title": "Review before cleaning",
+      "body": "This is exactly what will happen:",
+      "summary_one": "{{count}} item · ≈ {{size}}",
+      "summary_other": "{{count}} items · ≈ {{size}}",
+      "action": "Clean now",
+      "sensitiveTitle": "These items are irreversible or will sign you out:",
+      "sensitiveAck": "I understand the consequences and want to continue.",
+      "closeBlocking": "Close {{names}} automatically before cleaning.",
+      "closeBlockingHint": "Unsaved work in those windows (open forms, downloads in progress) will be lost. If unchecked, their items are skipped."
+    },
+    "toast": {
+      "done": "Cleanup finished · {{size}} freed",
+      "skippedRunning_one": "{{count}} item skipped because its app was open.",
+      "skippedRunning_other": "{{count}} items skipped because their apps were open.",
+      "needsAdmin_one": "{{count}} item needs administrator rights.",
+      "needsAdmin_other": "{{count}} items need administrator rights.",
+      "partial_one": "{{count}} item was partly cleaned (files in use).",
+      "partial_other": "{{count}} items were partly cleaned (files in use).",
+      "failed_one": "{{count}} item could not be cleaned.",
+      "failed_other": "{{count}} items could not be cleaned."
+    }
   }
 }

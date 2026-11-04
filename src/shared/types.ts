@@ -146,6 +146,70 @@ export interface EngineSettings {
   protectedNames: string[]
 }
 
+// ───────────── Cleanup ─────────────
+
+/** safe = regenerated automatically · caution = side effects worth knowing · sensitive = irreversible or logs you out */
+export type CleanerRisk = 'safe' | 'caution' | 'sensitive'
+
+export type CleanerKind =
+  | 'user-temp'
+  | 'system-temp'
+  | 'update-cache'
+  | 'recycle-bin'
+  | 'dns-cache'
+  | 'dev-caches'
+  | 'browser-cache'
+  | 'browser-history'
+  | 'browser-cookies'
+
+export interface CleanerTarget {
+  /** Stable id, e.g. "user-temp" or "browser:chrome:history". */
+  id: string
+  kind: CleanerKind
+  group: 'system' | 'browsers' | 'apps'
+  /** Browser product name for browser targets. */
+  browser?: string
+  risk: CleanerRisk
+  requiresAdmin: boolean
+  defaultSelected: boolean
+  /** False for actions with no measurable footprint (DNS flush). */
+  measurable: boolean
+  sizeBytes: number
+  itemCount: number
+  available: boolean
+  unavailableReason?: 'not-found' | 'needs-full-disk-access' | 'unsupported'
+  /** Running processes that lock these files; they must close first. */
+  blockedBy: string[]
+}
+
+export interface CleanerReport {
+  targets: CleanerTarget[]
+  elevated: boolean
+  scannedAt: number
+}
+
+export interface CleanRequest {
+  ids: string[]
+  /** End the blocking apps (e.g. open browsers) before cleaning. */
+  closeBlocking: boolean
+  /** Required when any selected target is `sensitive`. */
+  acknowledgedSensitive: boolean
+}
+
+export interface CleanOutcome {
+  id: string
+  status: 'cleaned' | 'partial' | 'skipped-running' | 'needs-admin' | 'not-acknowledged' | 'failed'
+  freedBytes: number
+  removed: number
+  skipped: number
+  error?: string
+}
+
+export interface CleanResult {
+  outcomes: CleanOutcome[]
+  freedBytes: number
+}
+
 /** API exposed on `window.repid` by the preload script. */
 export interface RepidApi {
   platform: Platform
@@ -155,6 +219,8 @@ export interface RepidApi {
   kill(request: KillRequest): Promise<KillResult>
   stopService(pid: number): Promise<ServiceStopResult>
   setSettings(settings: EngineSettings): Promise<void>
+  cleanerScan(): Promise<CleanerReport>
+  cleanerClean(request: CleanRequest): Promise<CleanResult>
   openRepo(path?: RepoPath): Promise<void>
   /** Opens the project's donation page (fixed URL owned by the main process). */
   openDonate(): Promise<void>

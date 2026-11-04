@@ -8,7 +8,8 @@
     "dashboard": "Resumen",
     "processes": "Procesos",
     "settings": "Ajustes",
-    "about": "Acerca de"
+    "about": "Acerca de",
+    "cleaner": "Limpieza"
   },
   "common": {
     "close": "Cerrar",
@@ -278,5 +279,110 @@
     "displayserver": "Servidor gráfico o shell de escritorio de Linux.",
     "audio": "Motor de audio del sistema.",
     "repid": "El propio RePID Identity."
+  },
+  "cleaner": {
+    "title": "Limpieza profunda",
+    "scanning": "Analizando…",
+    "recoverable": "Se pueden recuperar hasta {{size}}. Revisa qué hace cada elemento antes de limpiar.",
+    "rescan": "Analizar de nuevo",
+    "cleaning": "Limpiando…",
+    "cleanSelected": "Limpiar selección ({{size}})",
+    "preserved": "Nunca se tocan: tus documentos, contraseñas, marcadores, extensiones, ajustes de los navegadores ni los programas instalados.",
+    "notElevatedWin": "RePID no se está ejecutando como administrador, así que se omitirán los elementos del sistema (temporales de Windows, caché de actualizaciones).",
+    "notElevatedUnix": "Los elementos del sistema pedirán tu contraseña una sola vez al limpiar.",
+    "groups": {
+      "system": "Sistema",
+      "browsers": "Navegadores",
+      "apps": "Herramientas de desarrollo"
+    },
+    "browsersFound_one": "{{count}} navegador encontrado",
+    "browsersFound_other": "{{count}} navegadores encontrados",
+    "open": "Abierto ahora",
+    "risk": {
+      "safe": "Seguro",
+      "caution": "Precaución",
+      "sensitive": "Sensible"
+    },
+    "admin": "Admin",
+    "adminHint": "Requiere privilegios de administrador / root",
+    "whatHappens": "Qué pasará:",
+    "unavailable": {
+      "not-found": "No hay nada que limpiar aquí por ahora.",
+      "needs-full-disk-access": "macOS bloquea el acceso. Concede a RePID «Acceso total al disco» en Ajustes del Sistema → Privacidad y seguridad y vuelve a analizar.",
+      "unsupported": "No disponible en este sistema operativo."
+    },
+    "blockedBy": "{{names}} está abierto. Debe cerrarse para limpiar esto; se te preguntará antes.",
+    "needsAdminNote": "Se omitirá sin permisos de administrador.",
+    "notMeasurable": "Instantáneo",
+    "items_count_one": "{{count}} elemento",
+    "items_count_other": "{{count}} elementos",
+    "status": {
+      "cleaned": "✓ Limpio · {{size}} liberados",
+      "partial": "Limpieza parcial · {{size}} liberados · {{skipped}} en uso o protegidos",
+      "skipped-running": "Omitido: la app seguía abierta",
+      "needs-admin": "Omitido: requiere permisos de administrador",
+      "not-acknowledged": "Omitido: no se confirmó",
+      "failed": "No se pudo limpiar"
+    },
+    "items": {
+      "user-temp": {
+        "title": "Archivos temporales y cachés de usuario",
+        "effect": "Borra archivos temporales, informes de fallos y cachés de miniaturas y sombreadores. Las apps los vuelven a crear cuando los necesitan; el primer arranque de algunos juegos o apps puede ser un poco más lento. Los archivos en uso se omiten."
+      },
+      "system-temp": {
+        "title": "Temporales del sistema",
+        "effect": "Borra temporales de todo el sistema e informes de errores antiguos. No afecta tus documentos; los archivos en uso se omiten. Requiere permisos de administrador."
+      },
+      "update-cache": {
+        "title": "Caché de descargas de actualizaciones",
+        "effect": "Borra instaladores de actualizaciones ya descargados. NO desinstala actualizaciones; si alguna sigue pendiente, el sistema la volverá a descargar."
+      },
+      "recycle-bin": {
+        "title": "Papelera de reciclaje",
+        "effect": "Elimina DEFINITIVAMENTE todo lo que hay en la papelera. No se puede deshacer y los archivos no se podrán recuperar."
+      },
+      "dns-cache": {
+        "title": "Caché DNS",
+        "effect": "Vacía la caché de nombres de dominio. Útil si una web no carga tras un cambio de red. Sin efectos negativos: las siguientes visitas resolverán los nombres de nuevo."
+      },
+      "dev-caches": {
+        "title": "Cachés de paquetes (npm, Yarn, pip)",
+        "effect": "Borra las cachés de paquetes descargados. Tus proyectos no se tocan, pero la próxima instalación volverá a descargar los paquetes (más lenta y requiere internet)."
+      },
+      "browser-cache": {
+        "title": "Caché",
+        "effect": "Borra imágenes, scripts y archivos guardados de las webs. Las páginas cargarán un poco más lento la primera vez. No cierra sesiones ni borra contraseñas."
+      },
+      "browser-history": {
+        "title": "Historial de navegación",
+        "effect": "Borra las páginas visitadas, las sugerencias de la barra de direcciones, los sitios más visitados y las pestañas guardadas para «restaurar sesión». No se puede deshacer. Marcadores y contraseñas se conservan."
+      },
+      "browser-cookies": {
+        "title": "Cookies e inicios de sesión",
+        "effect": "Cierra tu sesión en TODOS los sitios web (correo, redes sociales, bancos) y borra las preferencias guardadas por las webs. Tendrás que volver a iniciar sesión y quizá repetir la verificación en dos pasos."
+      }
+    },
+    "confirm": {
+      "title": "Revisa antes de limpiar",
+      "body": "Esto es exactamente lo que va a pasar:",
+      "summary_one": "{{count}} elemento · ≈ {{size}}",
+      "summary_other": "{{count}} elementos · ≈ {{size}}",
+      "action": "Limpiar ahora",
+      "sensitiveTitle": "Estos elementos son irreversibles o cerrarán tus sesiones:",
+      "sensitiveAck": "Entiendo las consecuencias y quiero continuar.",
+      "closeBlocking": "Cerrar {{names}} automáticamente antes de limpiar.",
+      "closeBlockingHint": "Se perderá el trabajo no guardado en esas ventanas (formularios abiertos, descargas en curso). Si lo desmarcas, esos elementos se omiten."
+    },
+    "toast": {
+      "done": "Limpieza terminada · {{size}} liberados",
+      "skippedRunning_one": "Se omitió {{count}} elemento porque su app estaba abierta.",
+      "skippedRunning_other": "Se omitieron {{count}} elementos porque sus apps estaban abiertas.",
+      "needsAdmin_one": "{{count}} elemento requiere permisos de administrador.",
+      "needsAdmin_other": "{{count}} elementos requieren permisos de administrador.",
+      "partial_one": "{{count}} elemento se limpió parcialmente (archivos en uso).",
+      "partial_other": "{{count}} elementos se limpiaron parcialmente (archivos en uso).",
+      "failed_one": "{{count}} elemento no se pudo limpiar.",
+      "failed_other": "{{count}} elementos no se pudieron limpiar."
+    }
   }
 }
