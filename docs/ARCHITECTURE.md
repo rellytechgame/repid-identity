@@ -51,6 +51,20 @@ RePID Identity is an Electron application split into three trust zones.
 
 Services are stopped instead of killed: `sc.exe stop`, `systemctl [--user] stop` (falling back to `pkexec` for system units), `launchctl stop`. The service name always comes from the engine's own lookup.
 
+## Cleanup
+
+`src/main/cleaner/`:
+
+- `targets.ts` — pure per-OS definitions (`systemTargets`, `chromiumTargets`, `firefoxTargets`, `safariTargets`) built from an injected environment, plus `isSafeCleanRoot` (refuses drive/filesystem roots, home, OS folders and anything shallower than two segments).
+- `fsops.ts` — `processSpec(spec, remove)` measures or deletes `contents` / named `files` / `match`ed files inside one directory. Uses `lstat`; links and junctions are removed as links, never traversed; every entry is checked with `isInside(entry, specDir)`; files in use are skipped and counted.
+- `firefox.ts` — clears history rows in `places.sqlite` with `node:sqlite` (bookmarks share the database).
+- `index.ts` — `Cleaner.scan()` discovers profiles and measures; `Cleaner.clean()` validates the id-only request, refuses sensitive targets without acknowledgement, optionally ends blocking browsers through the engine (protection rules apply), deletes, and runs all macOS/Linux privileged lines in a single elevated call.
+
+## Privileges
+
+- Windows: `requestedExecutionLevel: requireAdministrator` in the packaged manifest. Denied terminations retry with `taskkill /F` (which enables SeDebugPrivilege).
+- macOS/Linux: Chromium cannot run as root, so the app stays unprivileged and escalates per action through `runElevated` (`pkexec` / AppleScript `with administrator privileges`). Only constant lines or validated integer pids are passed.
+
 ## Impact score
 
 ```

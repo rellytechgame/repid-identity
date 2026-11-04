@@ -1,4 +1,14 @@
-import type { KillOutcome, ProcessInfo, RepidApi, ServiceRef, SystemSnapshot } from '@shared/types'
+import type {
+  CleanOutcome,
+  CleanResult,
+  CleanerReport,
+  CleanerTarget,
+  KillOutcome,
+  ProcessInfo,
+  RepidApi,
+  ServiceRef,
+  SystemSnapshot
+} from '@shared/types'
 import { DONATE_URL, REPO_URL } from '@shared/constants'
 import { buildGroups, descendantsOf } from '@shared/engine/grouping'
 import { riskOf } from '@shared/engine/protection'
@@ -94,11 +104,55 @@ function seed(): { procs: ProcessInfo[]; services: Map<number, ServiceRef[]> } {
   return { procs, services }
 }
 
+function demoCleanerTargets(running: Set<string>, cleaned: Set<string>): CleanerTarget[] {
+  const row = (
+    id: string,
+    kind: CleanerTarget['kind'],
+    group: CleanerTarget['group'],
+    risk: CleanerTarget['risk'],
+    size: number,
+    items: number,
+    extra: Partial<CleanerTarget> = {}
+  ): CleanerTarget => ({
+    id,
+    kind,
+    group,
+    risk,
+    requiresAdmin: false,
+    defaultSelected: risk === 'safe',
+    measurable: true,
+    sizeBytes: cleaned.has(id) ? 0 : size,
+    itemCount: cleaned.has(id) ? 0 : items,
+    available: true,
+    blockedBy: [],
+    ...extra
+  })
+  const chromeOpen = running.has('chrome.exe') ? ['Google Chrome'] : []
+  return [
+    row('user-temp', 'user-temp', 'system', 'safe', 2.4 * GB, 18432),
+    row('system-temp', 'system-temp', 'system', 'caution', 860 * MB, 3120, { requiresAdmin: true, defaultSelected: true }),
+    row('update-cache', 'update-cache', 'system', 'caution', 3.1 * GB, 214, { requiresAdmin: true }),
+    row('recycle-bin', 'recycle-bin', 'system', 'sensitive', 1.7 * GB, 96),
+    row('dns-cache', 'dns-cache', 'system', 'safe', 0, 0, { measurable: false }),
+    row('dev-caches', 'dev-caches', 'apps', 'caution', 4.6 * GB, 52110),
+    row('browser:chrome:cache', 'browser-cache', 'browsers', 'safe', 1.2 * GB, 9420, { browser: 'Google Chrome', blockedBy: chromeOpen }),
+    row('browser:chrome:history', 'browser-history', 'browsers', 'sensitive', 84 * MB, 11, { browser: 'Google Chrome', blockedBy: chromeOpen }),
+    row('browser:chrome:cookies', 'browser-cookies', 'browsers', 'sensitive', 6 * MB, 2, { browser: 'Google Chrome', blockedBy: chromeOpen }),
+    row('browser:edge:cache', 'browser-cache', 'browsers', 'safe', 540 * MB, 3810, { browser: 'Microsoft Edge' }),
+    row('browser:edge:history', 'browser-history', 'browsers', 'sensitive', 31 * MB, 9, { browser: 'Microsoft Edge' }),
+    row('browser:edge:cookies', 'browser-cookies', 'browsers', 'sensitive', 3 * MB, 2, { browser: 'Microsoft Edge' }),
+    row('browser:firefox:cache', 'browser-cache', 'browsers', 'safe', 690 * MB, 5120, { browser: 'Firefox' }),
+    row('browser:firefox:history', 'browser-history', 'browsers', 'sensitive', 22 * MB, 3, { browser: 'Firefox' }),
+    row('browser:firefox:cookies', 'browser-cookies', 'browsers', 'sensitive', 2 * MB, 1, { browser: 'Firefox' })
+  ]
+}
+
 export function createDemoApi(): RepidApi {
   const seeded = seed()
   let procs = seeded.procs
   const services = seeded.services
   const base = new Map(procs.map((p) => [p.pid, { cpu: p.cpu, mem: p.memBytes, gpu: p.gpu }]))
+  const cleaned = new Set<string>()
   const ctx = { platform: 'win32' as const, selfPids: new Set<number>(), userProtected: new Set<string>() }
   let tick = 0
 
@@ -178,6 +232,27 @@ export function createDemoApi(): RepidApi {
     },
     async setSettings(settings) {
       ctx.userProtected = new Set(settings.protectedNames.map((n) => n.toLowerCase().replace(/\.exe$/, '')))
+    },
+    async cleanerScan(): Promise<CleanerReport> {
+      await new Promise((r) => setTimeout(r, 700))
+      const running = new Set(procs.map((p) => p.name.toLowerCase()))
+      return { targets: demoCleanerTargets(running, cleaned), elevated: false, scannedAt: Date.now() }
+    },
+    async cleanerClean(req): Promise<CleanResult> {
+      await new Promise((r) => setTimeout(r, 1100))
+      const running = new Set(procs.map((p) => p.name.toLowerCase()))
+      const targets = demoCleanerTargets(running, cleaned)
+      const outcomes: CleanOutcome[] = req.ids.map((id) => {
+        const t = targets.find((x) => x.id === id)
+        if (!t) return { id, status: 'failed', freedBytes: 0, removed: 0, skipped: 0 }
+        if (t.risk === 'sensitive' && !req.acknowledgedSensitive) return { id, status: 'not-acknowledged', freedBytes: 0, removed: 0, skipped: 0 }
+        if (t.blockedBy.length && !req.closeBlocking) return { id, status: 'skipped-running', freedBytes: 0, removed: 0, skipped: 0 }
+        if (t.requiresAdmin) return { id, status: 'needs-admin', freedBytes: 0, removed: 0, skipped: 0 }
+        cleaned.add(id)
+        return { id, status: 'cleaned', freedBytes: t.sizeBytes, removed: t.itemCount, skipped: 0 }
+      })
+      if (req.closeBlocking) procs = procs.filter((p) => !/^(chrome|firefox)\.exe$/i.test(p.name))
+      return { outcomes, freedBytes: outcomes.reduce((s, o) => s + o.freedBytes, 0) }
     },
     async openRepo(path = '') {
       const suffix: Record<string, string> = {

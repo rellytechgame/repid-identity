@@ -51,6 +51,8 @@ RePID (*Re*-identificar el *PID*) resuelve eso: **identifica** cada proceso, lo 
 | 📈 **CPU · RAM · GPU en vivo** | Medidores con historial, uso por aplicación y GPU por proceso (contadores del motor de GPU en Windows, `nvidia-smi` en el resto). |
 | ⚙️ **Consciente de servicios** | Detecta servicios de Windows, unidades systemd y agentes launchd, y los **detiene** mediante su administrador. |
 | 🛡️ **Red de seguridad** | Protección en tres niveles (Protegido / Precaución / Seguro) aplicada dentro del motor y verificada otra vez justo antes de cada acción. |
+| 🧹 **Limpieza profunda** | Temporales, temporales del sistema, caché de actualizaciones, papelera, caché DNS, cachés de paquetes y la **caché, historial y cookies de todos los navegadores** (Chrome, Edge, Firefox, Brave, Opera, Opera GX, Vivaldi, Chromium, Safari). Cada elemento explica *exactamente qué pasará* antes de borrarlo; lo irreversible requiere confirmación explícita. Contraseñas, marcadores y documentos nunca se tocan. |
+| 🔑 **Privilegios completos** | En Windows se ejecuta como administrador (UAC al iniciar) para finalizar cualquier proceso, detener servicios y limpiar carpetas del sistema. En macOS/Linux pide tu contraseña solo para las acciones que lo necesitan. Los procesos críticos siguen bloqueados. |
 | 🌍 **Multiidioma** | Español e inglés incluidos. Agregar un idioma es añadir **un archivo JSON**. |
 | 🔒 **100 % local** | Sin cuentas, sin telemetría, sin servidores. |
 
@@ -66,9 +68,27 @@ Descarga el instalador para tu sistema desde la [**última versión**](https://g
 
 | Sistema | Paquete | Notas |
 |---|---|---|
-| **Windows 10/11** | Instalador `.exe` o portable | x64 y ARM64. Ejecuta como administrador para gestionar procesos de otros usuarios y servicios (o usa *Ajustes → Reiniciar como administrador*). |
+| **Windows 10/11** | Instalador `.exe` o portable | x64 y ARM64. Solicita permisos de administrador al iniciar (UAC) para finalizar cualquier proceso, detener servicios y limpiar carpetas del sistema. |
 | **macOS 12+** | `.dmg` | Apple Silicon e Intel. |
 | **Linux** | `.AppImage`, `.deb`, `.rpm` | Los servicios del sistema se detienen con polkit (`pkexec`) cuando hace falta. |
+
+## Limpieza profunda
+
+<img src="assets/screenshots/cleanup.png" alt="Módulo de limpieza" width="800" />
+
+| Elemento | Riesgo | Qué pasará |
+|---|---|---|
+| Temporales y cachés de usuario | 🟢 Seguro | Se recrean solos; los archivos en uso se omiten. |
+| Temporales del sistema | 🟠 Precaución | Requiere administrador. No afecta documentos. |
+| Caché de actualizaciones | 🟠 Precaución | No desinstala actualizaciones; las pendientes se vuelven a descargar. |
+| Papelera | 🔴 Sensible | Borrado **definitivo**. Desactivado por defecto. |
+| Caché DNS | 🟢 Seguro | Sin efectos negativos. |
+| Cachés de paquetes | 🟠 Precaución | La próxima instalación vuelve a descargar. |
+| Caché del navegador | 🟢 Seguro | No cierra sesiones ni borra contraseñas. |
+| Historial del navegador | 🔴 Sensible | Irreversible. **Marcadores y contraseñas se conservan.** |
+| Cookies del navegador | 🔴 Sensible | Cierra sesión en todos los sitios web. |
+
+Si un navegador está abierto, RePID te lo indica y te ofrece cerrarlo (advirtiendo del trabajo no guardado) u omitirlo.
 
 ## Compatibilidad
 

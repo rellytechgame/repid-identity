@@ -10,6 +10,8 @@ const api: RepidApi = {
   kill: (request) => ipcRenderer.invoke('repid:kill', request),
   stopService: (pid) => ipcRenderer.invoke('repid:stop-service', pid),
   setSettings: (settings) => ipcRenderer.invoke('repid:settings', settings),
+  cleanerScan: () => ipcRenderer.invoke('repid:cleaner-scan'),
+  cleanerClean: (request) => ipcRenderer.invoke('repid:cleaner-clean', request),
   openRepo: (path = '') => ipcRenderer.invoke('repid:open-repo', path),
   openDonate: () => ipcRenderer.invoke('repid:open-donate'),
   relaunchElevated: () => ipcRenderer.invoke('repid:relaunch-elevated'),
