@@ -2,7 +2,7 @@
 
 RePID Identity is free and open source thanks to the people and companies below. Thank you!
 
-Want to join them? See [Support the project](README.md#support-the-project) or donate directly via [PayPal](https://paypal.me/REPLACE_WITH_YOUR_PAYPAL_ME) — add your name or GitHub username in the payment note.
+Want to join them? See [Support the project](README.md#support-the-project) or donate directly via [PayPal](https://paypal.me/iandasystems) — add your name or GitHub username in the payment note.
 
 ## 🏢 Companies
 
