@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔒 Report a security vulnerability
+    url: https://github.com/rellytechgame/repid-identity/security/advisories/new
+    about: Please report security issues privately, never in a public issue.
+  - name: 💬 Questions & ideas
+    url: https://github.com/rellytechgame/repid-identity/discussions
+    about: Ask questions and share ideas with the community.

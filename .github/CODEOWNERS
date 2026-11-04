@@ -1,0 +1,8 @@
+# Every change needs a maintainer review. Security-sensitive paths are listed explicitly.
+* @rellytechgame
+/src/main/ @rellytechgame
+/src/preload/ @rellytechgame
+/src/shared/engine/protection.ts @rellytechgame
+/.github/ @rellytechgame
+/electron-builder.yml @rellytechgame
+/policy.yaml @rellytechgame

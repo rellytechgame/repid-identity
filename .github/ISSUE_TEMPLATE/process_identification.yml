@@ -1,0 +1,35 @@
+name: 🔎 Unknown or misidentified process
+description: RePID can't explain a process, or explains it wrong
+labels: ["catalog"]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Process name
+      placeholder: FooHelper.exe
+    validations:
+      required: true
+  - type: input
+    id: path
+    attributes:
+      label: Executable location (remove your username)
+      placeholder: C:\Program Files\Foo\FooHelper.exe
+  - type: textarea
+    id: what
+    attributes:
+      label: What does it actually do?
+      description: Which app installs it, and what is it for? Links to official docs are great.
+    validations:
+      required: true
+  - type: dropdown
+    id: safety
+    attributes:
+      label: Is it safe to end?
+      options: ["Yes — a normal app", "Caution — something visible restarts", "No — the system breaks", "Not sure"]
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options: [Windows, macOS, Linux]
+    validations:
+      required: true
