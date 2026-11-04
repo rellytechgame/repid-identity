@@ -123,7 +123,7 @@ RePID Identity es gratis, sin anuncios, sin venta de datos y **nunca** tendrá f
 
 <div align="center">
 
-[![Donar con PayPal](https://img.shields.io/badge/Donar-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/REPLACE_WITH_YOUR_PAYPAL_ME)
+[![Donar con PayPal](https://img.shields.io/badge/Donar-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/iandasystems)
 
 </div>
 

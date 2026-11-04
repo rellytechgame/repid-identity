@@ -246,7 +246,7 @@ RePID Identity is free, has no ads, sells no data and will **never** lock featur
 
 <div align="center">
 
-[![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/REPLACE_WITH_YOUR_PAYPAL_ME)
+[![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/iandasystems)
 
 </div>
 
