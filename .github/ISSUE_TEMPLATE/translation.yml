@@ -1,0 +1,23 @@
+name: 🌍 Translation
+description: Propose a new language or report a translation problem
+labels: ["i18n"]
+body:
+  - type: input
+    id: language
+    attributes:
+      label: Language
+      placeholder: Português (Brasil) — pt-BR
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Type
+      options: ["New language (I'll translate it)", "Wrong or unclear translation", "Missing translation"]
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: For corrections, include the current text and your suggestion. Guide → docs/ADDING_A_LANGUAGE.md

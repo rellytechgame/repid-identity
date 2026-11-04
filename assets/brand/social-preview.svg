@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640">
+  <defs>
+    <radialGradient id="bg" cx="0.8" cy="0.1" r="1.1">
+      <stop offset="0" stop-color="#1e1b4b"/><stop offset="0.6" stop-color="#0b0f19"/><stop offset="1" stop-color="#05070d"/>
+    </radialGradient>
+    <linearGradient id="t" x1="0" x2="1"><stop offset="0" stop-color="#22D3EE"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient>
+  </defs>
+  <rect width="1280" height="640" fill="url(#bg)"/>
+  <image href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJSZVBJRCBJZGVudGl0eSI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9InJlcGlkLWciIHgxPSIxMCIgeTE9IjQiIHgyPSI1NCIgeTI9IjYwIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzIyRDNFRSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjAuNTUiIHN0b3AtY29sb3I9IiM2MzY2RjEiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjOEI1Q0Y2Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cGF0aCBkPSJNMzIgNS41IDU1IDE4Ljc1djI2LjVMMzIgNTguNSA5IDQ1LjI1di0yNi41WiIgZmlsbD0idXJsKCNyZXBpZC1nKSIgc3Ryb2tlPSJ1cmwoI3JlcGlkLWcpIiBzdHJva2Utd2lkdGg9IjUiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KICA8Y2lyY2xlIGN4PSIzMiIgY3k9IjIxIiByPSI4LjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLW9wYWNpdHk9Ii42NSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtZGFzaGFycmF5PSI5LjYgMy43NSIgdHJhbnNmb3JtPSJyb3RhdGUoLTgxIDMyIDIxKSIvPgogIDxwYXRoIGQ9Ik0zMiAyOS41VjM1TTIwIDQydi0zLjVhMy41IDMuNSAwIDAgMSAzLjUtMy41aDE3YTMuNSAzLjUgMCAwIDEgMy41IDMuNVY0Mk0zMiAzNXY3IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMi42IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KICA8Y2lyY2xlIGN4PSIzMiIgY3k9IjIxIiByPSI0LjIiIGZpbGw9IiNmZmYiLz4KICA8cmVjdCB4PSIxNi41IiB5PSI0MiIgd2lkdGg9IjciIGhlaWdodD0iNyIgcng9IjIiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iLjkyIi8+CiAgPHJlY3QgeD0iMjguNSIgeT0iNDIiIHdpZHRoPSI3IiBoZWlnaHQ9IjciIHJ4PSIyIiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9Ii45MiIvPgogIDxyZWN0IHg9IjQwLjUiIHk9IjQyIiB3aWR0aD0iNyIgaGVpZ2h0PSI3IiByeD0iMiIgZmlsbD0iI2ZmZiIgZmlsbC1vcGFjaXR5PSIuOTIiLz4KPC9zdmc+Cg==" x="96" y="200" width="240" height="240"/>
+  <text x="380" y="300" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif" font-size="104" font-weight="800" fill="#fff">RePID <tspan fill="url(#t)" font-weight="300">Identity</tspan></text>
+  <text x="384" y="370" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif" font-size="30" fill="#94a3b8">Identify what every process does. End hogs from the root.</text>
+  <text x="384" y="440" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif" font-size="26" fill="#64748b">Windows · macOS · Linux  —  Open source (MIT)  —  by Voxel Enterprise</text>
+</svg>

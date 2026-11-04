@@ -1,0 +1,68 @@
+{
+  "name": "repid-identity",
+  "productName": "RePID Identity",
+  "version": "1.0.0",
+  "description": "Identify what every process really does and end resource hogs from the root.",
+  "license": "MIT",
+  "author": {
+    "name": "Voxel Enterprise"
+  },
+  "homepage": "https://github.com/rellytechgame/repid-identity",
+  "main": "./out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "dev:web": "vite --config vite.web.config.mts",
+    "build:web": "vite build --config vite.web.config.mts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "dist": "electron-vite build && electron-builder",
+    "dist:win": "electron-vite build && electron-builder --win",
+    "dist:mac": "electron-vite build && electron-builder --mac",
+    "dist:linux": "electron-vite build && electron-builder --linux",
+    "i18n:check": "node scripts/check-locales.mjs",
+    "icons": "node scripts/generate-icons.mjs"
+  },
+  "dependencies": {
+    "i18next": "^26.7.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-i18next": "^17.1.12",
+    "systeminformation": "^5.33.19"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.2.1",
+    "electron": "^45.2.2",
+    "electron-builder": "^26.18.0",
+    "electron-vite": "^6.0.0",
+    "sharp": "^0.35.5",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vitest": "^5.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rellytechgame/repid-identity.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rellytechgame/repid-identity/issues"
+  },
+  "keywords": [
+    "process-manager",
+    "task-manager",
+    "electron",
+    "cpu",
+    "ram",
+    "gpu",
+    "performance",
+    "cross-platform",
+    "open-source"
+  ],
+  "engines": {
+    "node": ">=20"
+  }
+}

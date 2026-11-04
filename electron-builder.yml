@@ -1,0 +1,50 @@
+appId: com.voxelenterprise.repid-identity
+productName: RePID Identity
+copyright: Copyright © 2026 Voxel Enterprise
+directories:
+  buildResources: build
+  output: release/${version}
+files:
+  - out/**
+  - build/icon.png
+  - package.json
+  - '!**/*.map'
+publish:
+  provider: github
+  owner: rellytechgame
+  repo: repid-identity
+  releaseType: draft
+
+win:
+  icon: build/icon.png
+  target:
+    - target: nsis
+      arch: [x64, arm64]
+    - target: portable
+      arch: [x64]
+  artifactName: RePID-Identity-${version}-${os}-${arch}.${ext}
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  shortcutName: RePID Identity
+
+mac:
+  icon: build/icon.png
+  category: public.app-category.utilities
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+  artifactName: RePID-Identity-${version}-mac-${arch}.${ext}
+  hardenedRuntime: true
+
+linux:
+  icon: build/icon.png
+  category: System
+  maintainer: Voxel Enterprise
+  target:
+    - AppImage
+    - deb
+    - rpm
+  artifactName: RePID-Identity-${version}-linux-${arch}.${ext}

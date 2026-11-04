@@ -1,0 +1,13 @@
+# Voxel Enterprise DevSecOps policy for this repository.
+project: repid-identity
+# Level 1: local desktop tool, no accounts, no PII, no backend, no payments handled in-app
+# (donations happen on PayPal's site). Privileged local actions are covered by the
+# protection model and the security-sensitive review rules in CONTRIBUTING.md.
+criticality: 1
+controls:
+  sast: codeql (security-extended)
+  sca: npm audit --omit=dev --audit-level=high + dependabot
+  secret_scanning: github native secret scanning + push protection (enable in repo settings)
+  tests: vitest (src/shared/engine)
+  review: CODEOWNERS required, no direct pushes to main
+exceptions: []

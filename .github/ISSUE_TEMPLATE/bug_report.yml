@@ -1,0 +1,61 @@
+name: 🐛 Bug report
+description: Something doesn't work as expected
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to report this! / ¡Gracias por reportarlo! (Puedes escribir en español.)
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Describe the problem and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open Processes
+        2. Click "End" on …
+        3. …
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: RePID version
+      description: Shown in About.
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options: [Windows 11, Windows 10, macOS (Apple Silicon), macOS (Intel), Linux, Web demo]
+    validations:
+      required: true
+  - type: input
+    id: os-details
+    attributes:
+      label: OS version / distribution
+      placeholder: Windows 11 24H2 · macOS 15.1 · Ubuntu 24.04 (GNOME, Wayland)
+  - type: dropdown
+    id: elevated
+    attributes:
+      label: Running as administrator/root?
+      options: ["No", "Yes", "Not sure"]
+  - type: textarea
+    id: logs
+    attributes:
+      label: Screenshots or logs
+      description: Please remove any personal information (usernames in paths, hostnames).
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and this is not a duplicate.
+          required: true
