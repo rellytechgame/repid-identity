@@ -50,4 +50,4 @@ We'll credit you in the release notes unless you prefer to stay anonymous.
 - Startup: ids only; every change re-scans and re-classifies first, uses the OS's own reversible flag (`StartupApproved`, Store task `State`, `schtasks /DISABLE`, `launchctl disable`, XDG `Hidden=true`), never deletes the entry, and is verified by reading the state back. Registry/task names reach `reg.exe`/`schtasks.exe` as argument-array values; Store package ids and launchd labels are pattern-validated.
 - Performance mode: group ids only; eligibility is re-checked on every tick; only below-normal/above-normal priorities are used; original values are restored with a pid+name check against reuse. The EcoQoS helper is a constant P/Invoke shim compiled in memory (no DLL written to disk); it receives integer pids only.
 - Commands: `execFile` with argument arrays only; dynamic values reach PowerShell via environment variables; service names are taken from the engine's own lookup and validated against a strict pattern.
-- Supply chain: lockfile committed, Dependabot, `npm audit` and CodeQL in CI.
+- Supply chain: lockfile committed, `npm audit` and CodeQL in CI.

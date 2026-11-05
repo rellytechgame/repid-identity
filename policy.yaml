@@ -6,7 +6,7 @@ project: repid-identity
 criticality: 1
 controls:
   sast: codeql (security-extended)
-  sca: npm audit --omit=dev --audit-level=high + dependabot
+  sca: npm audit --omit=dev --audit-level=high (CI) + npm audit before releases
   secret_scanning: github native secret scanning + push protection (enable in repo settings)
   tests: vitest (src/shared/engine)
   review: CODEOWNERS required, no direct pushes to main

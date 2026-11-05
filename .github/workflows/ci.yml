@@ -22,7 +22,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -38,8 +38,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
-      # Shipped dependencies must be free of high/critical advisories; dev tooling is tracked by Dependabot.
+      # Shipped dependencies must be free of high/critical advisories; dev tooling is reviewed with `npm audit` before releases.
       - run: npm audit --omit=dev --audit-level=high
