@@ -60,6 +60,19 @@ Services are stopped instead of killed: `sc.exe stop`, `systemctl [--user] stop`
 - `firefox.ts` — clears history rows in `places.sqlite` with `node:sqlite` (bookmarks share the database).
 - `index.ts` — `Cleaner.scan()` discovers profiles and measures; `Cleaner.clean()` validates the id-only request, refuses sensitive targets without acknowledgement, optionally ends blocking browsers through the engine (protection rules apply), deletes, and runs all macOS/Linux privileged lines in a single elevated call.
 
+## Startup manager
+
+`src/main/startup/` — one adapter per OS behind `StartupAdapter { list, setEnabled }`:
+
+- `windows.ts` — one read-only PowerShell inventory (Run keys + `StartupApproved`, Startup folders with shortcut targets, Store startup tasks from each package manifest, non-Microsoft logon/boot tasks). Changes go through `reg.exe` (`StartupApproved` / Store `State`) or `schtasks.exe`.
+- `darwin.ts` — LaunchAgents via `plutil` + `launchctl print-disabled`, toggled with `launchctl enable|disable gui/<uid>/<label>`; login items through JXA with values passed in environment variables.
+- `linux.ts` — XDG autostart with user-over-system precedence; pure helpers for `.desktop` editing.
+- `index.ts` — `StartupManager`: classification (`shared/engine/startup.ts`: `parseCommand`, `assessStartup`, `matchRunning`, `measureImpact`), protection re-check, verification by re-reading, and the change journal (`startup-journal.json` in userData, written atomically).
+
+## Performance mode
+
+`src/main/boost/` — `Booster` keeps targets by cluster key (`boostKey`) and a ledger of adjusted pids with their original priority. A 4 s tick adjusts new pids and forgets exited ones; `stop()` (also on `before-quit`) restores everything. `ecoqos.ts` runs one PowerShell worker per session that compiles a constant P/Invoke shim for `SetProcessInformation(ProcessPowerThrottling)` and receives pid batches over stdin. Planning (`shared/engine/boost.ts`: profiles, eligibility, suggestions) is pure and shared with the web demo.
+
 ## Privileges
 
 - Windows: `requestedExecutionLevel: requireAdministrator` in the packaged manifest. Denied terminations retry with `taskkill /F` (which enables SeDebugPrivilege).

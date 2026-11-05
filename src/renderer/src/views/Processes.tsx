@@ -14,9 +14,11 @@ interface Props {
   onToggleProtected: (v: boolean) => void
   onSelect: (g: AppGroup) => void
   onKill: (groups: AppGroup[]) => void
+  /** Group ids currently adjusted by performance mode. */
+  boosted?: ReadonlyMap<string, 'eco' | 'focus'>
 }
 
-export function Processes({ snapshot, selectedId, showProtected, onToggleProtected, onSelect, onKill }: Props) {
+export function Processes({ snapshot, selectedId, showProtected, onToggleProtected, onSelect, onKill, boosted }: Props) {
   const { t, i18n } = useTranslation()
   const lng = i18n.language
   const [query, setQuery] = useState('')
@@ -142,6 +144,11 @@ export function Processes({ snapshot, selectedId, showProtected, onToggleProtect
                       <div className="app-cell__name">
                         {g.identity.product ?? g.name}
                         <RiskBadge risk={g.risk} />
+                        {boosted?.has(g.id) && (
+                          <span className={`boost-mark boost-mark--${boosted.get(g.id)}`} title={t(`boost.roles.${boosted.get(g.id)}`)}>
+                            <Icon name={boosted.get(g.id) === 'focus' ? 'target' : 'leaf'} size={13} />
+                          </span>
+                        )}
                       </div>
                       <div className="app-cell__meta">
                         <CategoryBadge category={g.identity.category} />

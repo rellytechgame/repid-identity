@@ -1,6 +1,7 @@
 import os from 'node:os'
 import si from 'systeminformation'
 import type {
+  AppGroup,
   EngineSettings,
   GpuController,
   KillRequest,
@@ -115,6 +116,21 @@ export class Engine {
       processCount: procs.length,
       groups
     }
+  }
+
+  /** Names the user protected in Settings (normalized), for modules outside the engine. */
+  get protectedNames(): ReadonlySet<string> {
+    return this.userProtected
+  }
+
+  /**
+   * Process list and app groups without the system-wide sampling of
+   * `snapshot()`, for the startup manager and performance mode.
+   */
+  async current(maxAgeMs = PROCESS_MAX_AGE_MS): Promise<{ procs: ProcessInfo[]; groups: AppGroup[] }> {
+    const procs = await this.processes(maxAgeMs)
+    const services = await getServiceMap(procs.map((p) => p.pid))
+    return { procs, groups: buildGroups(procs, { ...this.protection(), totalMem: os.totalmem(), services }) }
   }
 
   async details(pid: number): Promise<ProcessDetails | null> {

@@ -38,6 +38,8 @@ We'll credit you in the release notes unless you prefer to stay anonymous.
 - Privilege escalation through the elevation flow (UAC relaunch, `pkexec`)
 - Loading remote content or navigating the app window to untrusted origins
 - Making the cleanup delete anything outside its target folders (path traversal, link/junction following, over-broad roots)
+- Making the startup manager change an entry RePID classifies as locked, or anything other than the entry's enable flag
+- Making performance mode change the priority of a protected process, or leave priorities changed after *Restore all* or quit
 
 ## Security design (summary)
 
@@ -45,5 +47,7 @@ We'll credit you in the release notes unless you prefer to stay anonymous.
 - IPC: sender origin verified; every payload validated (integer pids, bounded arrays, enum-only link targets). External URLs are fixed constants in the main process.
 - Engine: protection is evaluated in the main process from freshly collected data; the UI's view of risk is never trusted.
 - Cleanup: the UI sends target ids only; paths come from fixed templates, deletion is confined to each target folder, links are never followed, drive/home/OS roots are refused; elevated shell lines on macOS/Linux are constants (plus validated integer pids for kills).
+- Startup: ids only; every change re-scans and re-classifies first, uses the OS's own reversible flag (`StartupApproved`, Store task `State`, `schtasks /DISABLE`, `launchctl disable`, XDG `Hidden=true`), never deletes the entry, and is verified by reading the state back. Registry/task names reach `reg.exe`/`schtasks.exe` as argument-array values; Store package ids and launchd labels are pattern-validated.
+- Performance mode: group ids only; eligibility is re-checked on every tick; only below-normal/above-normal priorities are used; original values are restored with a pid+name check against reuse. The EcoQoS helper is a constant P/Invoke shim compiled in memory (no DLL written to disk); it receives integer pids only.
 - Commands: `execFile` with argument arrays only; dynamic values reach PowerShell via environment variables; service names are taken from the engine's own lookup and validated against a strict pattern.
 - Supply chain: lockfile committed, Dependabot, `npm audit` and CodeQL in CI.

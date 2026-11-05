@@ -1,4 +1,7 @@
 import type {
+  AppGroup,
+  BoostApp,
+  BoostProfileId,
   CleanOutcome,
   CleanResult,
   CleanerReport,
@@ -7,11 +10,16 @@ import type {
   ProcessInfo,
   RepidApi,
   ServiceRef,
+  StartupChangeOutcome,
+  StartupEntry,
+  StartupSource,
   SystemSnapshot
 } from '@shared/types'
 import { DONATE_URL, REPO_URL } from '@shared/constants'
 import { buildGroups, descendantsOf } from '@shared/engine/grouping'
+import { boostKey, isEcoEligible, isFocusEligible } from '@shared/engine/boost'
 import { riskOf } from '@shared/engine/protection'
+import { MACHINE_SOURCES, assessStartup, matchRunning, measureImpact, parseCommand } from '@shared/engine/startup'
 
 /**
  * Simulated machine for the web demo. Browsers cannot see OS processes, so a
@@ -147,6 +155,31 @@ function demoCleanerTargets(running: Set<string>, cleaned: Set<string>): Cleaner
   ]
 }
 
+interface DemoStartup {
+  source: StartupSource
+  label: string
+  command: string
+  publisher?: string
+  declaredName?: string
+  enabled: boolean
+}
+
+const X86 = 'C:\\Program Files (x86)\\'
+const DEMO_STARTUP: DemoStartup[] = [
+  { source: 'hkcu-run', label: 'Discord', command: `${APPDATA}Local\\Discord\\Update.exe --processStart Discord.exe`, publisher: 'Discord Inc.', enabled: true },
+  { source: 'hkcu-run', label: 'Spotify', command: `"${APPDATA}Roaming\\Spotify\\Spotify.exe" /minimized`, publisher: 'Spotify AB', enabled: true },
+  { source: 'hkcu-run', label: 'OneDrive', command: `"${APPDATA}Local\\Microsoft\\OneDrive\\OneDrive.exe" /background`, publisher: 'Microsoft Corporation', enabled: true },
+  { source: 'hkcu-run', label: 'MicrosoftEdgeAutoLaunch_0A1B2C3D4E5F60718293A4B5C6D7E8F9', command: `"${X86}Microsoft\\Edge\\Application\\msedge.exe" --no-startup-window`, publisher: 'Microsoft Corporation', enabled: true },
+  { source: 'hkcu-run', label: 'Steam', command: `"${X86}Steam\\steam.exe" -silent`, publisher: 'Valve Corporation', enabled: true },
+  { source: 'hkcu-run', label: 'Docker Desktop', command: `"${PF}Docker\\Docker\\Docker Desktop.exe" -Autostart`, publisher: 'Docker Inc.', enabled: false },
+  { source: 'user-folder', label: 'QuickTools.lnk', command: `"${APPDATA}Roaming\\QuickTools\\QuickToolsHelper.exe"`, declaredName: 'QuickTools', publisher: 'QuickTools Ltd.', enabled: true },
+  { source: 'store-app', label: 'MSTeams_8wekyb3d8bbwe\\TeamsTfwStartupTask', command: `${PF}WindowsApps\\MSTeams\\ms-teams.exe`, declaredName: 'Microsoft Teams', publisher: 'Microsoft Corporation', enabled: true },
+  { source: 'hklm-run', label: 'SecurityHealth', command: `${W}SecurityHealthSystray.exe`, declaredName: 'Windows Security notification icon', publisher: 'Microsoft Corporation', enabled: true },
+  { source: 'hklm-run', label: 'RtkAudUService', command: `"${W}DriverStore\\FileRepository\\realtek.inf_amd64\\RtkAudUService64.exe" -background`, declaredName: 'Realtek HD Audio Universal Service', publisher: 'Realtek Semiconductor', enabled: true },
+  { source: 'hklm-run32', label: 'SunJavaUpdateSched', command: `"${X86}Common Files\\Java\\Java Update\\jusched.exe"`, declaredName: 'Java Update Scheduler', publisher: 'Oracle Corporation', enabled: true },
+  { source: 'task', label: '\\Adobe Acrobat Update Task', command: `"${X86}Common Files\\Adobe\\ARM\\1.0\\AdobeARM.exe"`, declaredName: 'Adobe Acrobat Update Service', publisher: 'Adobe Inc.', enabled: true }
+]
+
 export function createDemoApi(): RepidApi {
   const seeded = seed()
   let procs = seeded.procs
@@ -155,6 +188,86 @@ export function createDemoApi(): RepidApi {
   const cleaned = new Set<string>()
   const ctx = { platform: 'win32' as const, selfPids: new Set<number>(), userProtected: new Set<string>() }
   let tick = 0
+  const startupState = new Map(DEMO_STARTUP.map((d) => [`${d.source}:${d.label}`, d.enabled]))
+  const startupJournal = new Set<string>()
+  const boostTargets = new Map<string, { role: 'eco' | 'focus'; name: string; product?: string }>()
+  let boostProfile: BoostProfileId | undefined
+  let boostSince: number | undefined
+  const groupsNow = (): AppGroup[] => buildGroups(procs, { ...ctx, totalMem: TOTAL_MEM, services })
+
+  const startupEntries = (): StartupEntry[] => {
+    const groups = groupsNow()
+    return DEMO_STARTUP.map((d) => {
+      const id = `${d.source}:${d.label}`
+      const enabled = startupState.get(id) ?? d.enabled
+      const cmd = parseCommand(d.command)
+      const a = assessStartup({
+        platform: 'win32',
+        label: d.label,
+        command: d.command,
+        exe: cmd.exe,
+        launches: cmd.launches,
+        declaredName: d.declaredName,
+        publisher: d.publisher,
+        userProtected: ctx.userProtected
+      })
+      const { running, impact } = measureImpact(enabled ? matchRunning(cmd.exe, cmd.launches, groups) : [])
+      const machine = MACHINE_SOURCES.has(d.source)
+      return {
+        id,
+        name: a.name,
+        publisher: d.publisher,
+        command: d.command,
+        exe: cmd.exe,
+        source: d.source,
+        scope: machine ? 'machine' : 'user',
+        enabled,
+        risk: a.risk,
+        effect: a.effect,
+        recommended: a.recommended && enabled,
+        requiresAdmin: machine,
+        running,
+        impact: enabled ? impact : 'not-running',
+        changedByRepid: startupJournal.has(id) && !enabled
+      }
+    })
+  }
+
+  const setStartup = async (ids: string[], enabled: boolean, allowCaution: boolean): Promise<StartupChangeOutcome[]> => {
+    await new Promise((r) => setTimeout(r, 350))
+    const all = startupEntries()
+    return ids.map((id): StartupChangeOutcome => {
+      const e = all.find((x) => x.id === id)
+      if (!e) return { id, name: id, status: 'not-found' }
+      if (e.risk === 'critical' || (e.risk === 'caution' && !allowCaution && !(enabled && e.changedByRepid))) return { id, name: e.name, status: 'protected' }
+      if (e.enabled === enabled) return { id, name: e.name, status: 'unchanged' }
+      startupState.set(id, enabled)
+      if (enabled) startupJournal.delete(id)
+      else startupJournal.add(id)
+      return { id, name: e.name, status: 'changed' }
+    })
+  }
+
+  const boostStatus = () => {
+    const groups = groupsNow()
+    const apps: BoostApp[] = [...boostTargets].map(([key, target]) => {
+      const matching = groups.filter((g) => boostKey(g) === key)
+      return {
+        key,
+        ...target,
+        groupIds: matching.map((g) => g.id),
+        applied: matching.reduce((s, g) => s + g.pids.length, 0),
+        refused: 0,
+        ecoQos: target.role === 'eco',
+        cpu: Math.round(matching.reduce((s, g) => s + g.cpu, 0) * 10) / 10,
+        memBytes: matching.reduce((s, g) => s + g.memBytes, 0)
+      }
+    })
+    return { active: boostTargets.size > 0, profile: boostProfile, startedAt: boostSince, apps, focusSupported: true, restorePending: false }
+  }
+
+  /** Simulated effect: background apps yield ~45% of their CPU while in efficiency mode. */
+  const ecoFactor = (p: ProcessInfo) => (boostTargets.get(boostKey({ name: p.name, command: p.command }))?.role === 'eco' ? 0.55 : 1)
 
   const jitter = () => {
     tick++
@@ -163,7 +276,7 @@ export function createDemoApi(): RepidApi {
       const wave = 1 + 0.35 * Math.sin(tick / 3 + p.pid) + (Math.random() - 0.5) * 0.4
       return {
         ...p,
-        cpu: Math.max(0, Math.round(b.cpu * wave * 10) / 10),
+        cpu: Math.max(0, Math.round(b.cpu * wave * ecoFactor(p) * 10) / 10),
         memBytes: Math.round(b.mem * (1 + 0.04 * Math.sin(tick / 5 + p.pid))),
         gpu: b.gpu !== undefined ? Math.max(0, Math.round(b.gpu * wave)) : undefined
       }
@@ -253,6 +366,39 @@ export function createDemoApi(): RepidApi {
       })
       if (req.closeBlocking) procs = procs.filter((p) => !/^(chrome|firefox)\.exe$/i.test(p.name))
       return { outcomes, freedBytes: outcomes.reduce((s, o) => s + o.freedBytes, 0) }
+    },
+    async startupScan() {
+      await new Promise((r) => setTimeout(r, 600))
+      return { entries: startupEntries(), elevated: false, supported: true, scannedAt: Date.now() }
+    },
+    async startupSet(req) {
+      return setStartup(req.ids, req.enabled, req.allowCaution)
+    },
+    async startupRestore() {
+      return setStartup([...startupJournal], true, true)
+    },
+    async boostStatus() {
+      return boostStatus()
+    },
+    async boostApply(req) {
+      const groups = groupsNow()
+      boostTargets.clear()
+      const focus = groups.find((g) => g.id === req.focusGroupId)
+      if (focus && isFocusEligible(focus)) boostTargets.set(boostKey(focus), { role: 'focus', name: focus.name, product: focus.identity.product })
+      for (const id of req.ecoGroupIds) {
+        const g = groups.find((x) => x.id === id)
+        if (g && isEcoEligible(g) && !boostTargets.has(boostKey(g))) boostTargets.set(boostKey(g), { role: 'eco', name: g.name, product: g.identity.product })
+      }
+      boostProfile = boostTargets.size ? req.profile : undefined
+      boostSince = boostTargets.size ? (boostSince ?? Date.now()) : undefined
+      await new Promise((r) => setTimeout(r, 300))
+      return boostStatus()
+    },
+    async boostStop() {
+      boostTargets.clear()
+      boostProfile = undefined
+      boostSince = undefined
+      return boostStatus()
     },
     async openRepo(path = '') {
       const suffix: Record<string, string> = {

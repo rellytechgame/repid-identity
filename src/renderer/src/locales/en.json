@@ -7,9 +7,11 @@
     "label": "Main navigation",
     "dashboard": "Overview",
     "processes": "Processes",
+    "boost": "Performance",
+    "startup": "Startup",
+    "cleaner": "Cleanup",
     "settings": "Settings",
-    "about": "About",
-    "cleaner": "Cleanup"
+    "about": "About"
   },
   "common": {
     "close": "Close",
@@ -383,6 +385,167 @@
       "partial_other": "{{count}} items were partly cleaned (files in use).",
       "failed_one": "{{count}} item could not be cleaned.",
       "failed_other": "{{count}} items could not be cleaned."
+    }
+  },
+  "startup": {
+    "title": "Startup programs",
+    "scanning": "Checking what opens when the computer starts…",
+    "summary": "{{enabled}} open on their own at sign-in · {{mem}} in use right now",
+    "rescan": "Scan again",
+    "disableSuggested": "Disable suggested ({{count}})",
+    "safeNote": "Disabling never uninstalls or deletes anything: the program just stops opening automatically at sign-in. You can turn it back on here any time.",
+    "nextBoot": "Takes effect at your next sign-in. Apps that are already open stay open.",
+    "notElevatedWin": "Some programs are registered for every user of this computer; changing them requires administrator rights.",
+    "unsupported": "Startup management is not available on this platform.",
+    "filters": {
+      "all": "All",
+      "suggested": "Suggested",
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "empty": "Nothing in this view.",
+    "whatHappens": "What happens if you disable it:",
+    "suggested": "Suggested",
+    "suggestedHint": "Rarely needed at startup and safe to disable.",
+    "locked": "Protected",
+    "lockedHint": "Operating-system component or locked by policy: RePID will not disable it.",
+    "admin": "Admin",
+    "adminHint": "Registered for all users: requires administrator rights.",
+    "changedByRepid": "Disabled by RePID",
+    "disabledState": "Disabled",
+    "impact": {
+      "high": "High impact",
+      "medium": "Medium impact",
+      "low": "Low impact",
+      "not-running": "Not running"
+    },
+    "impactHint": "Measured now from what it uses while open.",
+    "usingNow": "Uses {{mem}} RAM · CPU {{cpu}}",
+    "toggleOn": "Enable {{name}} at startup",
+    "toggleOff": "Disable {{name}} at startup",
+    "source": {
+      "hkcu-run": "Registry · your user",
+      "hklm-run": "Registry · all users",
+      "hklm-run32": "Registry · all users (32-bit)",
+      "user-folder": "Startup folder",
+      "common-folder": "Startup folder · all users",
+      "store-app": "Microsoft Store app",
+      "task": "Scheduled task at sign-in",
+      "launch-agent": "LaunchAgent",
+      "login-item": "Login item",
+      "xdg-user": "Autostart · your user",
+      "xdg-system": "Autostart · system"
+    },
+    "effect": {
+      "updater": "It will check for updates when you open the program instead of sitting in the background from boot.",
+      "browser": "The browser (or web app) won't preload at sign-in; the first time you open it may take a couple of seconds longer.",
+      "communication": "You won't get messages or calls from this app until you open it yourself.",
+      "media": "The app won't open on its own. Your music, library and settings stay intact.",
+      "gaming": "The launcher won't open on its own. Your games stay installed; downloads and updates start when you open it.",
+      "cloud": "Your files stop syncing until you open the app: anything you change meanwhile won't be backed up to the cloud.",
+      "security": "It may stop alerting you or protecting in real time whatever this product watches. Only do this if you know you don't need it.",
+      "hardware": "Hardware features that rely on this utility may stop working: special keys, audio controls, lighting, advanced touchpad, or camera and microphone effects.",
+      "development": "Developer tools (containers, local servers) won't be ready until you open them.",
+      "system": "It is part of the operating system and stays enabled.",
+      "generic": "The program won't open automatically; you can open it yourself whenever you need it."
+    },
+    "confirm": {
+      "title": "Disable at startup",
+      "body": "These programs will stop opening automatically at sign-in. Nothing is uninstalled or deleted.",
+      "cautionTitle": "Review before continuing",
+      "cautionAck": "I understand what will happen and want to disable them anyway.",
+      "action_one": "Disable",
+      "action_other": "Disable {{count}}"
+    },
+    "history": {
+      "title": "Changes made by RePID",
+      "body_one": "RePID disabled {{count}} program. You can put it back exactly as it was in one click.",
+      "body_other": "RePID disabled {{count}} programs. You can put everything back exactly as it was in one click.",
+      "restore": "Restore all"
+    },
+    "toast": {
+      "disabled_one": "{{name}} will no longer open at sign-in",
+      "disabled_other": "{{count}} programs will no longer open at sign-in",
+      "enabled_one": "{{name}} will open at sign-in again",
+      "enabled_other": "{{count}} programs will open at sign-in again",
+      "restored_one": "Startup restored: {{count}} program re-enabled",
+      "restored_other": "Startup restored: {{count}} programs re-enabled",
+      "nothing": "Nothing was changed",
+      "needsAdmin_one": "{{count}} needs administrator rights.",
+      "needsAdmin_other": "{{count}} need administrator rights.",
+      "protected_one": "{{count}} is protected and was left alone.",
+      "protected_other": "{{count}} are protected and were left alone.",
+      "failed_one": "{{count}} could not be changed.",
+      "failed_other": "{{count}} could not be changed.",
+      "cancelled": "Authorization was cancelled."
+    }
+  },
+  "boost": {
+    "title": "Performance mode",
+    "inactive": "Off · pick a profile to prioritize what you're doing",
+    "active_one": "On · {{profile}} · {{count}} app adjusted since {{time}}",
+    "active_other": "On · {{profile}} · {{count}} apps adjusted since {{time}}",
+    "restore": "Restore all",
+    "apply": "Turn on profile",
+    "update": "Apply changes",
+    "safeNote": "No app is closed and nothing is deleted. The selected apps keep working; they just yield CPU to what you're using. Everything goes back to normal when you press “Restore all”, close RePID, or restart the app.",
+    "profileLabel": "Profile",
+    "profiles": {
+      "gaming": {
+        "title": "Gaming",
+        "desc": "Priority to your game. Browsers, sync and updaters yield CPU. Voice chat, overlays and launchers are left alone."
+      },
+      "work": {
+        "title": "Focus",
+        "desc": "Game launchers and background processes yield CPU to your work apps."
+      },
+      "creative": {
+        "title": "Render / build",
+        "desc": "Everything non-essential yields CPU to your editor, renderer or build."
+      },
+      "custom": {
+        "title": "Custom",
+        "desc": "You choose which apps to adjust; nothing is pre-selected."
+      }
+    },
+    "focus": {
+      "label": "Priority app",
+      "hint": "Gets above-normal priority. “High” and “Realtime” are never used: they can freeze keyboard and audio.",
+      "none": "None",
+      "unsupported": "On macOS and Linux raising priority requires root; RePID only lowers the other apps."
+    },
+    "listTitle": "Apps that will yield CPU",
+    "listHint": "Pre-selected by the profile. You can change the selection.",
+    "suggested": "Suggested",
+    "whatHappens": "What happens:",
+    "ecoEffect": "It keeps working normally; when the computer is busy it waits its turn and may respond a little slower while the mode is on.",
+    "ecoQosNote": "On Windows 11 it also turns on “Efficiency mode” (the green leaf in Task Manager).",
+    "protectedCount_one": "{{count}} system, service or security app is left alone.",
+    "protectedCount_other": "{{count}} system, service and security apps are left alone.",
+    "empty": "No background app is using a meaningful amount of resources right now.",
+    "selected_one": "{{count}} selected",
+    "selected_other": "{{count}} selected",
+    "activeTitle": "Active adjustments",
+    "roles": {
+      "eco": "Efficiency",
+      "focus": "Priority"
+    },
+    "applied_one": "{{count}} process adjusted",
+    "applied_other": "{{count}} processes adjusted",
+    "refused_one": "{{count}} protected by the OS",
+    "refused_other": "{{count}} protected by the OS",
+    "notRunning": "Closed · will be adjusted if you open it again",
+    "ecoQos": "Windows Efficiency mode",
+    "restorePending": "Some priorities could not be restored because the password prompt was cancelled. They return to normal when those apps restart.",
+    "detailToggle": "Efficiency mode",
+    "detailHint": "Lowers its priority without closing it. Restored when you turn it off or close RePID.",
+    "detailBlocked": "System apps, services, security software and apps marked caution keep their priority.",
+    "toast": {
+      "applied_one": "Performance mode on: {{count}} app adjusted",
+      "applied_other": "Performance mode on: {{count}} apps adjusted",
+      "stopped": "All restored: apps are back to their original priority",
+      "ecoOn": "{{name}} is in efficiency mode",
+      "ecoOff": "{{name}} is back to normal priority"
     }
   }
 }

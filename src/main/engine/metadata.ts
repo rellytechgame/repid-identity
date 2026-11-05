@@ -1,7 +1,7 @@
 import type { AppGroup } from '../../shared/types'
 import { powershell } from './exec'
 
-interface FileMeta {
+export interface FileMeta {
   description?: string
   company?: string
 }
@@ -36,6 +36,21 @@ export function enrichWithMetadata(groups: AppGroup[]): void {
 async function fetchBatch(paths: string[]): Promise<void> {
   inflight = true
   try {
+    const found = await readFileMeta(paths)
+    for (const path of paths) cache.set(path, found.get(path) ?? {})
+  } finally {
+    inflight = false
+  }
+}
+
+/**
+ * Reads FileDescription/CompanyName for many executables in one PowerShell
+ * call. Missing or unreadable files are simply absent from the result.
+ */
+export async function readFileMeta(paths: string[]): Promise<Map<string, FileMeta>> {
+  const out = new Map<string, FileMeta>()
+  if (process.platform !== 'win32' || !paths.length) return out
+  try {
     // Paths travel as JSON in an env var, never interpolated into the script.
     const res = await powershell(
       '$paths = $env:REPID_PATHS | ConvertFrom-Json; ' +
@@ -45,13 +60,11 @@ async function fetchBatch(paths: string[]): Promise<void> {
     )
     const parsed: unknown = res.ok && res.stdout.trim() ? JSON.parse(res.stdout) : []
     const rows = (Array.isArray(parsed) ? parsed : [parsed]) as Array<{ p: string; d?: string; c?: string }>
-    for (const path of paths) cache.set(path, {})
     for (const row of rows) {
-      if (row?.p) cache.set(row.p, { description: row.d?.trim() || undefined, company: row.c?.trim() || undefined })
+      if (row?.p) out.set(row.p, { description: row.d?.trim() || undefined, company: row.c?.trim() || undefined })
     }
   } catch {
-    for (const path of paths) cache.set(path, {})
-  } finally {
-    inflight = false
+    // metadata is optional enrichment
   }
+  return out
 }

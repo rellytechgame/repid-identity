@@ -1,27 +1,31 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { AppGroup, CleanResult, KillResult } from '@shared/types'
+import type { AppGroup, BoostProfileId, CleanResult, KillResult } from '@shared/types'
 import { suggestTargets } from '@shared/engine/smart'
 import { api, isDemo } from './api'
 import { formatBytes, formatPercent } from './format'
-import { usePrefersDark, useSettings, useSnapshot } from './hooks'
+import { useBoost, usePrefersDark, useSettings, useSnapshot } from './hooks'
 import { applyDocumentLanguage, resolveLanguage } from './i18n'
 import { Icon, type IconName } from './components/Icon'
 import { LogoMark, Wordmark } from './components/Logo'
 import { StarButton, Toasts, type Toast } from './components/ui'
 import { About } from './views/About'
+import { BoostView } from './views/BoostView'
 import { Dashboard } from './views/Dashboard'
 import { DetailPanel } from './views/DetailPanel'
 import { ConfirmKill, SmartFree, type KillOptions } from './views/Dialogs'
 import { CleanerView } from './views/CleanerView'
 import { Processes } from './views/Processes'
 import { SettingsView } from './views/SettingsView'
+import { StartupView } from './views/StartupView'
 
-type View = 'dashboard' | 'processes' | 'cleaner' | 'settings' | 'about'
+type View = 'dashboard' | 'processes' | 'boost' | 'startup' | 'cleaner' | 'settings' | 'about'
 
 const NAV: Array<{ id: View; icon: IconName }> = [
   { id: 'dashboard', icon: 'dashboard' },
   { id: 'processes', icon: 'list' },
+  { id: 'boost', icon: 'rocket' },
+  { id: 'startup', icon: 'power' },
   { id: 'cleaner', icon: 'broom' },
   { id: 'settings', icon: 'settings' },
   { id: 'about', icon: 'info' }
@@ -31,8 +35,14 @@ export function App() {
   const { t, i18n } = useTranslation()
   const { settings, update } = useSettings()
   const { snapshot, history, error, refresh } = useSnapshot(settings.refreshMs)
+  const { boost, setBoost } = useBoost(snapshot?.timestamp)
   const prefersDark = usePrefersDark()
   const [view, setView] = useState<View>('dashboard')
+  const viewRef = useRef<HTMLElement>(null)
+  // Every section shares one scroll container: start each one at the top.
+  useEffect(() => {
+    viewRef.current?.scrollTo({ top: 0 })
+  }, [view])
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [confirmGroups, setConfirmGroups] = useState<AppGroup[] | null>(null)
   const [smartOpen, setSmartOpen] = useState(false)
@@ -140,6 +150,46 @@ export function App() {
     }
   }
 
+  const boosted = useMemo(() => new Map(boost.apps.flatMap((a) => a.groupIds.map((id) => [id, a.role] as const))), [boost])
+
+  const applyBoost = async (profile: BoostProfileId, focusGroupId: string | undefined, ecoGroupIds: string[], toast?: string) => {
+    setBusy(true)
+    try {
+      const state = await api.boostApply({ profile, focusGroupId, ecoGroupIds })
+      setBoost(state)
+      pushToast(
+        state.active
+          ? { tone: 'success', title: toast ?? t('boost.toast.applied', { count: state.apps.length }) }
+          : { tone: 'info', title: t('boost.toast.stopped') }
+      )
+    } catch (err) {
+      pushToast({ tone: 'error', title: t('toast.error'), body: err instanceof Error ? err.message : String(err) })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const stopBoost = async (toast?: string) => {
+    setBusy(true)
+    try {
+      setBoost(await api.boostStop())
+      pushToast({ tone: 'success', title: toast ?? t('boost.toast.stopped') })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  /** Detail-panel switch: rebuilds the current plan with this app added or removed. */
+  const toggleEco = (group: AppGroup, on: boolean) => {
+    const others = boost.apps.filter((a) => !a.groupIds.includes(group.id))
+    const eco = others.filter((a) => a.role === 'eco').flatMap((a) => a.groupIds)
+    const focus = others.find((a) => a.role === 'focus')?.groupIds[0]
+    const name = group.identity.product ?? group.name
+    if (on) eco.push(group.id)
+    if (!eco.length && !focus) void stopBoost(t('boost.toast.ecoOff', { name }))
+    else void applyBoost(boost.profile ?? 'custom', focus, eco, t(on ? 'boost.toast.ecoOn' : 'boost.toast.ecoOff', { name }))
+  }
+
   const suggestions = snapshot ? suggestTargets(snapshot.groups, { threshold: settings.smartThreshold }) : []
   const platformClass = `platform-${window.repid?.platform ?? 'web'}`
 
@@ -192,7 +242,7 @@ export function App() {
         </header>
 
         <div className={`content ${selected && (view === 'dashboard' || view === 'processes') ? 'has-detail' : ''}`}>
-          <main className="view">
+          <main className="view" ref={viewRef}>
             {!snapshot && !error && (
               <div className="loading">
                 <LogoMark size={56} />
@@ -218,14 +268,27 @@ export function App() {
                 onToggleProtected={(v) => update({ showProtected: v })}
                 onSelect={(g) => setSelectedId(g.id)}
                 onKill={requestKill}
+                boosted={boosted}
               />
             )}
+            {snapshot && view === 'boost' && (
+              <BoostView snapshot={snapshot} boost={boost} busy={busy} onApply={(p, f, e) => void applyBoost(p, f, e)} onStop={() => void stopBoost()} />
+            )}
+            {view === 'startup' && <StartupView notify={pushToast} />}
             {view === 'cleaner' && <CleanerView onResult={(result) => reportClean(result)} />}
             {view === 'settings' && <SettingsView settings={settings} update={update} snapshot={snapshot} />}
             {view === 'about' && <About />}
           </main>
           {selected && (view === 'dashboard' || view === 'processes') && (
-            <DetailPanel group={selected} onClose={() => setSelectedId(null)} onKill={requestKill} onStopService={stopService} />
+            <DetailPanel
+              group={selected}
+              boostRole={boosted.get(selected.id)}
+              busy={busy}
+              onClose={() => setSelectedId(null)}
+              onKill={requestKill}
+              onStopService={stopService}
+              onEco={(on) => toggleEco(selected, on)}
+            />
           )}
         </div>
       </div>

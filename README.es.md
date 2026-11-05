@@ -51,6 +51,8 @@ RePID (*Re*-identificar el *PID*) resuelve eso: **identifica** cada proceso, lo 
 | 📈 **CPU · RAM · GPU en vivo** | Medidores con historial, uso por aplicación y GPU por proceso (contadores del motor de GPU en Windows, `nvidia-smi` en el resto). |
 | ⚙️ **Consciente de servicios** | Detecta servicios de Windows, unidades systemd y agentes launchd, y los **detiene** mediante su administrador. |
 | 🛡️ **Red de seguridad** | Protección en tres niveles (Protegido / Precaución / Seguro) aplicada dentro del motor y verificada otra vez justo antes de cada acción. |
+| 🚀 **Modo rendimiento** | Perfiles de un clic (Juego, Concentración, Render/compilar, Personalizado) que hacen que las apps en segundo plano **cedan CPU** a lo que estás usando: prioridad inferior a la normal más **EcoQoS** de Windows 11 (la hoja verde del Administrador de tareas) y, opcionalmente, prioridad superior para una app. No se cierra nada; todo se restaura al detenerlo o al cerrar RePID. |
+| ⏻ **Programas de inicio** | Todo lo que se abre al iniciar sesión (claves Run del registro, carpetas Inicio, apps de Microsoft Store, tareas programadas · LaunchAgents e ítems de inicio · autostart XDG) con su nombre real, editor e **impacto medido en vivo**. Se deshabilita de forma reversible con el mecanismo del propio sistema, avisando antes qué pasará, y se restaura todo lo que cambió RePID con un clic. |
 | 🧹 **Limpieza profunda** | Temporales, temporales del sistema, caché de actualizaciones, papelera, caché DNS, cachés de paquetes y la **caché, historial y cookies de todos los navegadores** (Chrome, Edge, Firefox, Brave, Opera, Opera GX, Vivaldi, Chromium, Safari). Cada elemento explica *exactamente qué pasará* antes de borrarlo; lo irreversible requiere confirmación explícita. Contraseñas, marcadores y documentos nunca se tocan. |
 | 🔑 **Privilegios completos** | En Windows se ejecuta como administrador (UAC al iniciar) para finalizar cualquier proceso, detener servicios y limpiar carpetas del sistema. En macOS/Linux pide tu contraseña solo para las acciones que lo necesitan. Los procesos críticos siguen bloqueados. |
 | 🌍 **Multiidioma** | Español e inglés incluidos. Agregar un idioma es añadir **un archivo JSON**. |
@@ -71,6 +73,41 @@ Descarga el instalador para tu sistema desde la [**última versión**](https://g
 | **Windows 10/11** | Instalador `.exe` o portable | x64 y ARM64. Solicita permisos de administrador al iniciar (UAC) para finalizar cualquier proceso, detener servicios y limpiar carpetas del sistema. |
 | **macOS 12+** | `.dmg` | Apple Silicon e Intel. |
 | **Linux** | `.AppImage`, `.deb`, `.rpm` | Los servicios del sistema se detienen con polkit (`pkexec`) cuando hace falta. |
+
+## Modo rendimiento
+
+No finaliza ningún proceso: solo cambia la **prioridad**, y solo de apps clasificadas como seguras.
+
+| Perfil | Ceden CPU (preseleccionadas) | Nunca preseleccionadas |
+|---|---|---|
+| 🎮 Juego | Navegadores, sincronización, actualizadores, ofimática, IDEs, procesos auxiliares | Chat de voz, overlays, launchers, multimedia, scripts y contenedores en ejecución, apps desconocidas (podría ser el juego) |
+| 🎯 Concentración | Launchers de juegos, actualizadores, procesos auxiliares | Tus apps de trabajo |
+| 🛠️ Render / compilar | Navegadores, chat, launchers, multimedia, sincronización, actualizadores, ofimática | Tu editor, renderizador o compilación |
+| ⚙️ Personalizado | Nada: eliges tú | — |
+
+- **Eficiencia**: prioridad inferior a la normal (`nice 10` en macOS/Linux) más **EcoQoS** en Windows 11. Nunca anula una elección manual más fuerte (por ejemplo «Baja»).
+- **App prioritaria**: solo «por encima de lo normal». Nunca «Alta» ni «Tiempo real», que pueden congelar teclado y audio. Solo Windows (en otros sistemas subir prioridad requiere root).
+- Los procesos nuevos que abra la app (pestañas nuevas) se ajustan automáticamente.
+- Cada cambio se registra con su valor original y se restaura con **Restaurar todo**, al cambiar la selección y al cerrar RePID.
+- Componentes del sistema, servicios, seguridad y todo lo marcado con *precaución* conservan su prioridad, y eso lo hace cumplir el proceso principal, no solo la interfaz.
+
+## Programas de inicio
+
+| Origen | Cómo lo deshabilita RePID |
+|---|---|
+| Registro Run (usuario / equipo / 32 bits) | Marca `StartupApproved`, exactamente lo que escribe el Administrador de tareas. El valor Run no se toca. |
+| Accesos directos de la carpeta Inicio | Marca `StartupApproved\StartupFolder`; el acceso directo se conserva. |
+| Apps de Microsoft Store | `State` = deshabilitado por el usuario, igual que *Configuración › Aplicaciones › Inicio*. |
+| Tareas programadas al iniciar sesión (no Microsoft) | `schtasks /Change /DISABLE`. |
+| LaunchAgents de macOS | `launchctl disable gui/<uid>/<label>`; el plist no se toca. |
+| Ítems de inicio de macOS | Se quitan y RePID guarda su ruta para volver a agregarlos. |
+| Autostart XDG (Linux) | `Hidden=true` en tu copia de usuario; nunca se modifica `/etc`. |
+
+- **Bloqueados**: componentes de Windows, entradas impuestas por directiva y piezas del escritorio en macOS/Linux.
+- **Precaución** (aviso + confirmación): seguridad, utilidades de hardware (audio, touchpad, teclas, RGB, GPU) y sincronización en la nube.
+- **Sugeridos**: actualizadores, navegadores precargados, chat, multimedia y launchers de juegos.
+- El impacto se **mide en el momento** con lo que consume el programa abierto.
+- Tras cada cambio RePID vuelve a leer el estado y avisa si no se aplicó. Todo lo que deshabilitó queda en un historial con **Restaurar todo**.
 
 ## Limpieza profunda
 

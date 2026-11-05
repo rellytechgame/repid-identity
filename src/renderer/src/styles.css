@@ -450,3 +450,72 @@ th.col-num { text-align: end; }
 .clean-ack ul { margin: 6px 0 8px; padding-inline-start: 18px; font-size: 13px; }
 .clean-ack .checkbox { color: var(--text); font-weight: 600; }
 @media (max-width: 760px) { .clean-hero { flex-wrap: wrap; } }
+
+/* ───────────── Startup & performance mode ───────────── */
+.startup, .boost { display: flex; flex-direction: column; gap: 16px; max-width: 1100px; }
+.clean-hero--active { border-color: color-mix(in srgb, var(--success) 45%, var(--border)); background: radial-gradient(120% 160% at 0% 0%, color-mix(in srgb, var(--success) 16%, transparent), transparent 60%), var(--bg-elev); }
+.clean-hero--active .clean-hero__icon { background: linear-gradient(135deg, var(--success), var(--brand-2)); }
+.startup-history { align-items: center; }
+.startup-history span { flex: 1; }
+.segmented__count { margin-inline-start: 6px; font-size: 11px; font-weight: 600; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+.badge--suggested { background: color-mix(in srgb, var(--brand-2) 16%, transparent); color: var(--brand-2); }
+.badge--repid { background: color-mix(in srgb, var(--brand-1) 14%, transparent); color: var(--brand-1); }
+.badge--eco { background: color-mix(in srgb, var(--success) 15%, transparent); color: var(--success); }
+.badge--focus { background: color-mix(in srgb, var(--brand-3) 18%, transparent); color: var(--brand-3); }
+
+.startup-list { list-style: none; margin: 0; padding: 0 8px 4px; }
+.startup-row { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: start; padding: 14px 10px; border-radius: var(--radius-sm); border-top: 1px solid var(--border); }
+.startup-row:first-child { border-top: 0; }
+.startup-row:hover { background: var(--bg-hover); }
+.startup-row.is-off .startup-row__text > *:not(.startup-row__title) { opacity: .7; }
+.startup-row.is-off .avatar { filter: grayscale(.85); opacity: .7; }
+.startup-row.is-locked { opacity: .75; }
+.startup-row__text { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.startup-row__title { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.startup-row__meta { font-size: 12px; color: var(--text-faint); }
+.startup-row__cmd { font-size: 11.5px; color: var(--text-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.startup-row__side { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; text-align: end; min-width: 150px; }
+.startup-row__side small { font-size: 11.5px; }
+.impact-pill { font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 99px; white-space: nowrap; }
+.impact-pill--high { background: color-mix(in srgb, var(--danger) 15%, transparent); color: var(--danger); }
+.impact-pill--medium { background: color-mix(in srgb, var(--warning) 16%, transparent); color: var(--warning); }
+.impact-pill--low { background: color-mix(in srgb, var(--success) 15%, transparent); color: var(--success); }
+.impact-pill--not-running, .impact-pill--off { background: var(--bg-hover); color: var(--text-faint); }
+
+.boost-config { padding-bottom: 16px; }
+.boost-profiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; padding: 0 18px; }
+.boost-profile {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 6px; text-align: start; padding: 14px; cursor: pointer;
+  border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-elev-2); color: var(--text); font: inherit;
+  transition: border-color .15s, box-shadow .15s, transform .15s;
+}
+.boost-profile:hover { border-color: var(--border-strong); }
+.boost-profile:focus-visible { outline: 2px solid var(--brand-2); outline-offset: 2px; }
+.boost-profile small { color: var(--text-muted); font-size: 12px; line-height: 1.4; }
+.boost-profile__icon { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; background: var(--bg-hover); color: var(--text-muted); }
+.boost-profile.is-active { border-color: var(--brand-2); box-shadow: 0 0 0 1px var(--brand-2), 0 10px 26px -16px var(--brand-2); }
+.boost-profile.is-active .boost-profile__icon { background: var(--brand-grad); color: #fff; }
+.boost-focus { display: grid; grid-template-columns: auto minmax(200px, 320px) 1fr; align-items: center; gap: 8px 14px; padding: 16px 18px 0; }
+.boost-focus label { display: flex; align-items: center; gap: 6px; }
+.boost-focus select { height: 36px; padding: 0 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--bg-elev-2); color: var(--text); }
+.boost-focus small { font-size: 12px; }
+.boost-effect { font-size: 12.5px; color: var(--text-muted); padding: 0 18px 8px; }
+.boost-protected { display: flex; align-items: center; gap: 6px; font-size: 12px; padding: 8px 18px 6px; }
+.boost-active { list-style: none; margin: 0; padding: 0 8px 6px; }
+.boost-active li { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 12px; padding: 10px; border-radius: var(--radius-sm); }
+.boost-active li:hover { background: var(--bg-hover); }
+.boost-active__text { min-width: 0; display: flex; flex-direction: column; }
+.boost-active__usage { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+.boost-mark { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 6px; }
+.boost-mark--eco { color: var(--success); background: color-mix(in srgb, var(--success) 14%, transparent); }
+.boost-mark--focus { color: var(--brand-3); background: color-mix(in srgb, var(--brand-3) 16%, transparent); }
+.detail__eco { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.detail__eco h3 { display: flex; align-items: center; gap: 6px; }
+@media (max-width: 1100px) { .boost-profiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 760px) {
+  .startup-row { grid-template-columns: auto 1fr; }
+  .startup-row__side { grid-column: 1 / -1; flex-direction: row; align-items: center; justify-content: space-between; min-width: 0; }
+  .boost-profiles { grid-template-columns: 1fr; }
+  .boost-focus { grid-template-columns: 1fr; }
+  .boost-active li { grid-template-columns: auto 1fr; }
+}

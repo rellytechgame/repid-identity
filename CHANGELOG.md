@@ -2,6 +2,23 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [1.2.0] — 2026-11-04
+
+### Added
+- **Performance mode**: Gaming, Focus, Render/build and Custom profiles. Background apps get below-normal priority plus Windows 11 EcoQoS; an optional focus app gets above-normal priority. New processes of selected apps are adjusted automatically, and everything is restored on stop, on selection change and when RePID quits.
+- Per-app *Efficiency mode* switch in the detail panel and leaf/target markers in the process list.
+- **Startup manager**: Registry Run keys, Startup folders, Microsoft Store startup tasks and logon scheduled tasks on Windows; LaunchAgents and login items on macOS; XDG autostart on Linux. Real names and publishers, live measured impact, suggestions, per-entry consequences, warnings for security/hardware/cloud-sync entries, a change journal and one-click *Restore all*.
+
+### Changed
+- PowerShell scripts are passed with `-EncodedCommand`, so quotes and newlines reach PowerShell byte for byte.
+- Switching sections always starts at the top of the page.
+
+### Fixed
+- Views could not be scrolled when the window was not maximized.
+
+### Security
+- Startup and performance requests carry ids only; the main process re-scans, re-classifies and re-checks protection before every change and verifies the result afterwards. Locked entries and protected processes are refused even if the UI asks.
+
 ## [1.1.0] — 2026-11-04
 
 ### Added

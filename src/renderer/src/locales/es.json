@@ -7,9 +7,11 @@
     "label": "Navegación principal",
     "dashboard": "Resumen",
     "processes": "Procesos",
+    "boost": "Rendimiento",
+    "startup": "Arranque",
+    "cleaner": "Limpieza",
     "settings": "Ajustes",
-    "about": "Acerca de",
-    "cleaner": "Limpieza"
+    "about": "Acerca de"
   },
   "common": {
     "close": "Cerrar",
@@ -383,6 +385,167 @@
       "partial_other": "{{count}} elementos se limpiaron parcialmente (archivos en uso).",
       "failed_one": "{{count}} elemento no se pudo limpiar.",
       "failed_other": "{{count}} elementos no se pudieron limpiar."
+    }
+  },
+  "startup": {
+    "title": "Programas de inicio",
+    "scanning": "Analizando lo que se abre al encender el equipo…",
+    "summary": "{{enabled}} se abren solos al iniciar sesión · {{mem}} en uso ahora mismo",
+    "rescan": "Volver a analizar",
+    "disableSuggested": "Deshabilitar sugeridos ({{count}})",
+    "safeNote": "Deshabilitar no desinstala ni borra nada: el programa solo deja de abrirse automáticamente al iniciar sesión. Puedes reactivarlo aquí cuando quieras.",
+    "nextBoot": "El cambio se nota en el próximo inicio de sesión. Las apps que ya están abiertas siguen abiertas.",
+    "notElevatedWin": "Algunos programas están registrados para todos los usuarios del equipo; cambiarlos requiere permisos de administrador.",
+    "unsupported": "La gestión de inicio no está disponible en esta plataforma.",
+    "filters": {
+      "all": "Todos",
+      "suggested": "Sugeridos",
+      "enabled": "Activos",
+      "disabled": "Deshabilitados"
+    },
+    "empty": "No hay programas en esta vista.",
+    "whatHappens": "Qué pasará si lo deshabilitas:",
+    "suggested": "Sugerido",
+    "suggestedHint": "No suele hacer falta al encender el equipo y deshabilitarlo es seguro.",
+    "locked": "Protegido",
+    "lockedHint": "Componente del sistema o bloqueado por una directiva: RePID no permite deshabilitarlo.",
+    "admin": "Admin",
+    "adminHint": "Registrado para todos los usuarios: requiere permisos de administrador.",
+    "changedByRepid": "Deshabilitado por RePID",
+    "disabledState": "Deshabilitado",
+    "impact": {
+      "high": "Impacto alto",
+      "medium": "Impacto medio",
+      "low": "Impacto bajo",
+      "not-running": "No está en ejecución"
+    },
+    "impactHint": "Medido ahora con lo que consume mientras está abierto.",
+    "usingNow": "Usa {{mem}} de RAM · CPU {{cpu}}",
+    "toggleOn": "Habilitar {{name}} al iniciar",
+    "toggleOff": "Deshabilitar {{name}} al iniciar",
+    "source": {
+      "hkcu-run": "Registro · tu usuario",
+      "hklm-run": "Registro · todo el equipo",
+      "hklm-run32": "Registro · todo el equipo (32 bits)",
+      "user-folder": "Carpeta Inicio",
+      "common-folder": "Carpeta Inicio · todos los usuarios",
+      "store-app": "App de Microsoft Store",
+      "task": "Tarea programada al iniciar sesión",
+      "launch-agent": "LaunchAgent",
+      "login-item": "Ítem de inicio de sesión",
+      "xdg-user": "Autostart · tu usuario",
+      "xdg-system": "Autostart · sistema"
+    },
+    "effect": {
+      "updater": "Buscará actualizaciones cuando abras el programa, en lugar de quedarse en segundo plano desde el arranque.",
+      "browser": "El navegador (o la app web) no se precargará al iniciar sesión; la primera vez que lo abras tardará un par de segundos más.",
+      "communication": "No recibirás mensajes ni llamadas de esta app hasta que la abras tú.",
+      "media": "La app no se abrirá sola. Tu música, biblioteca y ajustes siguen intactos.",
+      "gaming": "El launcher no se abrirá solo. Tus juegos siguen instalados; las descargas y actualizaciones empezarán cuando lo abras.",
+      "cloud": "Tus archivos dejarán de sincronizarse hasta que abras la app: lo que cambies mientras tanto no se respaldará en la nube.",
+      "security": "Puede dejar de avisarte o de proteger en tiempo real lo que este producto vigila. Hazlo solo si sabes que no lo necesitas.",
+      "hardware": "Pueden dejar de funcionar funciones del equipo que dependen de esta utilidad: teclas especiales, control de audio, iluminación, touchpad avanzado o efectos de cámara y micrófono.",
+      "development": "Las herramientas de desarrollo (contenedores, servidores locales) no estarán listas hasta que las abras.",
+      "system": "Es parte del sistema operativo y se mantiene activo.",
+      "generic": "El programa no se abrirá automáticamente; podrás abrirlo tú cuando lo necesites."
+    },
+    "confirm": {
+      "title": "Deshabilitar al iniciar",
+      "body": "Estos programas dejarán de abrirse automáticamente al iniciar sesión. No se desinstala ni se borra nada.",
+      "cautionTitle": "Revisa antes de continuar",
+      "cautionAck": "Entiendo lo que pasará y quiero deshabilitarlos igualmente.",
+      "action_one": "Deshabilitar",
+      "action_other": "Deshabilitar {{count}}"
+    },
+    "history": {
+      "title": "Cambios hechos por RePID",
+      "body_one": "RePID deshabilitó {{count}} programa. Puedes devolverlo a como estaba con un clic.",
+      "body_other": "RePID deshabilitó {{count}} programas. Puedes devolver todo a como estaba con un clic.",
+      "restore": "Restaurar todo"
+    },
+    "toast": {
+      "disabled_one": "{{name}} ya no se abrirá al iniciar sesión",
+      "disabled_other": "{{count}} programas ya no se abrirán al iniciar sesión",
+      "enabled_one": "{{name}} volverá a abrirse al iniciar sesión",
+      "enabled_other": "{{count}} programas volverán a abrirse al iniciar sesión",
+      "restored_one": "Inicio restaurado: {{count}} programa reactivado",
+      "restored_other": "Inicio restaurado: {{count}} programas reactivados",
+      "nothing": "No se hizo ningún cambio",
+      "needsAdmin_one": "{{count}} requiere permisos de administrador.",
+      "needsAdmin_other": "{{count}} requieren permisos de administrador.",
+      "protected_one": "{{count}} está protegido y no se tocó.",
+      "protected_other": "{{count}} están protegidos y no se tocaron.",
+      "failed_one": "{{count}} no se pudo cambiar.",
+      "failed_other": "{{count}} no se pudieron cambiar.",
+      "cancelled": "Se canceló la autorización."
+    }
+  },
+  "boost": {
+    "title": "Modo rendimiento",
+    "inactive": "Inactivo · elige un perfil para dar prioridad a lo que estás haciendo",
+    "active_one": "Activo · {{profile}} · {{count}} app ajustada desde las {{time}}",
+    "active_other": "Activo · {{profile}} · {{count}} apps ajustadas desde las {{time}}",
+    "restore": "Restaurar todo",
+    "apply": "Activar perfil",
+    "update": "Aplicar cambios",
+    "safeNote": "No se cierra ninguna app ni se borra nada. Las apps elegidas siguen funcionando, solo ceden CPU a lo que estás usando. Todo vuelve a la normalidad al pulsar «Restaurar todo», al cerrar RePID o al reiniciar la app.",
+    "profileLabel": "Perfil",
+    "profiles": {
+      "gaming": {
+        "title": "Juego",
+        "desc": "Prioridad al juego. Navegadores, sincronización y actualizadores ceden CPU. El chat de voz, los overlays y los launchers no se tocan."
+      },
+      "work": {
+        "title": "Concentración",
+        "desc": "Launchers de juegos y procesos en segundo plano ceden CPU a tus apps de trabajo."
+      },
+      "creative": {
+        "title": "Render / compilar",
+        "desc": "Todo lo prescindible cede CPU a tu editor, renderizador o compilación."
+      },
+      "custom": {
+        "title": "Personalizado",
+        "desc": "Tú eliges qué apps ajustar; no se marca nada por defecto."
+      }
+    },
+    "focus": {
+      "label": "App prioritaria",
+      "hint": "Recibe prioridad por encima de lo normal. Nunca se usa «Alta» ni «Tiempo real», que pueden congelar el teclado y el audio.",
+      "none": "Ninguna",
+      "unsupported": "En macOS y Linux subir la prioridad requiere root; RePID solo baja la de las demás apps."
+    },
+    "listTitle": "Apps que cederán CPU",
+    "listHint": "Marcadas según el perfil. Puedes cambiar la selección.",
+    "suggested": "Sugerida",
+    "whatHappens": "Qué pasará:",
+    "ecoEffect": "Sigue funcionando con normalidad; cuando el equipo esté ocupado, esperará su turno y puede responder un poco más lento mientras el modo esté activo.",
+    "ecoQosNote": "En Windows 11 también se activa el «Modo eficiencia» (la hoja verde del Administrador de tareas).",
+    "protectedCount_one": "{{count}} app del sistema, servicio o seguridad no se toca.",
+    "protectedCount_other": "{{count}} apps del sistema, servicios y seguridad no se tocan.",
+    "empty": "Ahora mismo no hay apps en segundo plano con un consumo relevante.",
+    "selected_one": "{{count}} seleccionada",
+    "selected_other": "{{count}} seleccionadas",
+    "activeTitle": "Ajustes en curso",
+    "roles": {
+      "eco": "Eficiencia",
+      "focus": "Prioritaria"
+    },
+    "applied_one": "{{count}} proceso ajustado",
+    "applied_other": "{{count}} procesos ajustados",
+    "refused_one": "{{count}} protegido por el sistema",
+    "refused_other": "{{count}} protegidos por el sistema",
+    "notRunning": "Cerrada · se ajustará si la vuelves a abrir",
+    "ecoQos": "Modo eficiencia de Windows",
+    "restorePending": "Algunas prioridades no se pudieron restaurar porque se canceló la contraseña. Se normalizarán al reiniciar esas apps.",
+    "detailToggle": "Modo eficiencia",
+    "detailHint": "Baja su prioridad sin cerrarla. Se restaura al desactivarlo o al cerrar RePID.",
+    "detailBlocked": "Las apps del sistema, servicios, seguridad y las marcadas con precaución mantienen su prioridad.",
+    "toast": {
+      "applied_one": "Modo rendimiento activo: {{count}} app ajustada",
+      "applied_other": "Modo rendimiento activo: {{count}} apps ajustadas",
+      "stopped": "Todo restaurado: las apps vuelven a su prioridad original",
+      "ecoOn": "{{name}} en modo eficiencia",
+      "ecoOff": "{{name}} vuelve a su prioridad normal"
     }
   }
 }
