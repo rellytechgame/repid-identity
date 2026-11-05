@@ -86,6 +86,8 @@ RePID (*Re*-identify the *PID*) closes that gap: it **identifies** every process
 | Understand what a process does | Smart Free suggestions |
 |---|---|
 | <img src="assets/screenshots/identify.png" alt="Process list with detail panel explaining a Python process" /> | <img src="assets/screenshots/smart.png" alt="Smart Free dialog with suggested apps" /> |
+| **Performance mode: background apps yield CPU** | **Startup programs with measured impact** |
+| <img src="assets/screenshots/boost.png" alt="Performance mode active with the Gaming profile: a priority app and background apps in efficiency mode" /> | <img src="assets/screenshots/startup.png" alt="Startup manager listing programs that open at sign-in with impact, suggestions and what happens if disabled" /> |
 | **Deep cleanup with clear consequences** | **Your language, your rules** |
 | <img src="assets/screenshots/cleanup.png" alt="Cleanup module listing temp files, recycle bin, DNS and per-browser cache, history and cookies with what happens if deleted" /> | <img src="assets/screenshots/settings.png" alt="Settings: language, theme, safety and protected processes" /> |
 

@@ -63,6 +63,8 @@ RePID (*Re*-identificar el *PID*) resuelve eso: **identifica** cada proceso, lo 
 | Entiende qué hace un proceso | Liberación inteligente |
 |---|---|
 | <img src="assets/screenshots/identify.png" alt="Lista de procesos con el panel de detalle de un proceso de Python" /> | <img src="assets/screenshots/smart.png" alt="Diálogo de Liberación inteligente" /> |
+| **Modo rendimiento** | **Programas de inicio** |
+| <img src="assets/screenshots/boost.png" alt="Modo rendimiento activo con el perfil Juego" /> | <img src="assets/screenshots/startup.png" alt="Programas de inicio con impacto medido y qué pasará al deshabilitarlos" /> |
 
 ## Descarga e instalación
 
