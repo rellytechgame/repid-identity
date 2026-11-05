@@ -41,6 +41,9 @@ A free, open-source desktop app for **Windows, macOS and Linux** that explains �
 - [Platform support](#platform-support)
 - [How it works](#how-it-works)
 - [Safety model](#safety-model)
+- [Performance mode](#performance-mode)
+- [Startup manager](#startup-manager)
+- [Deep cleanup](#deep-cleanup)
 - [Privacy](#privacy)
 - [Development](#development)
 - [Project structure](#project-structure)
@@ -70,6 +73,8 @@ RePID (*Re*-identify the *PID*) closes that gap: it **identifies** every process
 | 📈 **Live CPU · RAM · GPU** | Gauges with history, per-application usage and per-process GPU utilization (Windows GPU engine counters, NVIDIA `nvidia-smi` elsewhere). |
 | ⚙️ **Service-aware** | Detects Windows services, systemd units and launchd agents, and **stops** them through their manager instead of killing processes that would come back. |
 | 🛡️ **Safety net** | Three-tier protection (Protected / Caution / Safe) enforced inside the engine, re-checked against fresh data right before every action. |
+| 🚀 **Performance mode** | One-click profiles (Gaming, Focus, Render/build, Custom) that make background apps **yield CPU** to what you're using: below-normal priority plus Windows 11 **EcoQoS** (Task Manager's green leaf), and optionally above-normal priority for one focus app. Nothing is closed; everything is restored on stop or when RePID exits. |
+| ⏻ **Startup manager** | Every program that opens at sign-in (Registry Run keys, Startup folders, Microsoft Store apps, logon scheduled tasks · LaunchAgents and login items · XDG autostart) with its real name, publisher and **live measured impact**. Disable reversibly with the OS's own mechanism, see what will happen first, and restore everything RePID changed in one click. |
 | 🧹 **Deep cleanup** | Temp files, system temp, update cache, Recycle Bin/Trash, DNS cache, package-manager caches and the **cache, history and cookies of every browser** (Chrome, Edge, Firefox, Brave, Opera, Opera GX, Vivaldi, Chromium, Safari). Every item says *exactly what will happen* before you delete it; irreversible items need explicit confirmation. Passwords, bookmarks and documents are never touched. |
 | 🔑 **Full privileges** | Windows builds run as administrator (UAC prompt at launch) to end any process, stop services and clean system folders. macOS/Linux ask for your password only for the actions that need it (one prompt per action). Critical processes stay blocked regardless. |
 | 🌍 **Multilingual** | Spanish and English built in. Adding a language is adding **one JSON file** — the UI discovers it automatically. |
@@ -145,6 +150,41 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for details.
 | 🟢 **Safe** | User applications | Confirmation dialog shows the whole tree and the memory it frees. |
 
 Electron hardening: `contextIsolation`, `sandbox`, no `nodeIntegration`, strict CSP in production, IPC sender verification, schema validation of every IPC payload, external links restricted to fixed URLs, no shell string interpolation (all commands use `execFile` with argument arrays; paths reach PowerShell through environment variables). Report vulnerabilities via [SECURITY.md](SECURITY.md).
+
+## Performance mode
+
+Performance mode never ends a process. It changes **scheduling priority only**, and only for apps classified as safe:
+
+| Profile | Yields CPU (pre-selected) | Never pre-selected |
+|---|---|---|
+| 🎮 Gaming | Browsers, cloud sync, updaters, office apps, IDEs, background helpers | Voice chat, overlays, launchers, media, running scripts/containers, unknown apps (it might be the game) |
+| 🎯 Focus | Game launchers, updaters, background helpers | Your work apps |
+| 🛠️ Render / build | Browsers, chat, launchers, media, sync, updaters, office | Your editor, renderer or build |
+| ⚙️ Custom | Nothing — you choose | — |
+
+- **Efficiency**: below-normal priority (`nice 10` on macOS/Linux) plus **EcoQoS** on Windows 11. A user's stronger manual choice (e.g. "Low") is never overridden.
+- **Priority app**: above-normal only. "High" and "Realtime" are never used — they can starve input and audio. Windows only (raising priority needs root elsewhere).
+- New processes an app starts later (new browser tabs) are adjusted automatically.
+- Every change is recorded with its original value and restored on **Restore all**, when the selection changes, and when RePID quits. Pids are re-checked against the process name before restoring, so a reused pid is never touched.
+- OS components, services, security software and anything marked *caution* keep their priority — enforced in the main process, not just hidden in the UI.
+
+## Startup manager
+
+| Source | How RePID disables it | Admin |
+|---|---|---|
+| Registry Run (user / machine / 32-bit) | `StartupApproved` flag — exactly what Task Manager's *Disable* writes. The Run value itself is untouched. | Machine entries only |
+| Startup folder shortcuts | `StartupApproved\StartupFolder` flag; the shortcut stays. | All-users folder only |
+| Microsoft Store apps | Startup task `State` = disabled-by-user, the same as *Settings › Apps › Startup*. | No |
+| Scheduled tasks at sign-in (non-Microsoft) | `schtasks /Change /DISABLE`. | Depends on the task |
+| macOS LaunchAgents | `launchctl disable gui/<uid>/<label>` — the plist is untouched. | No |
+| macOS login items | Removed and kept in RePID's journal so they can be added back. | No |
+| Linux XDG autostart | `Hidden=true` in your user copy; system files in `/etc` are never modified. | No |
+
+- **Locked**: Windows components (outside DriverStore), entries enforced by policy, desktop plumbing on macOS/Linux (settings daemons, keyring, input methods, accessibility).
+- **Caution** (warning + confirmation): security tools, hardware utilities (audio, touchpad, hotkeys, RGB, GPU) and cloud sync.
+- **Suggested**: updaters, browsers preloading at sign-in, chat, media and game launchers.
+- Impact is **measured now** from the entry's running processes (RAM/CPU), not guessed.
+- After every change RePID reads the state back and reports *not applied* if the OS or the app reverted it. Everything RePID disabled is listed in a journal with **Restore all**.
 
 ## Deep cleanup
 
@@ -228,10 +268,11 @@ The website ([repid-identity.vercel.app](https://repid-identity.vercel.app)) is 
 ## Roadmap
 
 - [x] Deep cleanup module (v1.1)
+- [x] Performance mode with Windows 11 EcoQoS and a reversible startup manager (v1.2)
 - [ ] Code-signed installers for Windows and macOS (**funded by donations**)
 - [ ] Auto-update through GitHub Releases
 - [ ] Per-process disk and network I/O
-- [ ] Rules: "always end X when battery < 20%", "warn when Y exceeds 4 GB"
+- [ ] Watchdog: alerts for memory leaks and runaway processes; rules such as "warn when Y exceeds 4 GB"
 - [ ] Tray icon with quick Smart Free
 - [ ] Community-maintained catalog file with remote updates (opt-in)
 - [ ] More languages: Português, Français, Deutsch, Italiano…

@@ -210,6 +210,128 @@ export interface CleanResult {
   freedBytes: number
 }
 
+// ───────────── Startup manager ─────────────
+
+/**
+ * Where an autostart entry lives. Every source is disabled reversibly with the
+ * OS's own mechanism (StartupApproved flags, task/launchd disable, XDG Hidden),
+ * never by deleting the entry.
+ */
+export type StartupSource =
+  | 'hkcu-run'
+  | 'hklm-run'
+  | 'hklm-run32'
+  | 'user-folder'
+  | 'common-folder'
+  | 'store-app'
+  | 'task'
+  | 'launch-agent'
+  | 'login-item'
+  | 'xdg-user'
+  | 'xdg-system'
+
+/** Which consequence text the UI shows before disabling an entry. */
+export type StartupEffect =
+  | 'updater'
+  | 'communication'
+  | 'cloud'
+  | 'media'
+  | 'gaming'
+  | 'security'
+  | 'hardware'
+  | 'browser'
+  | 'development'
+  | 'system'
+  | 'generic'
+
+/** Measured from the entry's running processes right now (not a boot trace). */
+export type StartupImpact = 'high' | 'medium' | 'low' | 'not-running'
+
+export interface StartupEntry {
+  /** Stable id: `<source>:<name>`. The main process re-resolves it on every action. */
+  id: string
+  name: string
+  publisher?: string
+  command: string
+  /** Executable resolved from the command (env vars expanded, shortcuts followed). */
+  exe?: string
+  source: StartupSource
+  scope: 'user' | 'machine'
+  enabled: boolean
+  /** critical = locked (OS component) · caution = warn first · safe */
+  risk: Risk
+  effect: StartupEffect
+  /** Safe to disable and typically not needed at sign-in. */
+  recommended: boolean
+  requiresAdmin: boolean
+  running: { pids: number; memBytes: number; cpu: number } | null
+  impact: StartupImpact
+  /** Disabled by RePID (listed in its change journal, can be restored in one click). */
+  changedByRepid: boolean
+}
+
+export interface StartupReport {
+  entries: StartupEntry[]
+  elevated: boolean
+  supported: boolean
+  scannedAt: number
+}
+
+export interface StartupChangeRequest {
+  ids: string[]
+  enabled: boolean
+  /** Required to change entries classified as `caution`. */
+  allowCaution: boolean
+}
+
+export interface StartupChangeOutcome {
+  id: string
+  name: string
+  status: 'changed' | 'unchanged' | 'not-found' | 'protected' | 'needs-admin' | 'cancelled' | 'failed'
+  error?: string
+}
+
+// ───────────── Performance mode ─────────────
+
+export type BoostProfileId = 'gaming' | 'work' | 'creative' | 'custom'
+
+export interface BoostRequest {
+  profile: BoostProfileId
+  /** App that gets above-normal priority (optional). */
+  focusGroupId?: string
+  /** Apps that run in efficiency mode (lower priority + EcoQoS on Windows 11). */
+  ecoGroupIds: string[]
+}
+
+export interface BoostApp {
+  /** Cluster key: identifies the app across refreshes and new child processes. */
+  key: string
+  name: string
+  product?: string
+  role: 'eco' | 'focus'
+  /** Groups currently matching the key. */
+  groupIds: string[]
+  /** Processes currently adjusted. */
+  applied: number
+  /** Processes the OS refused (protected/anti-cheat, other session). */
+  refused: number
+  /** Windows 11 EcoQoS applied on top of the priority change. */
+  ecoQos: boolean
+  cpu: number
+  memBytes: number
+}
+
+export interface BoostState {
+  active: boolean
+  profile?: BoostProfileId
+  startedAt?: number
+  apps: BoostApp[]
+  /** Raising priority needs root on macOS/Linux; Windows always allows above-normal. */
+  focusSupported: boolean
+  /** Restoring priorities on macOS/Linux asked for a password and the user cancelled. */
+  restorePending: boolean
+}
+
 /** API exposed on `window.repid` by the preload script. */
 export interface RepidApi {
   platform: Platform
@@ -221,6 +343,13 @@ export interface RepidApi {
   setSettings(settings: EngineSettings): Promise<void>
   cleanerScan(): Promise<CleanerReport>
   cleanerClean(request: CleanRequest): Promise<CleanResult>
+  startupScan(): Promise<StartupReport>
+  startupSet(request: StartupChangeRequest): Promise<StartupChangeOutcome[]>
+  /** Re-enables every entry RePID disabled. */
+  startupRestore(): Promise<StartupChangeOutcome[]>
+  boostStatus(): Promise<BoostState>
+  boostApply(request: BoostRequest): Promise<BoostState>
+  boostStop(): Promise<BoostState>
   openRepo(path?: RepoPath): Promise<void>
   /** Opens the project's donation page (fixed URL owned by the main process). */
   openDonate(): Promise<void>

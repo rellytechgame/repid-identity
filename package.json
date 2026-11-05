@@ -1,7 +1,7 @@
 {
   "name": "repid-identity",
   "productName": "RePID Identity",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Identify what every process really does and end resource hogs from the root.",
   "license": "MIT",
   "author": {

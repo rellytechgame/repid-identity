@@ -1,8 +1,10 @@
 import { join } from 'node:path'
 import { app, BrowserWindow, Menu, session, shell } from 'electron'
+import { Booster } from './boost'
 import { Cleaner } from './cleaner'
 import { Engine } from './engine'
 import { registerIpc } from './ipc'
+import { StartupManager } from './startup'
 
 const isMac = process.platform === 'darwin'
 const TITLEBAR = {
@@ -94,11 +96,23 @@ if (!app.requestSingleInstanceLock()) {
     session.defaultSession.setPermissionRequestHandler((_wc, _permission, callback) => callback(false))
 
     const engine = new Engine(selfPids)
-    registerIpc(engine, new Cleaner(engine), (theme) => {
+    const booster = new Booster(engine)
+    const startup = new StartupManager(engine, join(app.getPath('userData'), 'startup-journal.json'))
+    registerIpc({ engine, cleaner: new Cleaner(engine), startup, booster }, (theme) => {
       if (!isMac) win?.setTitleBarOverlay(TITLEBAR[theme])
       win?.setBackgroundColor(TITLEBAR[theme].color)
     })
     createWindow()
+
+    // Performance mode changes live processes: put every priority back before exiting.
+    let restored = false
+    app.on('before-quit', (event) => {
+      if (restored || !booster.active) return
+      event.preventDefault()
+      restored = true
+      const timeout = new Promise((resolve) => setTimeout(resolve, 8000))
+      void Promise.race([booster.stop().catch(() => undefined), timeout]).finally(() => app.quit())
+    })
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) createWindow()

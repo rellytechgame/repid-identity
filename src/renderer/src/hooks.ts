@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { SystemSnapshot } from '@shared/types'
+import type { BoostState, SystemSnapshot } from '@shared/types'
 import { api } from './api'
 
 export type Theme = 'system' | 'dark' | 'light'
@@ -102,4 +102,22 @@ export function usePrefersDark(): boolean {
     return () => mq.removeEventListener('change', onChange)
   }, [])
   return dark
+}
+
+const BOOST_IDLE: BoostState = { active: false, apps: [], focusSupported: true, restorePending: false }
+
+/** Performance-mode status, refreshed together with each snapshot. */
+export function useBoost(tick: number | undefined) {
+  const [boost, setBoost] = useState<BoostState>(BOOST_IDLE)
+  const refresh = useCallback(async () => {
+    try {
+      setBoost(await api.boostStatus())
+    } catch {
+      // keep the last known state; the next snapshot retries
+    }
+  }, [])
+  useEffect(() => {
+    void refresh()
+  }, [tick, refresh])
+  return { boost, setBoost }
 }

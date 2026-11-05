@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AppGroup, ProcessDetails } from '@shared/types'
+import { isEcoEligible } from '@shared/engine/boost'
 import { api } from '../api'
 import { describeIdentity, formatBytes, formatPercent } from '../format'
 import { Icon } from '../components/Icon'
@@ -11,9 +12,12 @@ interface Props {
   onClose: () => void
   onKill: (groups: AppGroup[]) => void
   onStopService: (group: AppGroup) => void
+  boostRole?: 'eco' | 'focus'
+  busy?: boolean
+  onEco: (on: boolean) => void
 }
 
-export function DetailPanel({ group, onClose, onKill, onStopService }: Props) {
+export function DetailPanel({ group, onClose, onKill, onStopService, boostRole, busy, onEco }: Props) {
   const { t, i18n } = useTranslation()
   const lng = i18n.language
   const [details, setDetails] = useState<ProcessDetails | null>(null)
@@ -84,6 +88,29 @@ export function DetailPanel({ group, onClose, onKill, onStopService }: Props) {
             <span>{t('processes.colImpact')}</span>
             <ImpactBar value={group.impact} />
             <strong>{group.impact}/100</strong>
+          </div>
+        </section>
+
+        <section className="detail__section">
+          <div className="detail__eco">
+            <div>
+              <h3><Icon name="leaf" size={16} /> {t('boost.detailToggle')}</h3>
+              <p className="muted">{isEcoEligible(group) ? t('boost.detailHint') : t('boost.detailBlocked')}</p>
+            </div>
+            {boostRole === 'focus' ? (
+              <span className="badge badge--focus"><Icon name="target" size={12} /> {t('boost.roles.focus')}</span>
+            ) : (
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={boostRole === 'eco'}
+                  disabled={busy || !isEcoEligible(group)}
+                  aria-label={t('boost.detailToggle')}
+                  onChange={(e) => onEco(e.target.checked)}
+                />
+                <span className="switch__track" />
+              </label>
+            )}
           </div>
         </section>
 

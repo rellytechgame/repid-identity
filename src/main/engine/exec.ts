@@ -29,8 +29,17 @@ export function run(file: string, args: string[], opts: { timeoutMs?: number; en
   })
 }
 
-export function powershell(script: string, env?: Record<string, string>): Promise<ExecResult> {
-  return run('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', script], {
+/**
+ * -EncodedCommand (UTF-16LE base64) sidesteps Windows command-line quoting:
+ * scripts with double quotes or newlines reach PowerShell byte for byte.
+ */
+export function encodePowerShell(script: string): string {
+  return Buffer.from(script, 'utf16le').toString('base64')
+}
+
+export function powershell(script: string, env?: Record<string, string>, timeoutMs?: number): Promise<ExecResult> {
+  return run('powershell.exe', ['-NoProfile', '-NonInteractive', '-EncodedCommand', encodePowerShell(script)], {
+    timeoutMs,
     env: env ? { ...process.env, ...env } : undefined
   })
 }
