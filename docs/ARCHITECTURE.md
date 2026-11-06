@@ -82,6 +82,8 @@ Services are stopped instead of killed: `sc.exe stop`, `systemctl [--user] stop`
 - `linux.ts` — Flatpak apps and `~/.var/app/<id>`.
 - `index.ts` — `Uninstaller`: protection re-check, closing running instances through the engine, verification that the app is gone, per-app leftover sessions (ids only reach the renderer) and deletion (Recycle Bin via injected `shell.trashItem`).
 
+Orphans (`orphans-windows.ts`, `orphans-unix.ts`) cross every top-level folder of the per-user and machine data roots with all evidence of use — installed apps, running processes, service/driver binaries (`Win32_Service`, `Win32_SystemDriver`), working startup entries and resolved shortcut targets — and skip anything changed in the last 60 days (`orphanVerdict`).
+
 Pure matching rules live in `shared/engine/uninstall.ts` (`productKeys`, `vendorKeys`, `matchFolders`, `classifyApp`, `parseUninstallString`) and are unit-tested with cases taken from a real inventory.
 
 ## Privileges

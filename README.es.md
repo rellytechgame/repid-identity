@@ -53,7 +53,7 @@ RePID (*Re*-identificar el *PID*) resuelve eso: **identifica** cada proceso, lo 
 | 🛡️ **Red de seguridad** | Protección en tres niveles (Protegido / Precaución / Seguro) aplicada dentro del motor y verificada otra vez justo antes de cada acción. |
 | 🚀 **Modo rendimiento** | Perfiles de un clic (Juego, Concentración, Render/compilar, Personalizado) que hacen que las apps en segundo plano **cedan CPU** a lo que estás usando: prioridad inferior a la normal más **EcoQoS** de Windows 11 (la hoja verde del Administrador de tareas) y, opcionalmente, prioridad superior para una app. No se cierra nada; todo se restaura al detenerlo o al cerrar RePID. |
 | ⏻ **Programas de inicio** | Todo lo que se abre al iniciar sesión (claves Run del registro, carpetas Inicio, apps de Microsoft Store, tareas programadas · LaunchAgents e ítems de inicio · autostart XDG) con su nombre real, editor e **impacto medido en vivo**. Se deshabilita de forma reversible con el mecanismo del propio sistema, avisando antes qué pasará, y se restaura todo lo que cambió RePID con un clic. |
-| 📦 **Desinstalador inteligente** | Ejecuta el **desinstalador oficial** de cada app y luego encuentra lo que dejó: carpeta de instalación, carpetas en AppData/ProgramData, cachés, claves del registro, entradas de inicio, tareas programadas y accesos directos (macOS: `~/Library` por bundle id · Linux: Flatpak). Los rastros se identifican por **nombre exacto**, nunca carpetas de otras apps; los archivos van a la **Papelera** y las claves del registro se **respaldan** antes. |
+| 📦 **Desinstalador inteligente** | Ejecuta el **desinstalador oficial** de cada app y luego encuentra lo que dejó: carpeta de instalación, carpetas en AppData/ProgramData, cachés, claves del registro, entradas de inicio, tareas programadas y accesos directos (macOS: `~/Library` por bundle id · Linux: Flatpak). Los rastros se identifican por **nombre exacto**, nunca carpetas de otras apps; los archivos van a la **Papelera** y las claves del registro se **respaldan** antes. También encuentra **rastros de apps que ya desinstalaste**: carpetas sin dueño, accesos directos, entradas de inicio y registros rotos. |
 | 🧹 **Limpieza profunda** | Temporales, temporales del sistema, caché de actualizaciones, papelera, caché DNS, cachés de paquetes y la **caché, historial y cookies de todos los navegadores** (Chrome, Edge, Firefox, Brave, Opera, Opera GX, Vivaldi, Chromium, Safari). Cada elemento explica *exactamente qué pasará* antes de borrarlo; lo irreversible requiere confirmación explícita. Contraseñas, marcadores y documentos nunca se tocan. |
 | 🔑 **Privilegios completos** | En Windows se ejecuta como administrador (UAC al iniciar) para finalizar cualquier proceso, detener servicios y limpiar carpetas del sistema. En macOS/Linux pide tu contraseña solo para las acciones que lo necesitan. Los procesos críticos siguen bloqueados. |
 | 🌍 **Multiidioma** | Español e inglés incluidos. Agregar un idioma es añadir **un archivo JSON**. |
@@ -120,6 +120,8 @@ No finaliza ningún proceso: solo cambia la **prioridad**, y solo de apps clasif
 2. **Verificado:** si la app sigue instalada (cancelaste en su ventana), RePID se detiene y no busca rastros de una app instalada.
 3. **Rastros con evidencia:** carpeta de instalación declarada; carpetas con el nombre **exacto** de la app (o `Fabricante\App`) en AppData, LocalLow, ProgramData, Program Files y el menú Inicio; claves `Software\App` o `Software\Fabricante\App`; entradas de inicio, tareas y accesos directos que abren archivos de la app.
 
+**Rastros de apps ya desinstaladas:** RePID revisa cada carpeta de AppData, LocalLow, ProgramData y Program Files contra todas las pruebas de uso (apps instaladas, procesos, **servicios y drivers**, entradas de inicio vigentes y destinos de accesos directos) y solo ofrece lo que nadie reclama **y** lleva más de 60 días sin cambios. Vienen marcados los accesos directos, entradas de inicio, tareas y registros rotos y las carpetas sin programas inactivas desde hace meses; lo que contiene programas o partidas guardadas queda para que lo revises.
+
 Reglas aprendidas en una simulación sobre 69 apps reales: los nombres de menos de 6 letras solo valen dentro de la carpeta del fabricante; la versión solo se quita del **final** del nombre; las carpetas compartidas con otra app no se ofrecen; los nombres de otras apps instaladas se excluyen; .NET, Visual C++, WebView2, componentes del sistema y RePID están bloqueados; drivers, seguridad y runtimes piden confirmación. Los archivos van a la Papelera y las claves se respaldan en `.reg` (doble clic para restaurar).
 
 ## Limpieza profunda
@@ -137,6 +139,9 @@ Reglas aprendidas en una simulación sobre 69 apps reales: los nombres de menos 
 | Caché del navegador | 🟢 Seguro | No cierra sesiones ni borra contraseñas. |
 | Historial del navegador | 🔴 Sensible | Irreversible. **Marcadores y contraseñas se conservan.** |
 | Cookies del navegador | 🔴 Sensible | Cierra sesión en todos los sitios web. |
+| Caché de aplicaciones | 🟢 Seguro | Caché de apps Electron/Chromium (Discord, Slack, VS Code, Postman…). Sesiones y mensajes se conservan. |
+| Volcados de memoria | 🟢 Seguro | `MEMORY.DMP` y `Minidump`: solo sirven para diagnosticar fallos pasados. |
+| Windows anterior y restos de actualizaciones | 🟠 Precaución | `Windows.old` y archivos de instalación, con la herramienta oficial de Windows. Ya no podrás volver a la versión anterior. |
 
 Si un navegador está abierto, RePID te lo indica y te ofrece cerrarlo (advirtiendo del trabajo no guardado) u omitirlo.
 

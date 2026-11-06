@@ -8,6 +8,9 @@ import { isElevated, runElevated, wasCancelled } from '../engine/privileges'
 import { clearFirefoxHistory } from './firefox'
 import { dirExists, emptyTally, listDirs, processSpec, type Tally } from './fsops'
 import {
+  APP_CACHE_DIRS,
+  APP_CACHE_EXCLUDE,
+  CHROMIUM_MARKERS,
   chromiumBrowsers,
   chromiumTargets,
   firefoxLayout,
@@ -16,8 +19,10 @@ import {
   safariTargets,
   systemTargets,
   type CleanerEnv,
+  type PathSpec,
   type TargetDef
 } from './targets'
+import { existsSync } from 'node:fs'
 
 const MAX_IDS = 200
 
@@ -42,6 +47,48 @@ async function chromiumProfiles(userData: string, single: boolean): Promise<stri
   // Older Opera builds keep the single profile in the root; recent ones use "Default" like Chrome.
   return profiles.length || !single ? profiles : [userData]
 }
+
+/**
+ * Electron/Chromium apps (Discord, Slack, VS Code, Postman, Notion…) keep
+ * HTTP, code and GPU caches in their user-data folder. A folder only counts
+ * when Chromium's own markers sit next to the cache (Local State, Local
+ * Storage…), so an unrelated app's "Cache" folder with real data is never touched.
+ */
+export async function appCacheSpecs(env: CleanerEnv): Promise<PathSpec[]> {
+  const roots =
+    env.platform === 'win32'
+      ? [env.appData, env.localAppData]
+      : env.platform === 'darwin'
+        ? [path.join(env.home, 'Library', 'Application Support')]
+        : [path.join(env.home, '.config')]
+  const specs: PathSpec[] = []
+  const consider = (userData: string) => {
+    if (!CHROMIUM_MARKERS.some((m) => existsSync(path.join(userData, m)))) return
+    for (const c of APP_CACHE_DIRS) {
+      const dir = path.join(userData, c)
+      if (existsSync(dir)) specs.push({ mode: 'contents', dir })
+    }
+  }
+  for (const root of roots) {
+    for (const child of await listDirs(root)) {
+      if (APP_CACHE_EXCLUDE.has(child.toLowerCase())) continue
+      const dir = path.join(root, child)
+      consider(dir)
+      // Vendor\App layouts (e.g. "Postman\Postman Agent"): one level deeper.
+      for (const sub of await listDirs(dir)) if (!APP_CACHE_EXCLUDE.has(sub.toLowerCase())) consider(path.join(dir, sub))
+    }
+  }
+  return specs
+}
+
+/** Disk Cleanup handlers for Windows.old and applied-update leftovers (constants; Windows does the deletion with its own ACL rights). */
+const SETUP_CLEANUP = String.raw`
+$h = 'Previous Installations', 'Temporary Setup Files', 'Windows Upgrade Log Files', 'Setup Log Files', 'Windows ESD installation files', 'Update Cleanup'
+$base = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches'
+foreach ($x in $h) { $k = Join-Path $base $x; if (Test-Path -LiteralPath $k) { New-ItemProperty -LiteralPath $k -Name StateFlags0777 -Value 2 -PropertyType DWord -Force | Out-Null } }
+try { Start-Process -FilePath "$env:SystemRoot\System32\cleanmgr.exe" -ArgumentList '/sagerun:777' -Wait -WindowStyle Hidden }
+finally { foreach ($x in $h) { Remove-ItemProperty -LiteralPath (Join-Path $base $x) -Name StateFlags0777 -ErrorAction SilentlyContinue } }
+`
 
 async function windowsRecycleBin(measureOnly: boolean): Promise<Tally> {
   const t = emptyTally()
@@ -78,8 +125,10 @@ export class Cleaner {
     const ffProfiles = (await listDirs(ff.profilesRoot)).filter((n) => !n.startsWith('.'))
     if (ffProfiles.length) defs.push(...firefoxTargets(env, ffProfiles))
     if (env.platform === 'darwin' && (await dirExists(path.join(env.home, 'Library', 'Safari')))) defs.push(...safariTargets(env))
-    // Defence in depth: drop any spec whose directory is too broad to clean.
-    for (const d of defs) d.specs = d.specs.filter((s) => isSafeCleanRoot(s.dir, env))
+    const caches = await appCacheSpecs(env)
+    if (caches.length) defs.push({ id: 'app-caches', kind: 'app-caches', group: 'apps', risk: 'safe', defaultSelected: true, requiresAdmin: false, measurable: true, specs: caches })
+    // Defence in depth: drop any spec whose directory is too broad to clean (measure-only specs are never deleted).
+    for (const d of defs) if (!d.measureOnly) d.specs = d.specs.filter((s) => isSafeCleanRoot(s.dir, env))
     return defs
   }
 
@@ -118,7 +167,7 @@ export class Cleaner {
     for (const def of this.defs) {
       const tally = await this.measure(def)
       // Admin-only folders are unreadable without elevation: keep them selectable so the user sees what is missing.
-      const hasWork = tally.count > 0 || !def.measurable || !!def.privileged?.length || (def.requiresAdmin && !elevated && tally.denied)
+      const hasWork = tally.count > 0 || !def.measurable || !!def.alwaysAvailable || !!def.privileged?.length || (def.requiresAdmin && !elevated && tally.denied)
       const needsFda = this.env.platform === 'darwin' && tally.denied && tally.count === 0
       targets.push({
         id: def.id,
@@ -180,7 +229,7 @@ export class Cleaner {
       }
       try {
         const tally = emptyTally()
-        for (const spec of def.specs) {
+        for (const spec of def.measureOnly ? [] : def.specs) {
           const t = await processSpec(spec, true)
           tally.bytes += t.bytes
           tally.count += t.count
@@ -194,6 +243,14 @@ export class Cleaner {
             tally.skipped += t.skipped
           } else if (action === 'dns-flush' && process.platform === 'win32') {
             const res = await run('ipconfig.exe', ['/flushdns'])
+            if (!res.ok) tally.skipped++
+          } else if (action === 'windows-setup-cleanup' && process.platform === 'win32') {
+            // Freed space is what the measured folders lost; "Update Cleanup" may free more in WinSxS that is not counted.
+            const before = await this.measure({ ...def, actions: [] })
+            const res = await powershell(SETUP_CLEANUP, undefined, 60 * 60 * 1000)
+            const after = await this.measure({ ...def, actions: [] })
+            tally.bytes += Math.max(0, before.bytes - after.bytes)
+            tally.count += Math.max(0, before.count - after.count)
             if (!res.ok) tally.skipped++
           } else if (action === 'firefox-history') {
             const layout = firefoxLayout(this.env)

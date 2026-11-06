@@ -1,5 +1,47 @@
 import { describe, expect, it } from 'vitest'
-import { classifyApp, isGenericName, matchFolders, normalize, parseUninstallString, productKeys, vendorKeys } from './uninstall'
+import {
+  classifyApp,
+  isGenericName,
+  isOwnedName,
+  isProtectedDirName,
+  matchFolders,
+  normalize,
+  orphanVerdict,
+  ownedNameSet,
+  parseUninstallString,
+  productKeys,
+  vendorKeys
+} from './uninstall'
+
+describe('orphans (leftovers of uninstalled apps)', () => {
+  const DAY = 864e5
+  const now = Date.UTC(2026, 10, 6)
+
+  it('never offers system, shared or other apps’ uninstall data (found on a real machine)', () => {
+    for (const n of ['InstallShield Installation Information', 'Whesvc', 'ServiceHub', 'Microsoft', 'Packages', 'Unity', 'NVIDIA Corporation', '{8E4F2B11-0000-4C3A-9D3A-111111111111}', '.vscode', 'Temp']) {
+      expect(isProtectedDirName(n)).toBe(true)
+    }
+    expect(isProtectedDirName('TikTok LIVE Studio')).toBe(false)
+    expect(isProtectedDirName('Steam')).toBe(false)
+  })
+
+  it('treats any related installed name as ownership (conservative)', () => {
+    const owned = ownedNameSet([{ name: 'Opera GX Stable 138.0', publisher: 'Opera Software', products: productKeys({ name: 'Opera GX Stable 138.0', publisher: 'Opera Software' }) }])
+    expect(isOwnedName('Opera Software', owned)).toBe(true)
+    expect(isOwnedName('Opera GX', owned)).toBe(true)
+    expect(isOwnedName('TikTok LIVE Studio', owned)).toBe(false)
+  })
+
+  it('skips recently used folders and pre-selects only clear remnants', () => {
+    const base = { hasExecutables: false, gameSaves: false }
+    expect(orphanVerdict({ ...base, bytes: 5e8, newest: now - 10 * DAY }, now)).toBe('skip')
+    expect(orphanVerdict({ ...base, bytes: 5e8, newest: now - 300 * DAY }, now)).toBe('high')
+    expect(orphanVerdict({ ...base, bytes: 5e8, newest: now - 300 * DAY, hasExecutables: true }, now)).toBe('medium')
+    expect(orphanVerdict({ ...base, bytes: 5e6, newest: now - 300 * DAY, gameSaves: true }, now)).toBe('medium')
+    expect(orphanVerdict({ ...base, bytes: 0, newest: now - 300 * DAY }, now)).toBe('medium')
+    expect(orphanVerdict({ ...base, bytes: 0, newest: now - 300 * DAY, programsRoot: true }, now)).toBe('high')
+  })
+})
 
 // Cases taken from a real Windows inventory (dry run, nothing deleted) where a naive matcher went wrong.
 

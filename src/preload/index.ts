@@ -21,6 +21,7 @@ const api: RepidApi = {
   uninstallList: () => ipcRenderer.invoke('repid:uninstall-list'),
   uninstallRun: (request) => ipcRenderer.invoke('repid:uninstall-run', request),
   uninstallForceScan: (id) => ipcRenderer.invoke('repid:uninstall-force-scan', id),
+  uninstallScanOrphans: () => ipcRenderer.invoke('repid:uninstall-orphans'),
   uninstallClean: (request) => ipcRenderer.invoke('repid:uninstall-clean', request),
   uninstallOpenBackups: () => ipcRenderer.invoke('repid:uninstall-open-backups'),
   openRepo: (path = '') => ipcRenderer.invoke('repid:open-repo', path),

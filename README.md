@@ -76,7 +76,7 @@ RePID (*Re*-identify the *PID*) closes that gap: it **identifies** every process
 | 🛡️ **Safety net** | Three-tier protection (Protected / Caution / Safe) enforced inside the engine, re-checked against fresh data right before every action. |
 | 🚀 **Performance mode** | One-click profiles (Gaming, Focus, Render/build, Custom) that make background apps **yield CPU** to what you're using: below-normal priority plus Windows 11 **EcoQoS** (Task Manager's green leaf), and optionally above-normal priority for one focus app. Nothing is closed; everything is restored on stop or when RePID exits. |
 | ⏻ **Startup manager** | Every program that opens at sign-in (Registry Run keys, Startup folders, Microsoft Store apps, logon scheduled tasks · LaunchAgents and login items · XDG autostart) with its real name, publisher and **live measured impact**. Disable reversibly with the OS's own mechanism, see what will happen first, and restore everything RePID changed in one click. |
-| 📦 **Smart uninstaller** | Runs each app's **own uninstaller**, then finds what it left behind — install folder, AppData/ProgramData folders, caches, registry keys, Run entries, scheduled tasks and shortcuts (macOS: `~/Library` by bundle id · Linux: Flatpak). Leftovers are matched by **exact name**, never other apps' folders; files go to the **Recycle Bin** and registry keys are **backed up** first. |
+| 📦 **Smart uninstaller** | Runs each app's **own uninstaller**, then finds what it left behind — install folder, AppData/ProgramData folders, caches, registry keys, Run entries, scheduled tasks and shortcuts (macOS: `~/Library` by bundle id · Linux: Flatpak). Leftovers are matched by **exact name**, never other apps' folders; files go to the **Recycle Bin** and registry keys are **backed up** first. Also finds **leftovers of apps you already uninstalled**: unclaimed folders, broken shortcuts, startup entries and “Installed apps” entries. |
 | 🧹 **Deep cleanup** | Temp files, system temp, update cache, Recycle Bin/Trash, DNS cache, package-manager caches and the **cache, history and cookies of every browser** (Chrome, Edge, Firefox, Brave, Opera, Opera GX, Vivaldi, Chromium, Safari). Every item says *exactly what will happen* before you delete it; irreversible items need explicit confirmation. Passwords, bookmarks and documents are never touched. |
 | 🔑 **Full privileges** | Windows builds run as administrator (UAC prompt at launch) to end any process, stop services and clean system folders. macOS/Linux ask for your password only for the actions that need it (one prompt per action). Critical processes stay blocked regardless. |
 | 🌍 **Multilingual** | Spanish and English built in. Adding a language is adding **one JSON file** — the UI discovers it automatically. |
@@ -207,6 +207,10 @@ Performance mode never ends a process. It changes **scheduling priority only**, 
 | macOS `~/Library` | Entry carries the bundle id (`com.vendor.app…`) | Trash |
 | Linux | `~/.var/app/<id>` of the Flatpak | Trash |
 
+### Leftovers of apps you already uninstalled
+
+**Find leftovers of uninstalled apps** checks every top-level folder of AppData, LocalLow, ProgramData and Program Files against all evidence of use: installed apps (names, publishers, folders), running processes, **services and drivers**, startup entries and tasks that still work, and every shortcut target. A folder is offered only if nothing claims it **and** nothing in it changed for 60 days. Ticked by default: broken shortcuts, Run entries and tasks whose program is gone, “Installed apps” entries whose uninstaller and folder are gone, and program-free folders idle for 6+ months. Folders with programs and LocalLow (game saves) are listed for review only. Windows plumbing, other apps' uninstall data (InstallShield) and shared ecosystems are never offered. In a real dry run it found 11 GB of leftovers from about 40 removed apps.
+
 Safety rules learned from a dry run over 69 real installed apps: names shorter than 6 letters only match inside the vendor's folder (so `Unity` never claims `LocalLow\Unity`, shared by every Unity game); a version is only stripped from the **end** of a name (so *Visual Studio 2010 Tools for Office* never becomes *Visual Studio*); install folders shared with another app (Office suites, plugins) are not offered; names claimed by any other installed app are skipped; shared runtimes (.NET, Visual C++, WebView2), OS components and RePID itself are locked; drivers, security software and runtimes need explicit confirmation. Nothing is removed until you review the list.
 
 ## Deep cleanup
@@ -221,6 +225,9 @@ Safety rules learned from a dry run over 69 real installed apps: names shorter t
 | Package-manager caches | 🟠 Caution | npm, Yarn and pip caches. The next install downloads again. Off by default. | No |
 | Browser cache | 🟢 Safe | Pages load slower the first time. Sessions and passwords are kept. | No |
 | Browser history | 🔴 Sensitive | History, address-bar suggestions, top sites, saved sessions. **Bookmarks and passwords are kept** (Firefox history is removed with SQL because bookmarks share its database). | No |
+| App caches | 🟢 Safe | HTTP, code and GPU caches of Electron/Chromium apps (Discord, Slack, VS Code, Postman…), only where Chromium's own markers prove it is a cache. Sessions and messages are kept. | No |
+| Crash memory dumps | 🟢 Safe | `MEMORY.DMP`, `Minidump`, `LiveKernelReports`: only useful to diagnose past crashes. | Yes |
+| Previous Windows & update leftovers | 🟠 Caution | `Windows.old`, setup files and superseded update components, removed by Windows' own Disk Cleanup handlers. You can no longer roll back to the previous Windows. Off by default. | Yes |
 | Browser cookies | 🔴 Sensitive | Signs you out of every website; two-step verification may be asked again. | No |
 
 Open browsers lock their files: RePID shows which ones are open and offers to close them (warning about unsaved work) or skips them. Deletion is confined to each target folder, never follows symbolic links or junctions, refuses over-broad roots (a misconfigured `%TEMP%` such as `C:\`) and only accepts target ids from the UI — never paths.
@@ -293,6 +300,7 @@ The website ([repid-identity.vercel.app](https://repid-identity.vercel.app)) is 
 - [x] Deep cleanup module (v1.1)
 - [x] Performance mode with Windows 11 EcoQoS and a reversible startup manager (v1.2)
 - [x] Smart uninstaller with leftover detection, Recycle Bin and registry backups (v1.3)
+- [x] Leftovers of already-uninstalled apps, app caches, crash dumps and Windows.old cleanup (v1.4)
 - [ ] Code-signed installers for Windows and macOS (**funded by donations**)
 - [ ] Auto-update through GitHub Releases
 - [ ] Per-process disk and network I/O

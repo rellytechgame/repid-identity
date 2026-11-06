@@ -161,6 +161,9 @@ export type CleanerKind =
   | 'browser-cache'
   | 'browser-history'
   | 'browser-cookies'
+  | 'app-caches'
+  | 'crash-dumps'
+  | 'windows-old'
 
 export interface CleanerTarget {
   /** Stable id, e.g. "user-temp" or "browser:chrome:history". */
@@ -390,7 +393,21 @@ export interface Leftover {
   sizeBytes: number
   /** high = provably the app's (its install folder, its keys); medium = matched by exact name. */
   confidence: 'high' | 'medium'
-  reason: 'install-dir' | 'name-match' | 'vendor-dir' | 'uninstall-entry' | 'points-to-app' | 'bundle-id'
+  reason:
+    | 'install-dir'
+    | 'name-match'
+    | 'vendor-dir'
+    | 'uninstall-entry'
+    | 'points-to-app'
+    | 'bundle-id'
+    /** Orphan scan: belongs to no installed app, service, driver, running process, startup entry or shortcut. */
+    | 'orphan'
+    /** Orphan scan: shortcut, startup entry or task whose target no longer exists. */
+    | 'broken-target'
+    /** Orphan scan: "Installed apps" entry whose uninstaller and folder are gone. */
+    | 'broken-entry'
+  /** Newest modification inside (orphan scan), epoch ms: shows how long it has been unused. */
+  lastModified?: number
 }
 
 export interface UninstallResult {
@@ -443,6 +460,8 @@ export interface RepidApi {
   uninstallRun(request: UninstallRequest): Promise<UninstallResult>
   /** Broken/missing uninstaller: skip it and list the app's leftovers (including its registration). */
   uninstallForceScan(id: string): Promise<UninstallResult>
+  /** Leftovers of apps that are no longer installed (orphans, broken shortcuts/entries). Session id: "orphans". */
+  uninstallScanOrphans(): Promise<UninstallResult>
   uninstallClean(request: LeftoverCleanRequest): Promise<LeftoverCleanResult>
   /** Opens the folder with registry/task backups (fixed location owned by the main process). */
   uninstallOpenBackups(): Promise<void>

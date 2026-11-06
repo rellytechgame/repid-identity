@@ -40,6 +40,7 @@ We'll credit you in the release notes unless you prefer to stay anonymous.
 - Making the cleanup delete anything outside its target folders (path traversal, link/junction following, over-broad roots)
 - Making the startup manager change an entry RePID classifies as locked, or anything other than the entry's enable flag
 - Making performance mode change the priority of a protected process, or leave priorities changed after *Restore all* or quit
+- Making the orphan scan offer a folder that an installed app, service, driver, running process or working startup entry uses
 - Making the uninstaller offer or delete a folder, key or task that belongs to another installed app or to the OS, or delete anything without a Recycle Bin move / registry backup
 
 ## Security design (summary)

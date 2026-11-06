@@ -173,6 +173,96 @@ export function matchFolders(
   return out
 }
 
+// ───────────── Orphans: leftovers of apps that are no longer installed ─────────────
+
+/**
+ * Folders under AppData/ProgramData/Program Files that belong to Windows,
+ * drivers, runtimes or shared tooling even though no "installed app" claims
+ * them. They are never offered as orphans.
+ */
+const SYSTEM_DIRS = new Set(
+  [
+    'Microsoft', 'Windows', 'Packages', 'Temp', 'Programs', 'Common Files', 'WindowsApps', 'ModifiableWindowsApps', 'Windows Defender',
+    'Windows Defender Advanced Threat Protection', 'Windows NT', 'Windows Mail', 'Windows Media Player', 'Windows Photo Viewer', 'Windows Sidebar',
+    'Windows Portable Devices', 'Windows Security', 'WindowsPowerShell', 'PowerShell', 'Internet Explorer', 'MSBuild', 'Reference Assemblies', 'dotnet',
+    'IIS', 'IIS Express', 'Uninstall Information', 'Package Cache', 'Application Data', 'Desktop', 'Documents', 'Start Menu', 'Templates', 'Favorites',
+    'regid.1991-06.com.microsoft', 'ssh', 'USOShared', 'USOPrivate', 'SoftwareDistribution', 'Comms', 'ConnectedDevicesPlatform', 'D3DSCache',
+    'CrashDumps', 'PeerDistRepub', 'PlaceholderTileLogoFolder', 'Publishers', 'VirtualStore', 'History', 'GameDVR', 'PackageManagement', 'NuGet',
+    'npm', 'npm-cache', 'pip', 'pypa', 'Yarn', 'node-gyp', 'pnpm', 'Python', 'fontconfig', 'Intel', 'NVIDIA', 'NVIDIA Corporation', 'AMD', 'ATI',
+    'Realtek', 'Oracle', 'Java', 'Mozilla', 'Google', 'Adobe', 'Apple', 'Apple Computer', 'Apple Inc', 'Dolby', 'Waves', 'Synaptics', 'Logitech',
+    'Package Store', 'ProgramData', 'Sun', 'Downloaded Installations', 'Installer', 'WinGet', 'Squirrel', 'SquirrelTemp', 'ElevatedDiagnostics',
+    'Diagnostics', 'Microsoft Help', 'Microsoft OneDrive', 'OneDrive', 'MicrosoftEdge', 'Edge', 'EdgeUpdate', 'EdgeWebView',
+    'Speech', 'Speech Graphics', 'ClickToRun', 'Microsoft Office', 'Microsoft Shared', 'Microsoft.NET', 'Mesa3D', 'Vulkan', 'VulkanRT', 'OpenAL',
+    // Shared ecosystems: data used by many tools/games at once (every Unity game writes LocalLow\Unity).
+    'DirectX', 'Unity', 'UnrealEngine', 'WSL', 'Git', 'Android', 'Gradle', 'Electron', 'RePID Identity',
+    // Found on a real machine: uninstall data of OTHER apps, Windows services and Visual Studio components.
+    'InstallShield Installation Information', 'InstallShield', 'Online Services', 'Whesvc', 'UniqueId', 'INetHistory', 'Propagation',
+    'ServiceHub', 'ASP.NET', 'SourceServer', 'IdentityNexusIntegration', 'maui', 'Xamarin', 'boost_interprocess', 'Windows Kits', 'Windows SDKs'
+  ].map(normalize)
+)
+
+/** Names the user may still use even without an installer record (shared or portable by nature). */
+export function isProtectedDirName(name: string): boolean {
+  if (/^[.$~{]/.test(name) || /^(s-1-|[0-9a-f-]{36}$)/i.test(name)) return true
+  const n = normalize(name)
+  return !n || isGenericName(name) || SYSTEM_DIRS.has(n)
+}
+
+/** Every name that proves a folder is still in use, collected from installed apps, startup entries and running processes. */
+export function ownedNameSet(sources: Array<{ name?: string; publisher?: string; installLocation?: string; products?: ProductKeys; vendors?: string[] }>): Set<string> {
+  const out = new Set<string>()
+  const add = (s?: string) => {
+    const n = s ? normalize(s) : ''
+    if (n.length >= 3) out.add(n)
+  }
+  for (const s of sources) {
+    add(s.name)
+    add(s.publisher)
+    add(s.name?.split(/\s+/)[0])
+    add(s.publisher?.split(/\s+/)[0])
+    if (s.installLocation) add(s.installLocation.replace(/[\\/]+$/, '').split(/[\\/]/).pop())
+    s.products?.primary.forEach(add)
+    s.products?.vendorScoped.forEach(add)
+    s.vendors?.forEach(add)
+  }
+  return out
+}
+
+/**
+ * Conservative ownership: equal names, or one contains the other when the
+ * shorter is at least 5 letters ("operasoftware" is owned by an installed
+ * "Opera GX"). Any doubt counts as owned, so the folder is not offered.
+ */
+export function isOwnedName(folder: string, owned: ReadonlySet<string>): boolean {
+  const n = normalize(folder)
+  if (!n) return true
+  if (owned.has(n)) return true
+  for (const s of owned) {
+    if ((s.length >= 5 && n.includes(s)) || (n.length >= 5 && s.includes(n))) return true
+  }
+  return false
+}
+
+export const ORPHAN_MIN_IDLE_DAYS = 60
+const DAY = 24 * 3600 * 1000
+
+/**
+ * Verdict for a folder nobody claims. Recently modified folders are in use
+ * (by a portable app, a game, a script) and are never offered. Empty or
+ * executable-free folders idle for 6+ months are pre-selected; anything with
+ * programs, or game saves in LocalLow, is left for the user to review.
+ */
+export function orphanVerdict(
+  f: { bytes: number; newest: number; hasExecutables: boolean; gameSaves: boolean; programsRoot?: boolean },
+  now = Date.now()
+): 'skip' | 'high' | 'medium' {
+  if (f.newest && now - f.newest < ORPHAN_MIN_IDLE_DAYS * DAY) return 'skip'
+  // An empty folder frees nothing: pre-select it only where it is an obvious install remnant (Program Files, Programs).
+  if (f.bytes === 0) return f.programsRoot ? 'high' : 'medium'
+  if (!f.hasExecutables && !f.gameSaves && now - (f.newest || 0) > 180 * DAY) return 'high'
+  return 'medium'
+}
+
 export function isUninstallId(value: unknown): value is string {
   return typeof value === 'string' && value.length > 3 && value.length <= 600 && !/[\u0000-\u001f]/.test(value)
 }

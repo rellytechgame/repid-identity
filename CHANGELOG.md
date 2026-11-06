@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [1.4.0] — 2026-11-06
+
+### Added
+- **Leftovers of already-uninstalled apps**: folders in AppData, LocalLow, ProgramData and Program Files that no installed app, process, service, driver, working startup entry or shortcut claims and that have been idle for 60+ days; broken shortcuts, Run entries and logon tasks; “Installed apps” entries whose uninstaller and folder are gone; matching HKCU\Software keys. Safe items pre-selected, the rest for review, with *select all / safe only / none*.
+- Cleanup: **app caches** of Electron/Chromium apps (verified by Chromium's own markers), **crash memory dumps**, and **previous Windows installation & update leftovers** through Windows' Disk Cleanup handlers (`cleanmgr /sagerun`).
+
+### Fixed
+- A broken startup entry no longer counts as evidence that a folder is in use.
+
 ## [1.3.0] — 2026-11-06
 
 ### Added

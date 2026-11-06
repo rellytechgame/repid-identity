@@ -21,6 +21,7 @@ export function UninstallView({ notify }: Props) {
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<Sort>('size')
   const [wizard, setWizard] = useState<InstalledApp | null>(null)
+  const [orphans, setOrphans] = useState(false)
 
   const scan = useCallback(async () => {
     setLoading(true)
@@ -57,6 +58,9 @@ export function UninstallView({ notify }: Props) {
         </div>
         <button className="btn btn--secondary" onClick={() => void scan()} disabled={loading}>
           <Icon name="refresh" size={16} /> {loading ? t('uninstall.scanning') : t('uninstall.rescan')}
+        </button>
+        <button className="btn btn--primary btn--lg" onClick={() => setOrphans(true)} disabled={!report?.supported}>
+          <Icon name="broom" size={16} /> {t('uninstall.orphans.cta')}
         </button>
       </section>
 
@@ -96,6 +100,16 @@ export function UninstallView({ notify }: Props) {
             ))}
           </ul>
         </section>
+      )}
+
+      {orphans && (
+        <OrphanModal
+          notify={notify}
+          onClose={() => {
+            setOrphans(false)
+            void scan()
+          }}
+        />
       )}
 
       {wizard && (
@@ -309,32 +323,7 @@ function UninstallWizard({ app, notify, onClose }: { app: InstalledApp; notify: 
             <>
               <p>{t('uninstall.wizard.leftoversBody', { count: leftovers.length, size: formatBytes(leftovers.reduce((s, l) => s + l.sizeBytes, 0), lng) })}</p>
               <p className="callout callout--info"><Icon name="undo" size={16} /> {t('uninstall.wizard.recoverable')}</p>
-              {GROUPS.map((g) => {
-                const items = leftovers.filter((l) => g.kinds.includes(l.kind))
-                if (!items.length) return null
-                return (
-                  <section key={g.id} className="leftover-group">
-                    <h3>{t(`uninstall.groups.${g.id}`)} <span className="muted">({items.length})</span></h3>
-                    <ul className="leftover-list">
-                      {items.map((l) => (
-                        <li key={l.id}>
-                          <label>
-                            <input type="checkbox" checked={picked.has(l.id)} disabled={step === 'cleaning'} onChange={(e) => toggle(l.id, e.target.checked)} />
-                            <span className="leftover-list__text">
-                              <span className="mono break">{l.location}</span>
-                              <small className="muted">
-                                {t(`uninstall.reason.${l.reason}`)}
-                                {l.confidence === 'medium' && <> · <span className="leftover-medium">{t('uninstall.medium')}</span></>}
-                              </small>
-                            </span>
-                            <span className="leftover-list__size">{l.sizeBytes ? formatBytes(l.sizeBytes, lng) : ''}</span>
-                          </label>
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
-                )
-              })}
+              <LeftoverList leftovers={leftovers} picked={picked} disabled={step === 'cleaning'} onToggle={toggle} />
             </>
           )}
           {leftovers.length === 0 && (
@@ -356,6 +345,148 @@ function UninstallWizard({ app, notify, onClose }: { app: InstalledApp; notify: 
           </span>
         </p>
       )}
+    </Modal>
+  )
+}
+
+function LeftoverList({ leftovers, picked, disabled, onToggle }: { leftovers: Leftover[]; picked: Set<string>; disabled: boolean; onToggle: (id: string, on: boolean) => void }) {
+  const { t, i18n } = useTranslation()
+  const lng = i18n.language
+  return (
+    <>
+      {GROUPS.map((g) => {
+        const items = leftovers.filter((l) => g.kinds.includes(l.kind))
+        if (!items.length) return null
+        return (
+          <section key={g.id} className="leftover-group">
+            <h3>{t(`uninstall.groups.${g.id}`)} <span className="muted">({items.length})</span></h3>
+            <ul className="leftover-list">
+              {items.map((l) => (
+                <li key={l.id}>
+                  <label>
+                    <input type="checkbox" checked={picked.has(l.id)} disabled={disabled} onChange={(e) => onToggle(l.id, e.target.checked)} />
+                    <span className="leftover-list__text">
+                      <span className="mono break">{l.location}</span>
+                      <small className="muted">
+                        {t(`uninstall.reason.${l.reason}`)}
+                        {l.lastModified && <> · {t('uninstall.orphans.idle', { count: Math.max(1, Math.round((Date.now() - l.lastModified) / 864e5)) })}</>}
+                        {l.confidence === 'medium' && <> · <span className="leftover-medium">{t(l.reason === 'orphan' ? 'uninstall.orphans.review' : 'uninstall.medium')}</span></>}
+                      </small>
+                    </span>
+                    <span className="leftover-list__size">{l.sizeBytes ? formatBytes(l.sizeBytes, lng) : ''}</span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      })}
+    </>
+  )
+}
+
+/** Leftovers of apps that are already uninstalled: scan → review → remove → summary. */
+function OrphanModal({ notify, onClose }: { notify: Props['notify']; onClose: () => void }) {
+  const { t, i18n } = useTranslation()
+  const lng = i18n.language
+  const [step, setStep] = useState<'scanning' | 'review' | 'cleaning' | 'done'>('scanning')
+  const [leftovers, setLeftovers] = useState<Leftover[]>([])
+  const [picked, setPicked] = useState<Set<string>>(new Set())
+  const [cleaned, setCleaned] = useState<LeftoverCleanResult | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let alive = true
+    api
+      .uninstallScanOrphans()
+      .then((res) => {
+        if (!alive) return
+        setLeftovers(res.leftovers)
+        setPicked(new Set(res.leftovers.filter((l) => l.confidence === 'high').map((l) => l.id)))
+        setStep('review')
+      })
+      .catch((err) => {
+        if (!alive) return
+        setError(err instanceof Error ? err.message : String(err))
+        setStep('review')
+      })
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  const toggle = (id: string, on: boolean) =>
+    setPicked((prev) => {
+      const next = new Set(prev)
+      if (on) next.add(id)
+      else next.delete(id)
+      return next
+    })
+  const total = leftovers.reduce((s, l) => s + l.sizeBytes, 0)
+  const pickedSize = leftovers.filter((l) => picked.has(l.id)).reduce((s, l) => s + l.sizeBytes, 0)
+
+  const clean = async () => {
+    setStep('cleaning')
+    try {
+      const res = await api.uninstallClean({ appId: 'orphans', ids: [...picked] })
+      setCleaned(res)
+      setStep('done')
+      notify({ tone: 'success', title: t('uninstall.orphans.toast', { count: res.outcomes.filter((o) => o.status === 'removed' || o.status === 'gone').length, size: formatBytes(res.recycledBytes, lng) }) })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err))
+      setStep('review')
+    }
+  }
+
+  const footer =
+    step === 'review' && leftovers.length ? (
+      <>
+        <span className="modal__summary">{t('uninstall.wizard.selected', { count: picked.size, size: formatBytes(pickedSize, lng) })}</span>
+        <button className="btn btn--ghost" onClick={onClose}>{t('common.cancel')}</button>
+        <button className="btn btn--primary" disabled={!picked.size} onClick={() => void clean()}>
+          <Icon name="broom" size={16} /> {t('uninstall.wizard.removeLeftovers')}
+        </button>
+      </>
+    ) : step === 'done' || (step === 'review' && !leftovers.length) ? (
+      <>
+        {cleaned?.backupDir && (
+          <button className="btn btn--secondary" onClick={() => void api.uninstallOpenBackups()}>
+            <Icon name="external" size={14} /> {t('uninstall.wizard.openBackups')}
+          </button>
+        )}
+        <button className="btn btn--primary" onClick={onClose}>{t('common.close')}</button>
+      </>
+    ) : undefined
+
+  return (
+    <Modal title={t('uninstall.orphans.title')} icon="broom" wide onClose={step === 'cleaning' ? () => undefined : onClose} footer={footer}>
+      {step === 'scanning' && (
+        <div className="wizard-wait">
+          <span className="spinner" aria-hidden="true" />
+          <div>
+            <strong>{t('uninstall.orphans.scanning')}</strong>
+            <p className="muted">{t('uninstall.orphans.scanningHint')}</p>
+          </div>
+        </div>
+      )}
+      {error && <p className="callout callout--critical">{error}</p>}
+      {(step === 'review' || step === 'cleaning') && !error && (
+        leftovers.length === 0 ? (
+          <p className="callout callout--info"><Icon name="check" size={16} /> {t('uninstall.orphans.none')}</p>
+        ) : (
+          <>
+            <p>{t('uninstall.orphans.body', { count: leftovers.length, size: formatBytes(total, lng) })}</p>
+            <p className="callout callout--info"><Icon name="shield" size={16} /> {t('uninstall.orphans.how')}</p>
+            <div className="orphan-tools">
+              <button className="btn btn--ghost btn--sm" disabled={step === 'cleaning'} onClick={() => setPicked(new Set(leftovers.map((l) => l.id)))}>{t('uninstall.orphans.selectAll')}</button>
+              <button className="btn btn--ghost btn--sm" disabled={step === 'cleaning'} onClick={() => setPicked(new Set(leftovers.filter((l) => l.confidence === 'high').map((l) => l.id)))}>{t('uninstall.orphans.selectSafe')}</button>
+              <button className="btn btn--ghost btn--sm" disabled={step === 'cleaning'} onClick={() => setPicked(new Set())}>{t('uninstall.orphans.selectNone')}</button>
+            </div>
+            <LeftoverList leftovers={leftovers} picked={picked} disabled={step === 'cleaning'} onToggle={toggle} />
+          </>
+        )
+      )}
+      {step === 'done' && cleaned && <CleanSummary result={cleaned} />}
     </Modal>
   )
 }

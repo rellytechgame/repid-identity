@@ -363,6 +363,18 @@
       "browser-cookies": {
         "title": "Cookies & sign-ins",
         "effect": "Signs you out of EVERY website (email, social networks, banking) and erases site preferences. You will need to sign in again and may have to repeat two-step verification."
+      },
+      "app-caches": {
+        "title": "App caches",
+        "effect": "Clears the cache of apps such as Discord, Slack, VS Code, Postman or Notion (images, compiled code and GPU cache). They rebuild automatically; the first launch is a bit slower. Your sessions, messages and settings are untouched. Files in use are skipped."
+      },
+      "crash-dumps": {
+        "title": "Crash memory dumps",
+        "effect": "Files Windows saves after a blue screen or a hang (MEMORY.DMP, Minidump). They only help diagnose crashes that already happened and can take several GB."
+      },
+      "windows-old": {
+        "title": "Previous Windows installation and update leftovers",
+        "effect": "Uses Windows' own cleanup tool to delete Windows.old, temporary setup files and components of updates already applied. Afterwards you can no longer go back to the previous Windows version or uninstall those updates. It can take several minutes."
       }
     },
     "confirm": {
@@ -611,7 +623,10 @@
       "vendor-dir": "Inside the publisher's folder, with the app's name",
       "uninstall-entry": "The app's entry in “Installed apps”",
       "points-to-app": "Opens a file of the app",
-      "bundle-id": "Carries the app's identifier"
+      "bundle-id": "Carries the app's identifier",
+      "orphan": "Belongs to no installed app, service, driver, process, startup entry or shortcut",
+      "broken-target": "Points to a program that no longer exists",
+      "broken-entry": "Listed in “Installed apps”, but its uninstaller and folder are gone"
     },
     "status": {
       "uninstalled": "{{name}} was uninstalled.",
@@ -672,6 +687,24 @@
     "toast": {
       "done_one": "{{name}}: {{count}} leftover removed",
       "done_other": "{{name}}: {{count}} leftovers removed"
+    },
+    "orphans": {
+      "cta": "Find leftovers of uninstalled apps",
+      "title": "Leftovers of uninstalled apps",
+      "scanning": "Looking for what apps you no longer have left behind…",
+      "scanningHint": "RePID checks every folder against your installed apps, services, drivers, processes, startup entries and shortcuts. It can take a minute.",
+      "body_one": "Found {{count}} leftover ({{size}}) of apps that are no longer installed.",
+      "body_other": "Found {{count}} leftovers ({{size}}) of apps that are no longer installed.",
+      "how": "Only things no app, service or driver uses and that haven't changed in 60+ days are shown. Broken shortcuts and entries and program-free folders unused for months are ticked; review the rest (they may be game saves or portable tools). Everything goes to the Recycle Bin or is backed up.",
+      "none": "All clean! No leftovers of uninstalled apps.",
+      "selectAll": "Select all",
+      "selectSafe": "Safe only",
+      "selectNone": "Select none",
+      "idle_one": "unused for {{count}} day",
+      "idle_other": "unused for {{count}} days",
+      "toast_one": "{{count}} leftover removed · {{size}} freed",
+      "toast_other": "{{count}} leftovers removed · {{size}} freed",
+      "review": "contains programs or saved games, review it"
     }
   }
 }

@@ -29,7 +29,7 @@ export type PathSpec =
   | { mode: 'match'; dir: string; pattern: RegExp }
 
 /** Special handlers that are not plain file deletion. */
-export type CleanerAction = 'recycle-bin-windows' | 'dns-flush' | 'firefox-history'
+export type CleanerAction = 'recycle-bin-windows' | 'dns-flush' | 'firefox-history' | 'windows-setup-cleanup'
 
 export interface TargetDef {
   id: string
@@ -46,6 +46,13 @@ export interface TargetDef {
   privileged?: string[]
   /** Normalized process names that lock the files (browser must be closed). */
   processNames?: string[]
+  /**
+   * Specs are only MEASURED (to show the size); the actions do the deletion.
+   * Used for Windows.old, whose ACLs only Windows' own cleanup tool can handle.
+   */
+  measureOnly?: boolean
+  /** Offer the target even when nothing measurable was found (the action may still free space). */
+  alwaysAvailable?: boolean
 }
 
 const KIND_META: Record<CleanerKind, Pick<TargetDef, 'risk' | 'defaultSelected' | 'group'>> = {
@@ -57,7 +64,10 @@ const KIND_META: Record<CleanerKind, Pick<TargetDef, 'risk' | 'defaultSelected' 
   'dev-caches': { risk: 'caution', defaultSelected: false, group: 'apps' },
   'browser-cache': { risk: 'safe', defaultSelected: true, group: 'browsers' },
   'browser-history': { risk: 'sensitive', defaultSelected: false, group: 'browsers' },
-  'browser-cookies': { risk: 'sensitive', defaultSelected: false, group: 'browsers' }
+  'browser-cookies': { risk: 'sensitive', defaultSelected: false, group: 'browsers' },
+  'app-caches': { risk: 'safe', defaultSelected: true, group: 'apps' },
+  'crash-dumps': { risk: 'safe', defaultSelected: true, group: 'system' },
+  'windows-old': { risk: 'caution', defaultSelected: false, group: 'system' }
 }
 
 function def(kind: CleanerKind, rest: Omit<TargetDef, 'kind' | 'risk' | 'defaultSelected' | 'group' | 'id'> & { id?: string }): TargetDef {
@@ -248,6 +258,29 @@ export function systemTargets(env: CleanerEnv): TargetDef[] {
           { mode: 'contents', dir: p.join(env.systemRoot, 'ServiceProfiles', 'NetworkService', 'AppData', 'Local', 'Microsoft', 'Windows', 'DeliveryOptimization', 'Cache') }
         ]
       }),
+      // Memory dumps written after crashes/blue screens: only useful to diagnose a crash that already happened.
+      def('crash-dumps', {
+        requiresAdmin: true,
+        measurable: true,
+        specs: [
+          { mode: 'files', dir: env.systemRoot, names: ['MEMORY.DMP'] },
+          { mode: 'contents', dir: p.join(env.systemRoot, 'Minidump') },
+          { mode: 'contents', dir: p.join(env.systemRoot, 'LiveKernelReports') }
+        ]
+      }),
+      // Previous Windows installation and applied-update leftovers, removed by Windows' own Disk Cleanup handlers.
+      def('windows-old', {
+        requiresAdmin: true,
+        measurable: true,
+        measureOnly: true,
+        alwaysAvailable: true,
+        specs: [
+          { mode: 'contents', dir: p.join(p.parse(env.systemRoot).root, 'Windows.old') },
+          { mode: 'contents', dir: p.join(p.parse(env.systemRoot).root, '$Windows.~BT') },
+          { mode: 'contents', dir: p.join(p.parse(env.systemRoot).root, '$Windows.~WS') }
+        ],
+        actions: ['windows-setup-cleanup']
+      }),
       def('recycle-bin', { requiresAdmin: false, measurable: true, specs: [], actions: ['recycle-bin-windows'] }),
       // ipconfig /flushdns needs an elevated token on current Windows releases.
       def('dns-cache', { requiresAdmin: true, measurable: false, specs: [], actions: ['dns-flush'] }),
@@ -333,6 +366,20 @@ export function systemTargets(env: CleanerEnv): TargetDef[] {
  * filesystem root, the home folder, the OS folder or a well-known parent.
  * Guards against a misconfigured %TEMP% such as "C:\".
  */
+/** Regenerable Chromium/Electron cache folders inside an app's user-data directory. */
+export const APP_CACHE_DIRS = ['Cache', 'Code Cache', 'GPUCache', 'DawnCache', 'DawnGraphiteCache', 'DawnWebGPUCache', 'GrShaderCache', 'ShaderCache', 'CachedData', 'CachedExtensionVSIXs', path.join('Crashpad', 'reports')]
+
+/** A user-data dir of a Chromium-based app has these next to its caches; without them a "Cache" folder may hold real data. */
+export const CHROMIUM_MARKERS = ['Local State', 'Preferences', 'Local Storage', 'Session Storage', 'Network']
+
+/**
+ * Folders never scanned for app caches: browsers (their own targets handle
+ * cache vs. history), system plumbing and RePID itself (Electron).
+ */
+export const APP_CACHE_EXCLUDE = new Set(
+  ['Google', 'Microsoft', 'BraveSoftware', 'Vivaldi', 'Opera Software', 'Mozilla', 'Chromium', 'Yandex', 'Packages', 'Temp', 'RePID Identity', 'Electron', 'npm-cache', 'pip', 'Yarn'].map((n) => n.toLowerCase())
+)
+
 export function isSafeCleanRoot(dir: string, env: CleanerEnv): boolean {
   const p = env.platform === 'win32' ? path.win32 : path.posix
   const norm = (x: string) => p.resolve(x).replace(/[\\/]+$/, '').toLowerCase()

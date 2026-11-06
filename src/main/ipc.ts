@@ -95,6 +95,7 @@ export function registerIpc({ engine, cleaner, startup, booster, uninstaller }: 
   handle('repid:uninstall-list', () => uninstaller.list())
   handle('repid:uninstall-run', (_e, req) => uninstaller.run(req))
   handle('repid:uninstall-force-scan', (_e, id) => uninstaller.forceScan(id))
+  handle('repid:uninstall-orphans', () => uninstaller.scanOrphans())
   handle('repid:uninstall-clean', (_e, req) => uninstaller.clean(req))
   handle('repid:uninstall-open-backups', () => uninstaller.openBackups())
   handle('repid:open-donate', () => shell.openExternal(DONATE_URL))

@@ -145,6 +145,9 @@ function demoCleanerTargets(running: Set<string>, cleaned: Set<string>): Cleaner
     row('update-cache', 'update-cache', 'system', 'caution', 3.1 * GB, 214, { requiresAdmin: true }),
     row('recycle-bin', 'recycle-bin', 'system', 'sensitive', 1.7 * GB, 96),
     row('dns-cache', 'dns-cache', 'system', 'safe', 0, 0, { measurable: false }),
+    row('crash-dumps', 'crash-dumps', 'system', 'safe', 2.1 * GB, 4, { requiresAdmin: true }),
+    row('windows-old', 'windows-old', 'system', 'caution', 14.6 * GB, 41230, { requiresAdmin: true }),
+    row('app-caches', 'app-caches', 'apps', 'safe', 1.8 * GB, 23840),
     row('dev-caches', 'dev-caches', 'apps', 'caution', 4.6 * GB, 52110),
     row('browser:chrome:cache', 'browser-cache', 'browsers', 'safe', 1.2 * GB, 9420, { browser: 'Google Chrome', blockedBy: chromeOpen }),
     row('browser:chrome:history', 'browser-history', 'browsers', 'sensitive', 84 * MB, 11, { browser: 'Google Chrome', blockedBy: chromeOpen }),
@@ -200,6 +203,32 @@ interface DemoInstalled {
 const LOCAL = `${APPDATA}Local\\`
 const ROAM = `${APPDATA}Roaming\\`
 const leftover = (kind: Leftover['kind'], location: string, sizeBytes: number, reason: Leftover['reason'], confidence: Leftover['confidence'] = 'high') => ({ kind, location, sizeBytes, reason, confidence })
+
+const DAYS = 24 * 3600 * 1000
+const orphan = (kind: Leftover['kind'], location: string, sizeBytes: number, reason: Leftover['reason'], confidence: Leftover['confidence'], idleDays?: number) => ({
+  kind,
+  location,
+  sizeBytes,
+  reason,
+  confidence,
+  lastModified: idleDays ? Date.now() - idleDays * DAYS : undefined
+})
+
+/** Leftovers of apps the demo machine no longer has. */
+const DEMO_ORPHANS: Array<Omit<Leftover, 'id'>> = [
+  orphan('folder', `${LOCAL}tiktok live studio-updater`, 998 * MB, 'orphan', 'medium', 674),
+  orphan('folder', `${ROAM}OldGameLauncher`, 812 * MB, 'orphan', 'medium', 410),
+  orphan('folder', `${LOCAL}DiskTool`, 214 * MB, 'orphan', 'high', 292),
+  orphan('folder', `${ROAM}PhotoSuite 2019`, 96 * MB, 'orphan', 'high', 840),
+  orphan('folder', `${PF}OldVPN`, 0, 'orphan', 'high', 520),
+  orphan('folder', `C:\\Users\\demo\\AppData\\LocalLow\\Indie Studio`, 3 * MB, 'orphan', 'medium', 689),
+  orphan('shortcut', `${ROAM}Microsoft\\Windows\\Start Menu\\Programs\\Steam\\Steam.lnk`, 0, 'broken-target', 'high'),
+  orphan('shortcut', `C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\PhotoSuite 2019\\PhotoSuite.lnk`, 0, 'broken-target', 'high'),
+  orphan('registry-value', 'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\OldGameLauncher', 0, 'broken-target', 'high'),
+  orphan('task', '\\OldVPN Updater', 0, 'broken-target', 'high'),
+  orphan('registry-key', 'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\PhotoSuite2019', 0, 'broken-entry', 'high'),
+  orphan('registry-key', 'HKCU\\Software\\PhotoSuite 2019', 0, 'orphan', 'high')
+]
 
 const DEMO_INSTALLED: DemoInstalled[] = [
   { name: 'Discord', publisher: 'Discord Inc.', version: '1.0.9180', date: '2026-08-14', size: 412 * MB, location: `${LOCAL}Discord`, exe: 'discord.exe', leftovers: [
@@ -507,6 +536,12 @@ export function createDemoApi(): RepidApi {
         recycledBytes: picked.reduce((s, l) => s + l.sizeBytes, 0),
         backupDir: picked.some((l) => l.kind.startsWith('registry') || l.kind === 'task') ? 'C:\\Users\\demo\\AppData\\Roaming\\RePID Identity\\uninstall-backups' : undefined
       }
+    },
+    async uninstallScanOrphans() {
+      await new Promise((r) => setTimeout(r, 1800))
+      const list = DEMO_ORPHANS.map((l, i) => ({ ...l, id: `o${i}${Math.random().toString(36).slice(2, 8)}` }))
+      leftoverSessions.set('orphans', list)
+      return { id: 'orphans', status: 'uninstalled', leftovers: list }
     },
     async uninstallOpenBackups() {},
     async openRepo(path = '') {

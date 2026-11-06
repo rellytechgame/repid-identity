@@ -17,10 +17,15 @@ import { isElevated } from '../engine/privileges'
 import { darwinUninstaller } from './darwin'
 import { exists } from './fsutil'
 import { linuxUninstaller } from './linux'
+import { darwinOrphans, linuxOrphans } from './orphans-unix'
+import { windowsOrphans } from './orphans-windows'
 import type { AppRecord, LeftoverRecord, PlatformUninstaller } from './types'
 import { isOfferablePath, windowsUninstaller } from './windows'
 
 const PLATFORMS: Partial<Record<Platform, PlatformUninstaller>> = { win32: windowsUninstaller, darwin: darwinUninstaller, linux: linuxUninstaller }
+type OrphanScan = (records: AppRecord[], processPaths: string[]) => Promise<LeftoverRecord[]>
+const ORPHANS: Partial<Record<Platform, OrphanScan>> = { win32: windowsOrphans, darwin: darwinOrphans, linux: linuxOrphans }
+export const ORPHAN_SESSION = 'orphans'
 const MAX_IDS = 500
 
 export function parseUninstallRequest(raw: unknown): UninstallRequest {
@@ -112,6 +117,21 @@ export class Uninstaller {
     const after = await this.inventory()
     if (after.some((r) => r.app.id === req.id)) return { id: req.id, status: 'still-installed', leftovers: [] }
     return { id: req.id, status: 'uninstalled', leftovers: await this.scan(rec, after) }
+  }
+
+  /**
+   * Leftovers of apps that are no longer installed. Results live in the
+   * "orphans" session and are removed through `clean({ appId: 'orphans' })`.
+   */
+  async scanOrphans(): Promise<UninstallResult> {
+    const id = ORPHAN_SESSION
+    const scan = ORPHANS[process.platform as Platform]
+    if (!scan) return { id, status: 'not-found', leftovers: [] }
+    const records = await this.inventory()
+    const { procs } = await this.engine.current(0)
+    const found = await scan(records, procs.map((p) => p.path).filter(Boolean))
+    this.sessions.set(id, new Map(found.map((l) => [l.id, l])))
+    return { id, status: 'uninstalled', leftovers: found.map(({ target: _t, ...l }) => l) }
   }
 
   /** Only for apps whose registered uninstaller no longer exists. */

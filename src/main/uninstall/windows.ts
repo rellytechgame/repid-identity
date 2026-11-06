@@ -10,7 +10,7 @@ import { windowsAdapter } from '../startup/windows'
 import { childDirs, exists, isDirectory, sizeOf } from './fsutil'
 import type { AppRecord, LeftoverRecord, PlatformUninstaller, RunOutcome } from './types'
 
-const UNINSTALL_KEYS: Record<string, string> = {
+export const UNINSTALL_KEYS: Record<string, string> = {
   HKLM64: 'HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall',
   HKLM32: 'HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall',
   HKCU: 'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall'
@@ -18,6 +18,8 @@ const UNINSTALL_KEYS: Record<string, string> = {
 
 /** Registry parents searched for `<Product>` and `<Vendor>\<Product>` keys. */
 const REG_PARENTS = ['HKCU\\Software', 'HKLM\\SOFTWARE', 'HKLM\\SOFTWARE\\WOW6432Node']
+/** Orphan registry keys are only looked for in the user hive, paired with an orphan folder. */
+export const REG_PARENTS_USER = ['HKCU\\Software']
 
 /** Read-only inventory: classic uninstall entries (all three hives) and removable Store apps. */
 const INVENTORY = String.raw`
@@ -158,7 +160,7 @@ async function waitForFollowUps(before: Set<number>, appDir: string | undefined,
   }
 }
 
-async function regSubkeys(key: string): Promise<string[]> {
+export async function regSubkeys(key: string): Promise<string[]> {
   const res = await run('reg.exe', ['query', key], { timeoutMs: 15000 })
   if (!res.ok) return []
   const prefix = key.toLowerCase() + '\\'
@@ -208,7 +210,7 @@ function isOfferableKey(key: string): boolean {
   return parentOk && parts.length >= 3 && REG_KEY_NAME.test(parts[parts.length - 1])
 }
 
-async function resolveShortcuts(paths: string[]): Promise<Map<string, string>> {
+export async function resolveShortcuts(paths: string[]): Promise<Map<string, string>> {
   const out = new Map<string, string>()
   if (!paths.length) return out
   const res = await powershell(
@@ -224,7 +226,7 @@ async function resolveShortcuts(paths: string[]): Promise<Map<string, string>> {
   return out
 }
 
-async function shortcutsUnder(dir: string, depth = 2): Promise<string[]> {
+export async function shortcutsUnder(dir: string, depth = 2): Promise<string[]> {
   const out: string[] = []
   const walk = async (d: string, level: number) => {
     let names: string[] = []

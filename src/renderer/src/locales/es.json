@@ -363,6 +363,18 @@
       "browser-cookies": {
         "title": "Cookies e inicios de sesión",
         "effect": "Cierra tu sesión en TODOS los sitios web (correo, redes sociales, bancos) y borra las preferencias guardadas por las webs. Tendrás que volver a iniciar sesión y quizá repetir la verificación en dos pasos."
+      },
+      "app-caches": {
+        "title": "Caché de aplicaciones",
+        "effect": "Borra la caché de apps como Discord, Slack, VS Code, Postman o Notion (imágenes, código compilado y caché de GPU). Se vuelven a generar solas; la primera apertura será algo más lenta. Tus sesiones, mensajes y ajustes no se tocan. Los archivos en uso se omiten."
+      },
+      "crash-dumps": {
+        "title": "Volcados de memoria por errores",
+        "effect": "Archivos que Windows guarda tras un pantallazo azul o un bloqueo (MEMORY.DMP, Minidump). Solo sirven para diagnosticar fallos que ya ocurrieron; pueden ocupar varios GB."
+      },
+      "windows-old": {
+        "title": "Instalación anterior de Windows y restos de actualizaciones",
+        "effect": "Usa la herramienta oficial de Windows para borrar Windows.old, archivos temporales de instalación y componentes de actualizaciones ya aplicadas. Después ya no podrás volver a la versión anterior de Windows ni desinstalar esas actualizaciones. Puede tardar varios minutos."
       }
     },
     "confirm": {
@@ -611,7 +623,10 @@
       "vendor-dir": "Dentro de la carpeta del fabricante, con el nombre de la app",
       "uninstall-entry": "Registro de la app en «Aplicaciones instaladas»",
       "points-to-app": "Abre un archivo de la app",
-      "bundle-id": "Lleva el identificador de la app"
+      "bundle-id": "Lleva el identificador de la app",
+      "orphan": "No pertenece a ninguna app instalada, servicio, driver, proceso, entrada de inicio ni acceso directo",
+      "broken-target": "Apunta a un programa que ya no existe",
+      "broken-entry": "Aparece en «Aplicaciones instaladas», pero su desinstalador y su carpeta ya no existen"
     },
     "status": {
       "uninstalled": "{{name}} se desinstaló.",
@@ -672,6 +687,24 @@
     "toast": {
       "done_one": "{{name}}: {{count}} rastro eliminado",
       "done_other": "{{name}}: {{count}} rastros eliminados"
+    },
+    "orphans": {
+      "cta": "Buscar rastros de apps desinstaladas",
+      "title": "Rastros de apps ya desinstaladas",
+      "scanning": "Buscando lo que dejaron las apps que ya no tienes…",
+      "scanningHint": "RePID cruza cada carpeta con tus apps instaladas, servicios, drivers, procesos, entradas de inicio y accesos directos. Puede tardar un minuto.",
+      "body_one": "Se encontró {{count}} rastro ({{size}}) de apps que ya no están instaladas.",
+      "body_other": "Se encontraron {{count}} rastros ({{size}}) de apps que ya no están instaladas.",
+      "how": "Solo se muestra lo que ninguna app, servicio o driver usa y que lleva más de 60 días sin cambios. Vienen marcados los accesos directos y entradas rotas y las carpetas sin programas que llevan meses sin usarse; revisa el resto (pueden ser partidas guardadas o herramientas portables). Todo va a la Papelera o se respalda.",
+      "none": "¡Todo limpio! No quedan rastros de apps desinstaladas.",
+      "selectAll": "Marcar todo",
+      "selectSafe": "Solo los seguros",
+      "selectNone": "Desmarcar todo",
+      "idle_one": "sin uso desde hace {{count}} día",
+      "idle_other": "sin uso desde hace {{count}} días",
+      "toast_one": "{{count}} rastro eliminado · {{size}} liberados",
+      "toast_other": "{{count}} rastros eliminados · {{size}} liberados",
+      "review": "contiene programas o partidas guardadas, revísalo"
     }
   }
 }

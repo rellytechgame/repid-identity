@@ -50,6 +50,47 @@ export async function sizeOf(p: string, limit = 150000): Promise<number> {
   return bytes
 }
 
+export interface FolderFacts {
+  bytes: number
+  /** Newest mtime of any entry (folders included), epoch ms; 0 when unreadable. */
+  newest: number
+  hasExecutables: boolean
+}
+
+const EXECUTABLE = /\.(exe|dll|sys|msi|com|scr|ocx|node|app|dylib|so)$/i
+
+/** One walk for size, last use and whether programs live inside. Links are not followed. */
+export async function inspectFolder(p: string, limit = 150000): Promise<FolderFacts> {
+  const facts: FolderFacts = { bytes: 0, newest: 0, hasExecutables: false }
+  let seen = 0
+  const walk = async (q: string): Promise<void> => {
+    if (seen++ > limit) return
+    let s
+    try {
+      s = await lstat(q)
+    } catch {
+      return
+    }
+    if (s.isSymbolicLink()) return
+    if (s.mtimeMs > facts.newest) facts.newest = s.mtimeMs
+    if (s.isFile()) {
+      facts.bytes += s.size
+      if (EXECUTABLE.test(q)) facts.hasExecutables = true
+      return
+    }
+    if (!s.isDirectory()) return
+    let names: string[] = []
+    try {
+      names = await readdir(q)
+    } catch {
+      return
+    }
+    for (const n of names) await walk(join(q, n))
+  }
+  await walk(p)
+  return facts
+}
+
 export async function isDirectory(p: string): Promise<boolean> {
   try {
     return (await stat(p)).isDirectory()

@@ -549,3 +549,4 @@ th.col-num { text-align: end; }
 .wizard-done__icon { width: 52px; height: 52px; flex: none; display: grid; place-items: center; border-radius: 50%; background: color-mix(in srgb, var(--success) 16%, transparent); color: var(--success); }
 .wizard-done p { margin-top: 4px; }
 @media (max-width: 760px) { .wizard-steps { font-size: 11px; } }
+.orphan-tools { display: flex; gap: 6px; flex-wrap: wrap; }
