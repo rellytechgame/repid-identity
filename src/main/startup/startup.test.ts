@@ -16,7 +16,7 @@ describe('windows startup', () => {
 
   it('derives readable Store app names', () => {
     expect(storeName('5319275A.WhatsAppDesktop_cv1g1gvanyjgm')).toBe('WhatsAppDesktop')
-    expect(storeName('Claude_pzs8sxrjxfjjc')).toBe('Claude')
+    expect(storeName('Spotify_zpdnekdrzrea0')).toBe('Spotify')
   })
 })
 
