@@ -3,6 +3,8 @@ import type {
   BoostApp,
   BoostProfileId,
   CleanOutcome,
+  InstalledApp,
+  Leftover,
   CleanResult,
   CleanerReport,
   CleanerTarget,
@@ -20,6 +22,7 @@ import { buildGroups, descendantsOf } from '@shared/engine/grouping'
 import { boostKey, isEcoEligible, isFocusEligible } from '@shared/engine/boost'
 import { riskOf } from '@shared/engine/protection'
 import { MACHINE_SOURCES, assessStartup, matchRunning, measureImpact, parseCommand } from '@shared/engine/startup'
+import { classifyApp } from '@shared/engine/uninstall'
 
 /**
  * Simulated machine for the web demo. Browsers cannot see OS processes, so a
@@ -180,6 +183,50 @@ const DEMO_STARTUP: DemoStartup[] = [
   { source: 'task', label: '\\Adobe Acrobat Update Task', command: `"${X86}Common Files\\Adobe\\ARM\\1.0\\AdobeARM.exe"`, declaredName: 'Adobe Acrobat Update Service', publisher: 'Adobe Inc.', enabled: true }
 ]
 
+interface DemoInstalled {
+  name: string
+  publisher: string
+  version: string
+  date: string
+  size: number
+  location: string
+  source?: InstalledApp['source']
+  /** Process name used to mark it as running. */
+  exe?: string
+  missing?: boolean
+  leftovers: Array<Omit<Leftover, 'id'>>
+}
+
+const LOCAL = `${APPDATA}Local\\`
+const ROAM = `${APPDATA}Roaming\\`
+const leftover = (kind: Leftover['kind'], location: string, sizeBytes: number, reason: Leftover['reason'], confidence: Leftover['confidence'] = 'high') => ({ kind, location, sizeBytes, reason, confidence })
+
+const DEMO_INSTALLED: DemoInstalled[] = [
+  { name: 'Discord', publisher: 'Discord Inc.', version: '1.0.9180', date: '2026-08-14', size: 412 * MB, location: `${LOCAL}Discord`, exe: 'discord.exe', leftovers: [
+    leftover('folder', `${LOCAL}Discord`, 96 * MB, 'install-dir'), leftover('folder', `${ROAM}discord`, 1.3 * GB, 'name-match'),
+    leftover('registry-value', 'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\Discord', 0, 'points-to-app'),
+    leftover('shortcut', `${ROAM}Microsoft\\Windows\\Start Menu\\Programs\\Discord Inc\\Discord.lnk`, 0, 'points-to-app') ] },
+  { name: 'Spotify', publisher: 'Spotify AB', version: '1.2.74', date: '2026-07-02', size: 388 * MB, location: `${ROAM}Spotify`, exe: 'spotify.exe', leftovers: [
+    leftover('folder', `${LOCAL}Spotify`, 2.4 * GB, 'name-match'), leftover('registry-key', 'HKCU\\Software\\Spotify', 0, 'name-match'),
+    leftover('shortcut', `C:\\Users\\demo\\Desktop\\Spotify.lnk`, 0, 'points-to-app') ] },
+  { name: 'QuickTools 4.2', publisher: 'QuickTools Ltd.', version: '4.2.0', date: '2025-11-30', size: 156 * MB, location: `${ROAM}QuickTools`, exe: 'quicktoolshelper.exe', leftovers: [
+    leftover('folder', `${ROAM}QuickTools`, 22 * MB, 'install-dir'), leftover('folder', `C:\\ProgramData\\QuickTools Ltd\\QuickTools`, 310 * MB, 'vendor-dir'),
+    leftover('registry-key', 'HKLM\\SOFTWARE\\WOW6432Node\\QuickTools Ltd\\QuickTools', 0, 'vendor-dir'), leftover('task', '\\QuickTools Updater', 0, 'points-to-app'),
+    leftover('folder', 'C:\\Users\\demo\\Documents\\QuickTools', 3 * MB, 'name-match', 'medium') ] },
+  { name: 'Docker Desktop', publisher: 'Docker Inc.', version: '4.49.0', date: '2026-09-21', size: 3.2 * GB, location: `${PF}Docker\\Docker`, exe: 'docker desktop.exe', leftovers: [
+    leftover('folder', `${ROAM}Docker Desktop`, 12 * MB, 'name-match'), leftover('folder', `${LOCAL}Docker`, 640 * MB, 'name-match'),
+    leftover('registry-key', 'HKCU\\Software\\Docker Inc.\\Docker Desktop', 0, 'vendor-dir') ] },
+  { name: 'Steam', publisher: 'Valve Corporation', version: '2.10.91.91', date: '2024-03-12', size: 1.1 * GB, location: 'C:\\Program Files (x86)\\Steam', exe: 'steam.exe', leftovers: [
+    leftover('registry-key', 'HKCU\\Software\\Valve\\Steam', 0, 'vendor-dir'), leftover('shortcut', `C:\\Users\\Public\\Desktop\\Steam.lnk`, 0, 'points-to-app') ] },
+  { name: 'Old Photo Editor 2019', publisher: 'PixelSoft', version: '9.1', date: '2021-02-08', size: 845 * MB, location: `${PF}PixelSoft\\Photo Editor 2019`, missing: true, leftovers: [
+    leftover('folder', `${PF}PixelSoft\\Photo Editor 2019`, 845 * MB, 'install-dir'),
+    leftover('registry-key', 'HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\PhotoEditor2019', 0, 'uninstall-entry') ] },
+  { name: 'WhatsApp', publisher: 'WhatsApp Inc.', version: '2.2640.100', date: '2026-10-02', size: 0, location: `${PF}WindowsApps\\5319275A.WhatsAppDesktop`, source: 'store', leftovers: [] },
+  { name: 'Realtek Audio Driver', publisher: 'Realtek Semiconductor Corp.', version: '6.0.9586', date: '2025-05-19', size: 290 * MB, location: `${PF}Realtek\\Audio`, leftovers: [] },
+  { name: 'Microsoft Visual C++ 2015-2022 Redistributable (x64)', publisher: 'Microsoft Corporation', version: '14.44.35211', date: '2026-04-09', size: 21 * MB, location: '', source: 'msi', leftovers: [] },
+  { name: 'Microsoft .NET Runtime - 8.0.11 (x64)', publisher: 'Microsoft Corporation', version: '8.0.11', date: '2026-01-15', size: 74 * MB, location: '', source: 'msi', leftovers: [] }
+]
+
 export function createDemoApi(): RepidApi {
   const seeded = seed()
   let procs = seeded.procs
@@ -194,6 +241,34 @@ export function createDemoApi(): RepidApi {
   let boostProfile: BoostProfileId | undefined
   let boostSince: number | undefined
   const groupsNow = (): AppGroup[] => buildGroups(procs, { ...ctx, totalMem: TOTAL_MEM, services })
+  const uninstalled = new Set<string>()
+  const leftoverSessions = new Map<string, Leftover[]>()
+  const demoApps = (): InstalledApp[] =>
+    DEMO_INSTALLED.filter((d) => !uninstalled.has(d.name)).map((d) => {
+      const { kind, risk } = classifyApp(d.name, d.publisher)
+      return {
+        id: `demo:${d.name}`,
+        name: d.name,
+        publisher: d.publisher,
+        version: d.version,
+        installDate: d.date,
+        sizeBytes: d.size || undefined,
+        installLocation: d.location || undefined,
+        source: d.source ?? 'win32',
+        scope: d.location.includes('\\Users\\') || d.source === 'store' ? 'user' : 'machine',
+        kind,
+        risk,
+        hasQuiet: d.source === 'msi',
+        uninstallerMissing: !!d.missing,
+        requiresAdmin: false,
+        runningPids: d.exe ? procs.filter((p) => p.name.toLowerCase() === d.exe).map((p) => p.pid) : []
+      }
+    })
+  const startLeftovers = (d: DemoInstalled): Leftover[] => {
+    const list = d.leftovers.map((l, i) => ({ ...l, id: `d${i}${Math.random().toString(36).slice(2, 8)}` }))
+    leftoverSessions.set(`demo:${d.name}`, list)
+    return list
+  }
 
   const startupEntries = (): StartupEntry[] => {
     const groups = groupsNow()
@@ -400,6 +475,40 @@ export function createDemoApi(): RepidApi {
       boostSince = undefined
       return boostStatus()
     },
+    async uninstallList() {
+      await new Promise((r) => setTimeout(r, 700))
+      return { apps: demoApps(), elevated: false, supported: true, scannedAt: Date.now() }
+    },
+    async uninstallRun(req) {
+      const app = demoApps().find((a) => a.id === req.id)
+      const d = DEMO_INSTALLED.find((x) => `demo:${x.name}` === req.id)
+      if (!app || !d) return { id: req.id, status: 'not-found', leftovers: [] }
+      if (app.risk === 'critical' || (app.risk === 'caution' && !req.allowCaution)) return { id: req.id, status: 'protected', leftovers: [] }
+      if (app.uninstallerMissing) return { id: req.id, status: 'uninstaller-failed', error: 'missing', leftovers: [] }
+      if (req.closeRunning) procs = procs.filter((p) => !app.runningPids.includes(p.pid))
+      await new Promise((r) => setTimeout(r, 2200))
+      uninstalled.add(d.name)
+      return { id: req.id, status: 'uninstalled', leftovers: startLeftovers(d) }
+    },
+    async uninstallForceScan(id) {
+      const d = DEMO_INSTALLED.find((x) => `demo:${x.name}` === id)
+      if (!d?.missing) return { id: String(id), status: 'protected', leftovers: [] }
+      await new Promise((r) => setTimeout(r, 1200))
+      uninstalled.add(d.name)
+      return { id, status: 'uninstalled', leftovers: startLeftovers(d) }
+    },
+    async uninstallClean(req) {
+      const session = leftoverSessions.get(req.appId) ?? []
+      await new Promise((r) => setTimeout(r, 900))
+      const picked = session.filter((l) => req.ids.includes(l.id))
+      leftoverSessions.set(req.appId, session.filter((l) => !req.ids.includes(l.id)))
+      return {
+        outcomes: req.ids.map((id) => ({ id, status: picked.some((l) => l.id === id) ? ('removed' as const) : ('failed' as const), error: picked.some((l) => l.id === id) ? undefined : 'unknown' })),
+        recycledBytes: picked.reduce((s, l) => s + l.sizeBytes, 0),
+        backupDir: picked.some((l) => l.kind.startsWith('registry') || l.kind === 'task') ? 'C:\\Users\\demo\\AppData\\Roaming\\RePID Identity\\uninstall-backups' : undefined
+      }
+    },
+    async uninstallOpenBackups() {},
     async openRepo(path = '') {
       const suffix: Record<string, string> = {
         stargazers: '/stargazers',

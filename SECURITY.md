@@ -40,6 +40,7 @@ We'll credit you in the release notes unless you prefer to stay anonymous.
 - Making the cleanup delete anything outside its target folders (path traversal, link/junction following, over-broad roots)
 - Making the startup manager change an entry RePID classifies as locked, or anything other than the entry's enable flag
 - Making performance mode change the priority of a protected process, or leave priorities changed after *Restore all* or quit
+- Making the uninstaller offer or delete a folder, key or task that belongs to another installed app or to the OS, or delete anything without a Recycle Bin move / registry backup
 
 ## Security design (summary)
 
@@ -49,5 +50,6 @@ We'll credit you in the release notes unless you prefer to stay anonymous.
 - Cleanup: the UI sends target ids only; paths come from fixed templates, deletion is confined to each target folder, links are never followed, drive/home/OS roots are refused; elevated shell lines on macOS/Linux are constants (plus validated integer pids for kills).
 - Startup: ids only; every change re-scans and re-classifies first, uses the OS's own reversible flag (`StartupApproved`, Store task `State`, `schtasks /DISABLE`, `launchctl disable`, XDG `Hidden=true`), never deletes the entry, and is verified by reading the state back. Registry/task names reach `reg.exe`/`schtasks.exe` as argument-array values; Store package ids and launchd labels are pattern-validated.
 - Performance mode: group ids only; eligibility is re-checked on every tick; only below-normal/above-normal priorities are used; original values are restored with a pid+name check against reuse. The EcoQoS helper is a constant P/Invoke shim compiled in memory (no DLL written to disk); it receives integer pids only.
+- Uninstaller: the UI sends an app id and session leftover ids only. Uninstall commands come from the app's own registration; MSI is rebuilt as `msiexec /x {ProductCode}`; Store package names and Flatpak ids are pattern-validated. Leftover paths are re-checked at deletion (depth ≥ 3, not a known root, not under Windows); files go to the Recycle Bin via `shell.trashItem`; registry keys are exported with `reg export` before `reg delete`.
 - Commands: `execFile` with argument arrays only; dynamic values reach PowerShell via environment variables; service names are taken from the engine's own lookup and validated against a strict pattern.
 - Supply chain: lockfile committed, `npm audit` and CodeQL in CI.

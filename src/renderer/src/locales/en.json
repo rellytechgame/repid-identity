@@ -9,6 +9,7 @@
     "processes": "Processes",
     "boost": "Performance",
     "startup": "Startup",
+    "uninstall": "Uninstall",
     "cleaner": "Cleanup",
     "settings": "Settings",
     "about": "About"
@@ -546,6 +547,131 @@
       "stopped": "All restored: apps are back to their original priority",
       "ecoOn": "{{name}} is in efficiency mode",
       "ecoOff": "{{name}} is back to normal priority"
+    }
+  },
+  "uninstall": {
+    "title": "Smart uninstaller",
+    "scanning": "Finding installed apps…",
+    "summary_one": "{{count}} app installed · {{size}} on disk",
+    "summary_other": "{{count}} apps installed · {{size}} on disk",
+    "rescan": "Scan again",
+    "safeNote": "The app's own uninstaller runs first; then RePID looks for what it left behind: folders, caches, registry keys, shortcuts and startup entries. Files go to the Recycle Bin and keys are backed up before deletion, so everything can be recovered.",
+    "unsupported": "The uninstaller is not available on this platform.",
+    "linuxNote": "On Linux RePID manages Flatpak apps. System packages (apt, dnf, pacman) are removed with your distribution's package manager.",
+    "notElevated": "Apps installed for all users need administrator rights to be uninstalled and cleaned up.",
+    "search": "Search by name or publisher…",
+    "sortLabel": "Sort",
+    "sort": {
+      "size": "Size",
+      "name": "Name",
+      "date": "Recent"
+    },
+    "empty": "No matching apps.",
+    "installedOn": "installed {{date}}",
+    "action": "Uninstall",
+    "running": "Open now",
+    "broken": "Broken uninstaller",
+    "medium": "name match, review it",
+    "kind": {
+      "app": "App",
+      "runtime": "Shared component",
+      "driver": "Driver / hardware",
+      "security": "Security",
+      "system": "System"
+    },
+    "kindHint": {
+      "app": "Review before continuing.",
+      "runtime": "Other apps may need this component; removing it can stop them from opening.",
+      "driver": "It's a driver or hardware utility: sound, display, printer or other devices may stop working.",
+      "security": "It's security software: your computer may be unprotected until you install another one.",
+      "system": "It's part of the operating system."
+    },
+    "lockedHint": {
+      "app": "Protected: RePID won't uninstall it.",
+      "runtime": "Shared component other apps rely on (such as .NET, Visual C++ or WebView2): RePID won't uninstall it.",
+      "driver": "Protected: RePID won't uninstall it.",
+      "security": "Protected: RePID won't uninstall it.",
+      "system": "Operating-system component: RePID won't uninstall it."
+    },
+    "source": {
+      "win32": "Classic",
+      "msi": "MSI",
+      "store": "Microsoft Store",
+      "mac-app": "App",
+      "flatpak": "Flatpak"
+    },
+    "groups": {
+      "files": "Folders and files",
+      "registry": "Registry",
+      "startup": "Shortcuts, startup and tasks"
+    },
+    "reason": {
+      "install-dir": "The app's install folder",
+      "name-match": "Folder or key with the app's exact name",
+      "vendor-dir": "Inside the publisher's folder, with the app's name",
+      "uninstall-entry": "The app's entry in “Installed apps”",
+      "points-to-app": "Opens a file of the app",
+      "bundle-id": "Carries the app's identifier"
+    },
+    "status": {
+      "uninstalled": "{{name}} was uninstalled.",
+      "still-installed": "{{name}} is still installed: the uninstaller seems to have been cancelled or didn't finish. RePID doesn't look for leftovers of an installed app so it won't break it.",
+      "uninstaller-failed": "{{name}}'s uninstaller ended with an error. Nothing else was touched.",
+      "not-found": "{{name}} no longer appears as installed.",
+      "protected": "{{name}} is protected and was not uninstalled.",
+      "needs-admin": "Uninstalling {{name}} requires administrator rights.",
+      "cancelled": "Uninstalling {{name}} was cancelled. Nothing was touched."
+    },
+    "wizard": {
+      "title": "Uninstall {{name}}",
+      "steps": {
+        "confirm": "Confirm",
+        "running": "Uninstall",
+        "leftovers": "Leftovers",
+        "done": "Done"
+      },
+      "body": {
+        "win32": "{{name}}'s official uninstaller will open. Complete its steps; when it finishes, RePID will look for what it left behind.",
+        "msi": "Windows Installer will uninstall {{name}}. When it finishes, RePID will look for what it left behind.",
+        "store": "{{name}} will be removed the same way Windows Settings does it. Then RePID checks for leftover data.",
+        "mac-app": "{{name}} will be moved to the Trash. Then RePID looks for its preferences, caches and data in your Library.",
+        "flatpak": "Flatpak will uninstall {{name}}. Then RePID looks for leftover data."
+      },
+      "point1": "Nothing is deleted without your review: you'll see every leftover before removing it.",
+      "point2": "Only leftovers that clearly belong to this app are ticked, never other apps' folders.",
+      "point3": "Files go to the Recycle Bin and registry keys are backed up: everything can be recovered.",
+      "closeRunning_one": "Close {{count}} open process of the app before uninstalling",
+      "closeRunning_other": "Close {{count}} open processes of the app before uninstalling",
+      "quiet": "Silent uninstall",
+      "quietHint": "No uninstaller windows or questions. Uses the vendor's default options.",
+      "ack": "I understand what will happen and want to continue.",
+      "missingTitle": "This app's uninstaller no longer exists",
+      "missingBody": "{{name}}'s registered uninstaller is no longer on disk, so it can't run. RePID can look for what's left of the app (including its entry in “Installed apps”) so you can remove it.",
+      "start": "Uninstall",
+      "forceAction": "Find leftovers",
+      "running": "Waiting for {{name}}'s uninstaller…",
+      "runningHint": "If an uninstaller window opened, complete its steps. RePID continues as soon as it finishes.",
+      "scanning": "Looking for leftovers…",
+      "noLeftovers": "All clean! {{name}} left nothing behind.",
+      "leftoversBody_one": "Found {{count}} leftover ({{size}}). Ticked items clearly belong to the app; review the rest before including it.",
+      "leftoversBody_other": "Found {{count}} leftovers ({{size}}). Ticked items clearly belong to the app; review the rest before including them.",
+      "recoverable": "Files and folders go to the Recycle Bin; registry keys and tasks are backed up before deletion.",
+      "selected": "{{count}} selected · {{size}}",
+      "keep": "Keep everything",
+      "removeLeftovers": "Remove selected",
+      "doneTitle_one": "{{count}} leftover removed",
+      "doneTitle_other": "{{count}} leftovers removed",
+      "doneBody": "{{size}} moved to the Recycle Bin.",
+      "doneAdmin_one": "{{count}} leftover needs administrator rights; restart RePID as administrator to remove it.",
+      "doneAdmin_other": "{{count}} leftovers need administrator rights; restart RePID as administrator to remove them.",
+      "doneFailed_one": "{{count}} leftover could not be removed (it may be in use).",
+      "doneFailed_other": "{{count}} leftovers could not be removed (they may be in use).",
+      "backupNote": "To recover a registry key, open the backups and double-click its .reg file.",
+      "openBackups": "Open backups"
+    },
+    "toast": {
+      "done_one": "{{name}}: {{count}} leftover removed",
+      "done_other": "{{name}}: {{count}} leftovers removed"
     }
   }
 }

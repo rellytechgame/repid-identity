@@ -73,6 +73,17 @@ Services are stopped instead of killed: `sc.exe stop`, `systemctl [--user] stop`
 
 `src/main/boost/` — `Booster` keeps targets by cluster key (`boostKey`) and a ledger of adjusted pids with their original priority. A 4 s tick adjusts new pids and forgets exited ones; `stop()` (also on `before-quit`) restores everything. `ecoqos.ts` runs one PowerShell worker per session that compiles a constant P/Invoke shim for `SetProcessInformation(ProcessPowerThrottling)` and receives pid batches over stdin. Planning (`shared/engine/boost.ts`: profiles, eligibility, suggestions) is pure and shared with the web demo.
 
+## Smart uninstaller
+
+`src/main/uninstall/` — `PlatformUninstaller { inventory, run, leftovers, removeNonFile }` per OS:
+
+- `windows.ts` — inventory from the three Uninstall registry views plus `Get-AppxPackage`; runs the registered uninstaller with its original command line (`windowsVerbatimArguments`), MSI through `msiexec /x`, Store through `Remove-AppxPackage`; waits for follow-up uninstaller processes; finds leftovers in folders, registry (`reg query`), startup entries (reusing the startup adapter) and shortcuts (resolved in one PowerShell call); removes keys/values after `reg export` and tasks after exporting their XML.
+- `darwin.ts` — `.app` bundles from `/Applications` and `~/Applications`, leftovers in `~/Library` by bundle id.
+- `linux.ts` — Flatpak apps and `~/.var/app/<id>`.
+- `index.ts` — `Uninstaller`: protection re-check, closing running instances through the engine, verification that the app is gone, per-app leftover sessions (ids only reach the renderer) and deletion (Recycle Bin via injected `shell.trashItem`).
+
+Pure matching rules live in `shared/engine/uninstall.ts` (`productKeys`, `vendorKeys`, `matchFolders`, `classifyApp`, `parseUninstallString`) and are unit-tested with cases taken from a real inventory.
+
 ## Privileges
 
 - Windows: `requestedExecutionLevel: requireAdministrator` in the packaged manifest. Denied terminations retry with `taskkill /F` (which enables SeDebugPrivilege).

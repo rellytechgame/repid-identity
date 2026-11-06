@@ -43,6 +43,7 @@ A free, open-source desktop app for **Windows, macOS and Linux** that explains �
 - [Safety model](#safety-model)
 - [Performance mode](#performance-mode)
 - [Startup manager](#startup-manager)
+- [Smart uninstaller](#smart-uninstaller)
 - [Deep cleanup](#deep-cleanup)
 - [Privacy](#privacy)
 - [Development](#development)
@@ -75,6 +76,7 @@ RePID (*Re*-identify the *PID*) closes that gap: it **identifies** every process
 | 🛡️ **Safety net** | Three-tier protection (Protected / Caution / Safe) enforced inside the engine, re-checked against fresh data right before every action. |
 | 🚀 **Performance mode** | One-click profiles (Gaming, Focus, Render/build, Custom) that make background apps **yield CPU** to what you're using: below-normal priority plus Windows 11 **EcoQoS** (Task Manager's green leaf), and optionally above-normal priority for one focus app. Nothing is closed; everything is restored on stop or when RePID exits. |
 | ⏻ **Startup manager** | Every program that opens at sign-in (Registry Run keys, Startup folders, Microsoft Store apps, logon scheduled tasks · LaunchAgents and login items · XDG autostart) with its real name, publisher and **live measured impact**. Disable reversibly with the OS's own mechanism, see what will happen first, and restore everything RePID changed in one click. |
+| 📦 **Smart uninstaller** | Runs each app's **own uninstaller**, then finds what it left behind — install folder, AppData/ProgramData folders, caches, registry keys, Run entries, scheduled tasks and shortcuts (macOS: `~/Library` by bundle id · Linux: Flatpak). Leftovers are matched by **exact name**, never other apps' folders; files go to the **Recycle Bin** and registry keys are **backed up** first. |
 | 🧹 **Deep cleanup** | Temp files, system temp, update cache, Recycle Bin/Trash, DNS cache, package-manager caches and the **cache, history and cookies of every browser** (Chrome, Edge, Firefox, Brave, Opera, Opera GX, Vivaldi, Chromium, Safari). Every item says *exactly what will happen* before you delete it; irreversible items need explicit confirmation. Passwords, bookmarks and documents are never touched. |
 | 🔑 **Full privileges** | Windows builds run as administrator (UAC prompt at launch) to end any process, stop services and clean system folders. macOS/Linux ask for your password only for the actions that need it (one prompt per action). Critical processes stay blocked regardless. |
 | 🌍 **Multilingual** | Spanish and English built in. Adding a language is adding **one JSON file** — the UI discovers it automatically. |
@@ -88,8 +90,10 @@ RePID (*Re*-identify the *PID*) closes that gap: it **identifies** every process
 | <img src="assets/screenshots/identify.png" alt="Process list with detail panel explaining a Python process" /> | <img src="assets/screenshots/smart.png" alt="Smart Free dialog with suggested apps" /> |
 | **Performance mode: background apps yield CPU** | **Startup programs with measured impact** |
 | <img src="assets/screenshots/boost.png" alt="Performance mode active with the Gaming profile: a priority app and background apps in efficiency mode" /> | <img src="assets/screenshots/startup.png" alt="Startup manager listing programs that open at sign-in with impact, suggestions and what happens if disabled" /> |
-| **Deep cleanup with clear consequences** | **Your language, your rules** |
-| <img src="assets/screenshots/cleanup.png" alt="Cleanup module listing temp files, recycle bin, DNS and per-browser cache, history and cookies with what happens if deleted" /> | <img src="assets/screenshots/settings.png" alt="Settings: language, theme, safety and protected processes" /> |
+| **Smart uninstaller: every leftover, reviewed** | **Deep cleanup with clear consequences** |
+| <img src="assets/screenshots/uninstall.png" alt="Uninstall wizard listing the leftovers an app left behind: folders, registry keys and a scheduled task, each with the reason it was matched" /> | <img src="assets/screenshots/cleanup.png" alt="Cleanup module listing temp files, recycle bin, DNS and per-browser cache, history and cookies with what happens if deleted" /> |
+| **Your language, your rules** | |
+| <img src="assets/screenshots/settings.png" alt="Settings: language, theme, safety and protected processes" /> | |
 
 ## Download & install
 
@@ -188,6 +192,23 @@ Performance mode never ends a process. It changes **scheduling priority only**, 
 - Impact is **measured now** from the entry's running processes (RAM/CPU), not guessed.
 - After every change RePID reads the state back and reports *not applied* if the OS or the app reverted it. Everything RePID disabled is listed in a journal with **Restore all**.
 
+## Smart uninstaller
+
+1. **Official uninstaller first.** RePID runs the command the app registered (or `msiexec /x {ProductCode}` for MSI, `Remove-AppxPackage` for Store apps, Trash for a macOS `.app`, `flatpak uninstall` on Linux) and waits for it — including uninstallers that relaunch themselves from `%TEMP%`. Open instances can be closed first.
+2. **Verified.** If the app is still installed afterwards (you cancelled in its window), RePID stops: it never hunts leftovers of an installed app.
+3. **Leftovers, by evidence:**
+
+| Where | Matched when | Removed with |
+|---|---|---|
+| Install folder | It is the folder the app declared (and no other app lives in it) | Recycle Bin |
+| `%APPDATA%`, `%LOCALAPPDATA%`, `LocalLow`, `ProgramData`, `Program Files`, Start Menu | Folder named **exactly** like the app, or `Vendor\App` | Recycle Bin |
+| `HKCU\Software`, `HKLM\SOFTWARE` (+ WOW6432Node) | Key named exactly like the app, or `Vendor\App` | `reg export` backup, then delete |
+| Run entries, logon tasks, shortcuts | They launch a file inside the app's folders | Backup (`.reg` / task XML) or Recycle Bin |
+| macOS `~/Library` | Entry carries the bundle id (`com.vendor.app…`) | Trash |
+| Linux | `~/.var/app/<id>` of the Flatpak | Trash |
+
+Safety rules learned from a dry run over 69 real installed apps: names shorter than 6 letters only match inside the vendor's folder (so `Unity` never claims `LocalLow\Unity`, shared by every Unity game); a version is only stripped from the **end** of a name (so *Visual Studio 2010 Tools for Office* never becomes *Visual Studio*); install folders shared with another app (Office suites, plugins) are not offered; names claimed by any other installed app are skipped; shared runtimes (.NET, Visual C++, WebView2), OS components and RePID itself are locked; drivers, security software and runtimes need explicit confirmation. Nothing is removed until you review the list.
+
 ## Deep cleanup
 
 | Item | Risk | What happens | Needs admin |
@@ -271,6 +292,7 @@ The website ([repid-identity.vercel.app](https://repid-identity.vercel.app)) is 
 
 - [x] Deep cleanup module (v1.1)
 - [x] Performance mode with Windows 11 EcoQoS and a reversible startup manager (v1.2)
+- [x] Smart uninstaller with leftover detection, Recycle Bin and registry backups (v1.3)
 - [ ] Code-signed installers for Windows and macOS (**funded by donations**)
 - [ ] Auto-update through GitHub Releases
 - [ ] Per-process disk and network I/O

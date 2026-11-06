@@ -53,6 +53,7 @@ RePID (*Re*-identificar el *PID*) resuelve eso: **identifica** cada proceso, lo 
 | 🛡️ **Red de seguridad** | Protección en tres niveles (Protegido / Precaución / Seguro) aplicada dentro del motor y verificada otra vez justo antes de cada acción. |
 | 🚀 **Modo rendimiento** | Perfiles de un clic (Juego, Concentración, Render/compilar, Personalizado) que hacen que las apps en segundo plano **cedan CPU** a lo que estás usando: prioridad inferior a la normal más **EcoQoS** de Windows 11 (la hoja verde del Administrador de tareas) y, opcionalmente, prioridad superior para una app. No se cierra nada; todo se restaura al detenerlo o al cerrar RePID. |
 | ⏻ **Programas de inicio** | Todo lo que se abre al iniciar sesión (claves Run del registro, carpetas Inicio, apps de Microsoft Store, tareas programadas · LaunchAgents e ítems de inicio · autostart XDG) con su nombre real, editor e **impacto medido en vivo**. Se deshabilita de forma reversible con el mecanismo del propio sistema, avisando antes qué pasará, y se restaura todo lo que cambió RePID con un clic. |
+| 📦 **Desinstalador inteligente** | Ejecuta el **desinstalador oficial** de cada app y luego encuentra lo que dejó: carpeta de instalación, carpetas en AppData/ProgramData, cachés, claves del registro, entradas de inicio, tareas programadas y accesos directos (macOS: `~/Library` por bundle id · Linux: Flatpak). Los rastros se identifican por **nombre exacto**, nunca carpetas de otras apps; los archivos van a la **Papelera** y las claves del registro se **respaldan** antes. |
 | 🧹 **Limpieza profunda** | Temporales, temporales del sistema, caché de actualizaciones, papelera, caché DNS, cachés de paquetes y la **caché, historial y cookies de todos los navegadores** (Chrome, Edge, Firefox, Brave, Opera, Opera GX, Vivaldi, Chromium, Safari). Cada elemento explica *exactamente qué pasará* antes de borrarlo; lo irreversible requiere confirmación explícita. Contraseñas, marcadores y documentos nunca se tocan. |
 | 🔑 **Privilegios completos** | En Windows se ejecuta como administrador (UAC al iniciar) para finalizar cualquier proceso, detener servicios y limpiar carpetas del sistema. En macOS/Linux pide tu contraseña solo para las acciones que lo necesitan. Los procesos críticos siguen bloqueados. |
 | 🌍 **Multiidioma** | Español e inglés incluidos. Agregar un idioma es añadir **un archivo JSON**. |
@@ -63,8 +64,10 @@ RePID (*Re*-identificar el *PID*) resuelve eso: **identifica** cada proceso, lo 
 | Entiende qué hace un proceso | Liberación inteligente |
 |---|---|
 | <img src="assets/screenshots/identify.png" alt="Lista de procesos con el panel de detalle de un proceso de Python" /> | <img src="assets/screenshots/smart.png" alt="Diálogo de Liberación inteligente" /> |
-| **Modo rendimiento** | **Programas de inicio** |
-| <img src="assets/screenshots/boost.png" alt="Modo rendimiento activo con el perfil Juego" /> | <img src="assets/screenshots/startup.png" alt="Programas de inicio con impacto medido y qué pasará al deshabilitarlos" /> |
+| **Desinstalador inteligente** | **Modo rendimiento** |
+| <img src="assets/screenshots/uninstall.png" alt="Asistente de desinstalación con los rastros encontrados" /> | <img src="assets/screenshots/boost.png" alt="Modo rendimiento activo con el perfil Juego" /> |
+| **Programas de inicio** | |
+| <img src="assets/screenshots/startup.png" alt="Programas de inicio con impacto medido y qué pasará al deshabilitarlos" /> | |
 
 ## Descarga e instalación
 
@@ -110,6 +113,14 @@ No finaliza ningún proceso: solo cambia la **prioridad**, y solo de apps clasif
 - **Sugeridos**: actualizadores, navegadores precargados, chat, multimedia y launchers de juegos.
 - El impacto se **mide en el momento** con lo que consume el programa abierto.
 - Tras cada cambio RePID vuelve a leer el estado y avisa si no se aplicó. Todo lo que deshabilitó queda en un historial con **Restaurar todo**.
+
+## Desinstalador inteligente
+
+1. **Primero el desinstalador oficial** de la app (o `msiexec /x` para MSI, `Remove-AppxPackage` para Microsoft Store, Papelera para una `.app` de macOS, `flatpak uninstall` en Linux). RePID espera a que termine, incluso si se relanza desde `%TEMP%`, y puede cerrar la app antes.
+2. **Verificado:** si la app sigue instalada (cancelaste en su ventana), RePID se detiene y no busca rastros de una app instalada.
+3. **Rastros con evidencia:** carpeta de instalación declarada; carpetas con el nombre **exacto** de la app (o `Fabricante\App`) en AppData, LocalLow, ProgramData, Program Files y el menú Inicio; claves `Software\App` o `Software\Fabricante\App`; entradas de inicio, tareas y accesos directos que abren archivos de la app.
+
+Reglas aprendidas en una simulación sobre 69 apps reales: los nombres de menos de 6 letras solo valen dentro de la carpeta del fabricante; la versión solo se quita del **final** del nombre; las carpetas compartidas con otra app no se ofrecen; los nombres de otras apps instaladas se excluyen; .NET, Visual C++, WebView2, componentes del sistema y RePID están bloqueados; drivers, seguridad y runtimes piden confirmación. Los archivos van a la Papelera y las claves se respaldan en `.reg` (doble clic para restaurar).
 
 ## Limpieza profunda
 

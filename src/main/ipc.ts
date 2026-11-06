@@ -6,6 +6,7 @@ import type { Cleaner } from './cleaner'
 import type { Engine } from './engine'
 import { relaunchElevated } from './engine/privileges'
 import type { StartupManager } from './startup'
+import type { Uninstaller } from './uninstall'
 
 const REPO_PATHS: Record<RepoPath, string> = {
   '': '',
@@ -52,9 +53,10 @@ export interface Modules {
   cleaner: Cleaner
   startup: StartupManager
   booster: Booster
+  uninstaller: Uninstaller
 }
 
-export function registerIpc({ engine, cleaner, startup, booster }: Modules, onTheme: (theme: 'dark' | 'light') => void): void {
+export function registerIpc({ engine, cleaner, startup, booster, uninstaller }: Modules, onTheme: (theme: 'dark' | 'light') => void): void {
   const handle = (channel: string, fn: (event: IpcMainInvokeEvent, arg: unknown) => unknown) =>
     ipcMain.handle(channel, (event, arg) => {
       assertTrustedSender(event)
@@ -88,6 +90,13 @@ export function registerIpc({ engine, cleaner, startup, booster }: Modules, onTh
   handle('repid:boost-status', () => booster.status())
   handle('repid:boost-apply', (_e, req) => booster.apply(req))
   handle('repid:boost-stop', () => booster.stop())
+  // Uninstall payloads are validated in the module (parseUninstallRequest / parseCleanRequest):
+  // app ids are re-resolved against a fresh inventory and leftovers are selected by session ids only.
+  handle('repid:uninstall-list', () => uninstaller.list())
+  handle('repid:uninstall-run', (_e, req) => uninstaller.run(req))
+  handle('repid:uninstall-force-scan', (_e, id) => uninstaller.forceScan(id))
+  handle('repid:uninstall-clean', (_e, req) => uninstaller.clean(req))
+  handle('repid:uninstall-open-backups', () => uninstaller.openBackups())
   handle('repid:open-donate', () => shell.openExternal(DONATE_URL))
   handle('repid:relaunch-elevated', async () => {
     const ok = await relaunchElevated(process.execPath, app.isPackaged ? [] : process.argv.slice(1))

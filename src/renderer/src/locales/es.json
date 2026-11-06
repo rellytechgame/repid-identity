@@ -9,6 +9,7 @@
     "processes": "Procesos",
     "boost": "Rendimiento",
     "startup": "Arranque",
+    "uninstall": "Desinstalar",
     "cleaner": "Limpieza",
     "settings": "Ajustes",
     "about": "Acerca de"
@@ -546,6 +547,131 @@
       "stopped": "Todo restaurado: las apps vuelven a su prioridad original",
       "ecoOn": "{{name}} en modo eficiencia",
       "ecoOff": "{{name}} vuelve a su prioridad normal"
+    }
+  },
+  "uninstall": {
+    "title": "Desinstalador inteligente",
+    "scanning": "Buscando las apps instaladas…",
+    "summary_one": "{{count}} app instalada · {{size}} en disco",
+    "summary_other": "{{count}} apps instaladas · {{size}} en disco",
+    "rescan": "Volver a analizar",
+    "safeNote": "Primero se ejecuta el desinstalador oficial de la app y después RePID busca lo que dejó: carpetas, caché, claves del registro, accesos directos y entradas de inicio. Los archivos van a la Papelera y las claves se respaldan antes de borrarse, así que todo se puede recuperar.",
+    "unsupported": "El desinstalador no está disponible en esta plataforma.",
+    "linuxNote": "En Linux RePID gestiona las apps Flatpak. Los paquetes del sistema (apt, dnf, pacman) se desinstalan con el gestor de paquetes de tu distribución.",
+    "notElevated": "Las apps instaladas para todos los usuarios necesitan permisos de administrador para desinstalarse y limpiar sus rastros.",
+    "search": "Buscar por nombre o editor…",
+    "sortLabel": "Ordenar",
+    "sort": {
+      "size": "Tamaño",
+      "name": "Nombre",
+      "date": "Recientes"
+    },
+    "empty": "No hay apps que coincidan.",
+    "installedOn": "instalada el {{date}}",
+    "action": "Desinstalar",
+    "running": "Abierta ahora",
+    "broken": "Desinstalador dañado",
+    "medium": "coincidencia por nombre, revísalo",
+    "kind": {
+      "app": "App",
+      "runtime": "Componente compartido",
+      "driver": "Driver / hardware",
+      "security": "Seguridad",
+      "system": "Sistema"
+    },
+    "kindHint": {
+      "app": "Revisa antes de continuar.",
+      "runtime": "Otras apps pueden necesitar este componente; si lo quitas podrían dejar de abrir.",
+      "driver": "Es un driver o utilidad de hardware: el sonido, la pantalla, la impresora u otros dispositivos podrían dejar de funcionar.",
+      "security": "Es software de seguridad: tu equipo podría quedar sin protección hasta que instales otro.",
+      "system": "Forma parte del sistema."
+    },
+    "lockedHint": {
+      "app": "Protegida: RePID no la desinstala.",
+      "runtime": "Componente compartido que usan otras apps (como .NET, Visual C++ o WebView2): RePID no lo desinstala.",
+      "driver": "Protegido: RePID no lo desinstala.",
+      "security": "Protegido: RePID no lo desinstala.",
+      "system": "Componente del sistema: RePID no lo desinstala."
+    },
+    "source": {
+      "win32": "Clásica",
+      "msi": "MSI",
+      "store": "Microsoft Store",
+      "mac-app": "App",
+      "flatpak": "Flatpak"
+    },
+    "groups": {
+      "files": "Carpetas y archivos",
+      "registry": "Registro",
+      "startup": "Accesos directos, inicio y tareas"
+    },
+    "reason": {
+      "install-dir": "Carpeta de instalación de la app",
+      "name-match": "Carpeta o clave con el nombre exacto de la app",
+      "vendor-dir": "Dentro de la carpeta del fabricante, con el nombre de la app",
+      "uninstall-entry": "Registro de la app en «Aplicaciones instaladas»",
+      "points-to-app": "Abre un archivo de la app",
+      "bundle-id": "Lleva el identificador de la app"
+    },
+    "status": {
+      "uninstalled": "{{name}} se desinstaló.",
+      "still-installed": "{{name}} sigue instalada: parece que el desinstalador se canceló o no terminó. RePID no busca rastros de una app instalada para no romperla.",
+      "uninstaller-failed": "El desinstalador de {{name}} terminó con un error. No se tocó nada más.",
+      "not-found": "{{name}} ya no aparece como instalada.",
+      "protected": "{{name}} está protegida y no se desinstaló.",
+      "needs-admin": "Desinstalar {{name}} requiere permisos de administrador.",
+      "cancelled": "Se canceló la desinstalación de {{name}}. No se tocó nada."
+    },
+    "wizard": {
+      "title": "Desinstalar {{name}}",
+      "steps": {
+        "confirm": "Confirmar",
+        "running": "Desinstalar",
+        "leftovers": "Rastros",
+        "done": "Listo"
+      },
+      "body": {
+        "win32": "Se abrirá el desinstalador oficial de {{name}}. Completa sus pasos; al terminar, RePID buscará lo que haya dejado.",
+        "msi": "Windows Installer desinstalará {{name}}. Al terminar, RePID buscará lo que haya dejado.",
+        "store": "{{name}} se quitará como lo hace Configuración de Windows. Después RePID revisará si quedaron datos.",
+        "mac-app": "{{name}} se moverá a la Papelera. Después RePID buscará sus preferencias, cachés y datos en tu Biblioteca.",
+        "flatpak": "Flatpak desinstalará {{name}}. Después RePID buscará los datos que hayan quedado."
+      },
+      "point1": "Nada se borra sin que lo revises: verás cada rastro antes de eliminarlo.",
+      "point2": "Solo se marcan los rastros que son claramente de esta app; nunca carpetas de otras apps.",
+      "point3": "Los archivos van a la Papelera y las claves del registro se respaldan: todo se puede recuperar.",
+      "closeRunning_one": "Cerrar {{count}} proceso abierto de la app antes de desinstalar",
+      "closeRunning_other": "Cerrar {{count}} procesos abiertos de la app antes de desinstalar",
+      "quiet": "Desinstalación silenciosa",
+      "quietHint": "Sin ventanas ni preguntas del desinstalador. Usa las opciones predeterminadas del fabricante.",
+      "ack": "Entiendo lo que pasará y quiero continuar.",
+      "missingTitle": "El desinstalador de esta app ya no existe",
+      "missingBody": "El desinstalador registrado de {{name}} ya no está en el disco, así que no se puede ejecutar. RePID puede buscar lo que quedó de la app (incluido su registro en «Aplicaciones instaladas») para que lo elimines.",
+      "start": "Desinstalar",
+      "forceAction": "Buscar rastros",
+      "running": "Esperando al desinstalador de {{name}}…",
+      "runningHint": "Si se abrió una ventana del desinstalador, completa sus pasos. RePID continuará en cuanto termine.",
+      "scanning": "Buscando rastros…",
+      "noLeftovers": "¡Limpio! {{name}} no dejó rastros.",
+      "leftoversBody_one": "Se encontró {{count}} rastro ({{size}}). Los marcados son claramente de la app; revisa el resto antes de incluirlo.",
+      "leftoversBody_other": "Se encontraron {{count}} rastros ({{size}}). Los marcados son claramente de la app; revisa el resto antes de incluirlo.",
+      "recoverable": "Los archivos y carpetas irán a la Papelera, y las claves del registro y tareas se respaldan antes de borrarse.",
+      "selected": "{{count}} seleccionados · {{size}}",
+      "keep": "Conservar todo",
+      "removeLeftovers": "Eliminar seleccionados",
+      "doneTitle_one": "{{count}} rastro eliminado",
+      "doneTitle_other": "{{count}} rastros eliminados",
+      "doneBody": "{{size}} movidos a la Papelera.",
+      "doneAdmin_one": "{{count}} rastro necesita permisos de administrador; reinicia RePID como administrador para eliminarlo.",
+      "doneAdmin_other": "{{count}} rastros necesitan permisos de administrador; reinicia RePID como administrador para eliminarlos.",
+      "doneFailed_one": "{{count}} rastro no se pudo eliminar (puede estar en uso).",
+      "doneFailed_other": "{{count}} rastros no se pudieron eliminar (pueden estar en uso).",
+      "backupNote": "Para recuperar una clave del registro, abre los respaldos y haz doble clic en el archivo .reg.",
+      "openBackups": "Abrir respaldos"
+    },
+    "toast": {
+      "done_one": "{{name}}: {{count}} rastro eliminado",
+      "done_other": "{{name}}: {{count}} rastros eliminados"
     }
   }
 }

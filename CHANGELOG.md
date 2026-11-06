@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [1.3.0] — 2026-11-06
+
+### Added
+- **Smart uninstaller**: lists classic (registry), MSI and Microsoft Store apps on Windows, `.app` bundles on macOS and Flatpak apps on Linux, with size, publisher, install date and whether the app is open. Runs the app's own uninstaller, waits for self-relaunching uninstallers, verifies the app is gone and then finds leftovers: install folder, AppData/LocalLow/ProgramData/Program Files/Start Menu folders, registry keys, Run entries, logon tasks and shortcuts (macOS `~/Library` by bundle id; Linux `~/.var/app`).
+- Guided four-step wizard; each leftover shows why it was matched. Files go to the Recycle Bin/Trash; registry keys and tasks are exported before deletion, with an *Open backups* button.
+- Forced cleanup for apps whose uninstaller no longer exists.
+
+### Security
+- Leftovers are matched by exact name, scoped to the vendor's folder for short or vendor-less names, and never include folders or names belonging to another installed app. Deletion requests carry session ids only; every path/key is re-validated at deletion time. Shared runtimes, OS components and RePID are locked.
+
 ## [1.2.0] — 2026-11-04
 
 ### Added

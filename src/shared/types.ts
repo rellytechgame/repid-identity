@@ -332,6 +332,94 @@ export interface BoostState {
   restorePending: boolean
 }
 
+// ───────────── Smart uninstaller ─────────────
+
+export type InstallSource = 'win32' | 'msi' | 'store' | 'mac-app' | 'flatpak'
+
+/** What kind of software it is: drives protection and the warning text. */
+export type AppKind = 'app' | 'runtime' | 'driver' | 'security' | 'system'
+
+export interface InstalledApp {
+  /** Opaque id; the main process re-resolves it against a fresh inventory. */
+  id: string
+  name: string
+  publisher?: string
+  version?: string
+  /** YYYY-MM-DD when the OS records it. */
+  installDate?: string
+  sizeBytes?: number
+  installLocation?: string
+  source: InstallSource
+  scope: 'user' | 'machine'
+  kind: AppKind
+  /** critical = locked (OS component, shared runtime, RePID) · caution = warn first · safe */
+  risk: Risk
+  /** The app ships a silent uninstall command (or is MSI). */
+  hasQuiet: boolean
+  /** The registered uninstaller no longer exists: only a forced cleanup is possible. */
+  uninstallerMissing: boolean
+  requiresAdmin: boolean
+  /** Running processes of this app (they are closed first when the user agrees). */
+  runningPids: number[]
+}
+
+export interface UninstallReport {
+  apps: InstalledApp[]
+  elevated: boolean
+  supported: boolean
+  scannedAt: number
+}
+
+export interface UninstallRequest {
+  id: string
+  /** standard = the app's own uninstaller window · quiet = silent command when available */
+  mode: 'standard' | 'quiet'
+  closeRunning: boolean
+  /** Required for apps classified as `caution`. */
+  allowCaution: boolean
+}
+
+export type LeftoverKind = 'folder' | 'file' | 'registry-key' | 'registry-value' | 'shortcut' | 'task'
+
+export interface Leftover {
+  /** Session-scoped id; deletion requests carry ids only, never paths. */
+  id: string
+  kind: LeftoverKind
+  /** File path, registry path (with `\\value` for values) or task path, for display. */
+  location: string
+  sizeBytes: number
+  /** high = provably the app's (its install folder, its keys); medium = matched by exact name. */
+  confidence: 'high' | 'medium'
+  reason: 'install-dir' | 'name-match' | 'vendor-dir' | 'uninstall-entry' | 'points-to-app' | 'bundle-id'
+}
+
+export interface UninstallResult {
+  id: string
+  status: 'uninstalled' | 'still-installed' | 'uninstaller-failed' | 'not-found' | 'protected' | 'needs-admin' | 'cancelled'
+  exitCode?: number
+  error?: string
+  leftovers: Leftover[]
+}
+
+export interface LeftoverCleanRequest {
+  appId: string
+  ids: string[]
+}
+
+export interface LeftoverOutcome {
+  id: string
+  status: 'removed' | 'gone' | 'needs-admin' | 'failed'
+  error?: string
+}
+
+export interface LeftoverCleanResult {
+  outcomes: LeftoverOutcome[]
+  /** Bytes moved to the Recycle Bin / Trash. */
+  recycledBytes: number
+  /** Registry keys and tasks were exported here before deletion (Windows). */
+  backupDir?: string
+}
+
 /** API exposed on `window.repid` by the preload script. */
 export interface RepidApi {
   platform: Platform
@@ -350,6 +438,14 @@ export interface RepidApi {
   boostStatus(): Promise<BoostState>
   boostApply(request: BoostRequest): Promise<BoostState>
   boostStop(): Promise<BoostState>
+  uninstallList(): Promise<UninstallReport>
+  /** Runs the app's own uninstaller, waits for it, then scans for leftovers. */
+  uninstallRun(request: UninstallRequest): Promise<UninstallResult>
+  /** Broken/missing uninstaller: skip it and list the app's leftovers (including its registration). */
+  uninstallForceScan(id: string): Promise<UninstallResult>
+  uninstallClean(request: LeftoverCleanRequest): Promise<LeftoverCleanResult>
+  /** Opens the folder with registry/task backups (fixed location owned by the main process). */
+  uninstallOpenBackups(): Promise<void>
   openRepo(path?: RepoPath): Promise<void>
   /** Opens the project's donation page (fixed URL owned by the main process). */
   openDonate(): Promise<void>

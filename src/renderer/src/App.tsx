@@ -18,14 +18,16 @@ import { CleanerView } from './views/CleanerView'
 import { Processes } from './views/Processes'
 import { SettingsView } from './views/SettingsView'
 import { StartupView } from './views/StartupView'
+import { UninstallView } from './views/UninstallView'
 
-type View = 'dashboard' | 'processes' | 'boost' | 'startup' | 'cleaner' | 'settings' | 'about'
+type View = 'dashboard' | 'processes' | 'boost' | 'startup' | 'uninstall' | 'cleaner' | 'settings' | 'about'
 
 const NAV: Array<{ id: View; icon: IconName }> = [
   { id: 'dashboard', icon: 'dashboard' },
   { id: 'processes', icon: 'list' },
   { id: 'boost', icon: 'rocket' },
   { id: 'startup', icon: 'power' },
+  { id: 'uninstall', icon: 'package' },
   { id: 'cleaner', icon: 'broom' },
   { id: 'settings', icon: 'settings' },
   { id: 'about', icon: 'info' }
@@ -275,6 +277,7 @@ export function App() {
               <BoostView snapshot={snapshot} boost={boost} busy={busy} onApply={(p, f, e) => void applyBoost(p, f, e)} onStop={() => void stopBoost()} />
             )}
             {view === 'startup' && <StartupView notify={pushToast} />}
+            {view === 'uninstall' && <UninstallView notify={pushToast} />}
             {view === 'cleaner' && <CleanerView onResult={(result) => reportClean(result)} />}
             {view === 'settings' && <SettingsView settings={settings} update={update} snapshot={snapshot} />}
             {view === 'about' && <About />}

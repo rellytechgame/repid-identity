@@ -5,6 +5,7 @@ import { Cleaner } from './cleaner'
 import { Engine } from './engine'
 import { registerIpc } from './ipc'
 import { StartupManager } from './startup'
+import { Uninstaller } from './uninstall'
 
 const isMac = process.platform === 'darwin'
 const TITLEBAR = {
@@ -98,7 +99,12 @@ if (!app.requestSingleInstanceLock()) {
     const engine = new Engine(selfPids)
     const booster = new Booster(engine)
     const startup = new StartupManager(engine, join(app.getPath('userData'), 'startup-journal.json'))
-    registerIpc({ engine, cleaner: new Cleaner(engine), startup, booster }, (theme) => {
+    const uninstaller = new Uninstaller(engine, {
+      trash: (p) => shell.trashItem(p),
+      openPath: (p) => shell.openPath(p),
+      backupRoot: join(app.getPath('userData'), 'uninstall-backups')
+    })
+    registerIpc({ engine, cleaner: new Cleaner(engine), startup, booster, uninstaller }, (theme) => {
       if (!isMac) win?.setTitleBarOverlay(TITLEBAR[theme])
       win?.setBackgroundColor(TITLEBAR[theme].color)
     })
