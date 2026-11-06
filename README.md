@@ -18,7 +18,7 @@ A free, open-source desktop app for **Windows, macOS and Linux** that explains �
 
 [**Download**](https://github.com/rellytechgame/repid-identity/releases/latest) ·
 [**Web demo**](https://repid-identity-demo.vercel.app) ·
-[**Website**](https://repid-identity.vercel.app) ·
+[**Website**](https://repid.voxel.lat) ·
 [**Report a bug**](https://github.com/rellytechgame/repid-identity/issues/new/choose) ·
 [**Español**](README.es.md)
 
@@ -34,25 +34,29 @@ A free, open-source desktop app for **Windows, macOS and Linux** that explains �
 
 ## Table of contents
 
-- [Why RePID Identity?](#why-repid-identity)
-- [Features](#features)
-- [Screenshots](#screenshots)
-- [Download & install](#download--install)
-- [Platform support](#platform-support)
-- [How it works](#how-it-works)
-- [Safety model](#safety-model)
-- [Performance mode](#performance-mode)
-- [Startup manager](#startup-manager)
-- [Smart uninstaller](#smart-uninstaller)
-- [Deep cleanup](#deep-cleanup)
-- [Privacy](#privacy)
-- [Development](#development)
-- [Project structure](#project-structure)
-- [Languages](#languages)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
-- [Support the project](#support-the-project)
-- [License & credits](#license--credits)
+- [RePID Identity](#repid-identity)
+  - [Table of contents](#table-of-contents)
+  - [Why RePID Identity?](#why-repid-identity)
+  - [Features](#features)
+  - [Screenshots](#screenshots)
+  - [Download \& install](#download--install)
+  - [Platform support](#platform-support)
+  - [How it works](#how-it-works)
+  - [Safety model](#safety-model)
+  - [Performance mode](#performance-mode)
+  - [Startup manager](#startup-manager)
+  - [Smart uninstaller](#smart-uninstaller)
+    - [Leftovers of apps you already uninstalled](#leftovers-of-apps-you-already-uninstalled)
+  - [Deep cleanup](#deep-cleanup)
+  - [Privacy](#privacy)
+  - [Development](#development)
+  - [Project structure](#project-structure)
+  - [Languages](#languages)
+  - [Roadmap](#roadmap)
+  - [Contributing](#contributing)
+  - [Support the project](#support-the-project)
+  - [Star history](#star-history)
+  - [License \& credits](#license--credits)
 
 ## Why RePID Identity?
 
