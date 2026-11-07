@@ -184,6 +184,16 @@ Nunca se ofrece borrar (en el mapa aparecen rayados): Windows y `Program Files` 
 - **Avisos de versión nueva:** al abrir RePID y cada 6 horas consulta la [página de descargas](https://github.com/rellytechgame/repid-identity/releases/tag/win-release); si hay una versión más nueva aparece un aviso con el botón **Actualizar**, que abre esa página. Se desactiva en Ajustes.
 - **Privacidad:** RePID no hace peticiones de red propias salvo el contador de estrellas y el aviso de versión nueva (ambos a la API pública de GitHub, sin enviar datos tuyos). La sección *Actualizaciones* ejecuta el gestor de paquetes del sistema, que consulta sus repositorios, solo cuando abres esa sección.
 
+## Ediciones: gratuita y Enterprise
+
+RePID es **gratis para personas**. Las empresas usan **RePID Enterprise** — **$20 USD al año por equipo** ([suscríbete con PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=YGXL925PT8524)) —, que incluye soporte directo de Voxel Enterprise (`soporte@voxel.lat`, con un código de soporte verificable) y acceso anticipado a las versiones Beta.
+
+- **Edición gratuita:** todo funciona. En un equipo de empresa (dominio, Azure AD, Windows Server o MDM) aparece un aviso sobre Enterprise. Si en la misma red local hay **más de 5 copias gratuitas**, Automático, Servicios, Actualizaciones, Disco y Red se bloquean con un aviso para instalar Enterprise; monitoreo, finalizar procesos, rendimiento, arranque, limpieza y desinstalador siguen funcionando.
+- **Edición Enterprise** (instaladores `RePID-Identity-Enterprise-x.y.z`): activa en *Acerca de* la clave que recibes por correo. La clave va firmada (no se puede falsificar ni editar) y se comprueba sin conexión; usarla en más equipos de los que cubre en una misma red se detecta.
+- **Privacidad:** para contar copias, RePID envía cada dos minutos un pequeño mensaje **solo a tu red local** (UDP 47913: un id aleatorio de instalación, la edición y, en Enterprise, el id de licencia). Nunca sale a internet.
+
+Sin servidor ni base de datos: ver [docs/ENTERPRISE.md](docs/ENTERPRISE.md).
+
 ## Compatibilidad
 
 | Plataforma | Estado | Motivo |

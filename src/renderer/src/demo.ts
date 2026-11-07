@@ -17,7 +17,7 @@ import type {
   StartupSource,
   SystemSnapshot
 } from '@shared/types'
-import { DONATE_URL, REPO_URL } from '@shared/constants'
+import { DONATE_URL, ENTERPRISE_BUY_URL, REPO_URL } from '@shared/constants'
 import { buildGroups, descendantsOf } from '@shared/engine/grouping'
 import { boostKey, isEcoEligible, isFocusEligible } from '@shared/engine/boost'
 import { riskOf } from '@shared/engine/protection'
@@ -555,6 +555,21 @@ export function createDemoApi(): RepidApi {
         translate: '/blob/main/docs/ADDING_A_LANGUAGE.md'
       }
       window.open(REPO_URL + (suffix[path] ?? ''), '_blank', 'noopener,noreferrer')
+    },
+    async edition() {
+      return { edition: 'free' as const, limited: false, corporate: false, corporateSignals: [], lanInstalls: 1, lanLimit: 5 }
+    },
+    async activateLicense() {
+      return { ok: false, error: 'free-edition' as const, state: await this.edition() }
+    },
+    async removeLicense() {
+      return this.edition()
+    },
+    async contactEnterprise() {
+      return false
+    },
+    async openEnterpriseBuy() {
+      window.open(ENTERPRISE_BUY_URL, '_blank', 'noopener,noreferrer')
     },
     async checkAppUpdate() {
       return { current: '1.5.0', latest: '1.5.0', available: false, checkedAt: Date.now() }

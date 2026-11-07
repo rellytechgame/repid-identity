@@ -730,6 +730,32 @@ export interface ServiceChangeOutcome {
   error?: string
 }
 
+export type Edition = 'free' | 'enterprise'
+
+export interface LicenseInfo {
+  id: string
+  company: string
+  email?: string
+  /** Computers covered. */
+  seats: number
+  issuedAt: number
+  expiresAt: number
+}
+
+export interface EditionState {
+  edition: Edition
+  /** Locked sections (automation, services, updates, disk, network) until the reason is solved. */
+  limited: boolean
+  reason?: 'lan-limit' | 'no-license' | 'expired' | 'seats-exceeded'
+  /** Signs of a company computer (domain, Azure AD, server OS, MDM): notice only. */
+  corporate: boolean
+  corporateSignals: string[]
+  /** Free copies of RePID seen on this local network in the last 14 days, this one included. */
+  lanInstalls: number
+  lanLimit: number
+  license?: LicenseInfo & { seatsInUse: number; graceUntil?: number; supportCode: string }
+}
+
 export interface AppUpdateInfo {
   current: string
   /** Version of the installer on the download page, when it could be read. */
@@ -793,6 +819,14 @@ export interface RepidApi {
   checkAppUpdate(force?: boolean): Promise<AppUpdateInfo>
   /** Opens the fixed download page in the browser. */
   openRelease(): Promise<void>
+  edition(): Promise<EditionState>
+  /** Enterprise: verifies and stores a signed license key. */
+  activateLicense(key: string): Promise<{ ok: boolean; error?: 'invalid' | 'expired' | 'free-edition'; state: EditionState }>
+  removeLicense(): Promise<EditionState>
+  /** Enterprise with a valid license: opens a pre-filled email to Voxel Enterprise (support or beta access). */
+  contactEnterprise(kind: 'support' | 'beta'): Promise<boolean>
+  /** Opens the PayPal subscription page (fixed URL). */
+  openEnterpriseBuy(): Promise<void>
   openRepo(path?: RepoPath): Promise<void>
   /** Opens the project's donation page (fixed URL owned by the main process). */
   openDonate(): Promise<void>

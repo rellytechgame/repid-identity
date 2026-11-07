@@ -52,6 +52,7 @@ A free, open-source desktop app for **Windows, macOS and Linux** that explains �
   - [Automatic mode](#automatic-mode)
   - [App updates](#app-updates)
   - [Health, network and services](#health-network-and-services)
+  - [Editions: free and Enterprise](#editions-free-and-enterprise)
   - [Privacy](#privacy)
   - [Development](#development)
   - [Project structure](#project-structure)
@@ -280,9 +281,18 @@ RePID runs the platform's package manager — `winget upgrade` on Windows, `brew
 - **Network:** open connections per app (loopback ignored), the servers it talks to and the ports it listens on, refreshed every 4 seconds. On Windows, *Block internet* adds an outbound Windows Firewall rule (group "RePID Identity") for that program; rules are listed even when the program is closed and removed with one click. System components cannot be blocked.
 - **Services (Windows):** only services that start automatically and match a curated list: Microsoft telemetry, Maps, link tracking, fax and demo mode (suggested); Search, SysMain and Print Spooler (caution); third-party updaters and analytics (suggested); remote access, databases and license managers (caution, never pre-selected). Drivers, audio, touchpad, GPU, network, security and any other Windows internal are never shown. RePID only switches *Automatic → Manual* (Windows still starts the service on demand), records the original mode (including *delayed*), verifies the change and restores it exactly.
 
+## Editions: free and Enterprise
+
+RePID is **free for individuals**. Companies use **RePID Enterprise** — **$20 USD per computer per year** ([subscribe with PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=YGXL925PT8524)) — which adds direct support from Voxel Enterprise (`support@voxel.lat` / `soporte@voxel.lat`, with a verifiable support code) and early access to Beta versions.
+
+- **Free edition:** everything works. On a company computer (domain, Azure AD, Windows Server or MDM) a notice suggests Enterprise. If **more than 5 free copies** run on the same local network, Automatic, Services, Updates, Disk and Network are locked with a banner pointing to Enterprise; monitoring, ending processes, performance mode, startup, cleanup and the uninstaller keep working.
+- **Enterprise edition** (`RePID-Identity-Enterprise-x.y.z` installers): activate the license key you receive by email in *About*. The key is signed (it cannot be forged or edited) and checked offline; using it on more computers than it covers on one network is detected.
+
+No server or database is involved — see [docs/ENTERPRISE.md](docs/ENTERPRISE.md).
+
 ## Privacy
 
-RePID makes **no network requests of its own** except anonymous calls to the public GitHub API: the star count on the *About* screen and, at start-up and every 6 hours, a look at the [download page](https://github.com/rellytechgame/repid-identity/releases/tag/win-release) to tell you when a newer version exists (turn it off in Settings). Nothing about you or your computer is sent. The *Updates* section runs your system's package manager (winget, Homebrew or Flatpak), which contacts its own repositories — only when you open that section. It has no analytics, no crash reporting service and no accounts. Settings live in the app's local storage.
+RePID makes **no network requests of its own** except anonymous calls to the public GitHub API: the star count on the *About* screen and, at start-up and every 6 hours, a look at the [download page](https://github.com/rellytechgame/repid-identity/releases/tag/win-release) to tell you when a newer version exists (turn it off in Settings). Nothing about you or your computer is sent. To count copies per network, RePID broadcasts a small message on your **local network only** every two minutes (UDP port 47913: a random install id, the edition and, for Enterprise, the license id) — it never reaches the internet. The *Updates* section runs your system's package manager (winget, Homebrew or Flatpak), which contacts its own repositories — only when you open that section. It has no analytics, no crash reporting service and no accounts. Settings live in the app's local storage.
 
 ## Development
 

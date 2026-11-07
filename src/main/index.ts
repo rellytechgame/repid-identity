@@ -6,6 +6,7 @@ import { Automation } from './automation'
 import { Booster } from './boost'
 import { Cleaner } from './cleaner'
 import { DiskAnalyzer } from './disk'
+import { EditionManager, editionStorePath } from './edition'
 import { Engine } from './engine'
 import { Health } from './health'
 import { registerIpc } from './ipc'
@@ -166,6 +167,13 @@ if (!app.requestSingleInstanceLock()) {
       openPath: (p) => shell.openPath(p),
       backupRoot: join(app.getPath('userData'), 'uninstall-backups')
     })
+    const edition = new EditionManager(__REPID_EDITION__, editionStorePath(app.getPath('userData')), process.execPath)
+    const appUpdate = new AppUpdateChecker(app.getVersion(), __REPID_EDITION__, (ms) => edition.observeTime(ms))
+    // Enterprise always learns GitHub's time (even with update notices off), so a clock set back cannot extend a license.
+    if (__REPID_EDITION__ === 'enterprise') {
+      void appUpdate.check(true)
+      setInterval(() => void appUpdate.check(true), 6 * 3600_000).unref()
+    }
     const cleaner = new Cleaner(engine)
     const disk = new DiskAnalyzer({ trash: (p) => shell.trashItem(p), reveal: (p) => shell.showItemInFolder(p), emit: emitProgress })
     automation = new Automation({
@@ -174,6 +182,7 @@ if (!app.requestSingleInstanceLock()) {
       cleaner,
       configPath: join(app.getPath('userData'), 'automation.json'),
       language: () => engine.language,
+      isLimited: () => edition.limited,
       applyBackground,
       notify: (title, body, view) => {
         if (!Notification.isSupported()) return
@@ -195,20 +204,22 @@ if (!app.requestSingleInstanceLock()) {
         health: new Health(),
         network: new Network(engine),
         services: new Services(join(app.getPath('userData'), 'services-journal.json')),
-        appUpdate: new AppUpdateChecker(app.getVersion())
+        appUpdate,
+        edition
       },
       (theme) => {
       if (!isMac) win?.setTitleBarOverlay(TITLEBAR[theme])
       win?.setBackgroundColor(TITLEBAR[theme].color)
       }
     )
-    void automation.start().finally(() => createWindow())
+    void Promise.all([automation.start(), edition.start()]).finally(() => createWindow())
 
     // Performance mode changes live processes: put every priority back before exiting.
     let restored = false
     app.on('before-quit', (event) => {
       quitting = true
       automation?.stop()
+      edition.stop()
       if (restored || !booster.active) return
       event.preventDefault()
       restored = true

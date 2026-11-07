@@ -11,3 +11,5 @@ Thumbs.db
 !.env.example
 .vercel
 coverage/
+*.pem
+.repid-license/

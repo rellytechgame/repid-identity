@@ -25,6 +25,8 @@ export interface AutomationDeps {
   configPath: string
   notify: (title: string, body: string, view: string) => void
   language: () => string
+  /** Limited mode (see EditionManager): automation pauses entirely. */
+  isLimited?: () => boolean
   /** Applies tray / login-item settings (owned by the main window code). */
   applyBackground: (cfg: AutomationConfig['background']) => void
 }
@@ -113,6 +115,10 @@ export class Automation {
 
   private async tick(): Promise<void> {
     if (this.ticking) return
+    if (this.deps.isLimited?.()) {
+      if (this.auto) await this.endAutoBoost(false)
+      return
+    }
     this.ticking = true
     try {
       const needGroups = this.config.autoBoost.enabled || this.auto || this.config.alerts.memoryGrowth

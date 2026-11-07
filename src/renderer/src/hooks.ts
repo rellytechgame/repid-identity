@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { AppUpdateInfo, BoostState, SystemSnapshot, TaskProgress } from '@shared/types'
+import type { AppUpdateInfo, BoostState, EditionState, SystemSnapshot, TaskProgress } from '@shared/types'
 import { api } from './api'
 
 export type Theme = 'system' | 'dark' | 'light'
@@ -18,6 +18,8 @@ export interface Settings {
   checkUpdates: boolean
   /** Version whose banner the user closed: hidden until an even newer one appears. */
   dismissedUpdate?: string
+  /** Company-computer notice (free edition) hidden until this time. */
+  corporateNoticeUntil?: number
 }
 
 const STORAGE_KEY = 'repid.settings.v1'
@@ -169,4 +171,22 @@ export function useAppUpdate(enabled: boolean) {
     return () => window.clearInterval(id)
   }, [enabled, check])
   return { info, check }
+}
+
+/** Edition and license state; refreshed every minute (new copies on the network can appear at any time). */
+export function useEdition() {
+  const [state, setState] = useState<EditionState | null>(null)
+  const refresh = useCallback(async () => {
+    try {
+      setState(await api.edition())
+    } catch {
+      // keep the last known state
+    }
+  }, [])
+  useEffect(() => {
+    void refresh()
+    const id = window.setInterval(() => void refresh(), 60_000)
+    return () => window.clearInterval(id)
+  }, [refresh])
+  return { edition: state, setEdition: setState, refreshEdition: refresh }
 }

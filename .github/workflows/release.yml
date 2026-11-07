@@ -30,5 +30,10 @@ jobs:
         run: npx electron-vite build && npx electron-builder --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Build and publish RePID Enterprise
+        run: node scripts/dist-enterprise.mjs --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Signing is skipped until certificates are configured as repository secrets (CSC_LINK / CSC_KEY_PASSWORD, APPLE_ID…).
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'

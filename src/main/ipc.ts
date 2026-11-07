@@ -1,6 +1,7 @@
 import { app, ipcMain, shell, type IpcMainInvokeEvent } from 'electron'
 import type { EngineSettings, KillRequest, RepoPath } from '../shared/types'
-import { DONATE_URL, RELEASE_URL, REPO_URL } from '../shared/constants'
+import { DONATE_URL, ENTERPRISE_BUY_URL, RELEASE_URL, REPO_URL } from '../shared/constants'
+import type { EditionManager } from './edition'
 import type { AppUpdateChecker } from './app-update'
 import type { Automation } from './automation'
 import type { Booster } from './boost'
@@ -70,9 +71,10 @@ export interface Modules {
   network: Network
   services: Services
   appUpdate: AppUpdateChecker
+  edition: EditionManager
 }
 
-export function registerIpc({ engine, cleaner, startup, booster, uninstaller, disk, automation, updater, health, network, services, appUpdate }: Modules, onTheme: (theme: 'dark' | 'light') => void): void {
+export function registerIpc({ engine, cleaner, startup, booster, uninstaller, disk, automation, updater, health, network, services, appUpdate, edition }: Modules, onTheme: (theme: 'dark' | 'light') => void): void {
   const handle = (channel: string, fn: (event: IpcMainInvokeEvent, arg: unknown) => unknown) =>
     ipcMain.handle(channel, (event, arg) => {
       assertTrustedSender(event)
@@ -115,22 +117,38 @@ export function registerIpc({ engine, cleaner, startup, booster, uninstaller, di
   handle('repid:uninstall-clean', (_e, req) => uninstaller.clean(req))
   handle('repid:uninstall-open-backups', () => uninstaller.openBackups())
   // The modules below validate their own payloads: ids from their last scan only, never paths or commands.
+  // Sections locked in limited mode (free edition over the network limit, Enterprise without a valid license).
+  const gated = (channel: string, fn: (event: IpcMainInvokeEvent, arg: unknown) => unknown) =>
+    handle(channel, (event, arg) => {
+      edition.assertAllowed()
+      return fn(event, arg)
+    })
   handle('repid:disk-roots', () => disk.roots())
-  handle('repid:disk-scan', (_e, rootId) => disk.scan(rootId))
-  handle('repid:disk-duplicates', () => disk.duplicates())
+  gated('repid:disk-scan', (_e, rootId) => disk.scan(rootId))
+  gated('repid:disk-duplicates', () => disk.duplicates())
   handle('repid:disk-cancel', () => disk.cancel())
-  handle('repid:disk-delete', (_e, req) => disk.delete(req))
+  gated('repid:disk-delete', (_e, req) => disk.delete(req))
   handle('repid:disk-reveal', (_e, id) => disk.reveal(id))
   handle('repid:automation-get', () => automation.state())
-  handle('repid:automation-set', (_e, cfg) => automation.set(cfg))
-  handle('repid:updates-scan', () => updater.scan())
-  handle('repid:updates-apply', (_e, ids) => updater.apply(ids))
+  gated('repid:automation-set', (_e, cfg) => automation.set(cfg))
+  gated('repid:updates-scan', () => updater.scan())
+  gated('repid:updates-apply', (_e, ids) => updater.apply(ids))
   handle('repid:health-scan', () => health.scan())
   handle('repid:restore-point', (_e, reason) => health.restorePoint(reason))
-  handle('repid:network-scan', () => network.scan())
-  handle('repid:network-block', (_e, req) => network.block(req))
-  handle('repid:services-scan', () => services.scan())
-  handle('repid:services-set', (_e, req) => services.set(req))
+  gated('repid:network-scan', () => network.scan())
+  gated('repid:network-block', (_e, req) => network.block(req))
+  gated('repid:services-scan', () => services.scan())
+  gated('repid:services-set', (_e, req) => services.set(req))
+  handle('repid:edition', () => edition.state())
+  handle('repid:license-activate', (_e, key) => edition.activate(key))
+  handle('repid:license-remove', () => edition.removeLicense())
+  handle('repid:enterprise-contact', async (_e, kind) => {
+    const url = edition.contactUrl(kind, engine.language, app.getVersion())
+    if (!url) return false
+    await shell.openExternal(url)
+    return true
+  })
+  handle('repid:open-enterprise-buy', () => shell.openExternal(ENTERPRISE_BUY_URL))
   handle('repid:app-update-check', (_e, force) => appUpdate.check(force))
   handle('repid:open-release', () => shell.openExternal(RELEASE_URL))
   handle('repid:open-donate', () => shell.openExternal(DONATE_URL))

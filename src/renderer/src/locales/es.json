@@ -1017,5 +1017,68 @@
     "upToDate": "Tienes la última versión (comprobado a las {{time}})",
     "notChecked": "Aún no se ha comprobado si hay una versión nueva",
     "error": "No se pudo comprobar ahora (¿sin conexión?)"
+  },
+  "edition": {
+    "name": {
+      "free": "Edición gratuita",
+      "enterprise": "RePID Enterprise"
+    },
+    "price": "$20 USD al año por equipo · pago seguro con PayPal",
+    "buy": "Comprar licencia Enterprise",
+    "getEnterprise": "Descargar RePID Enterprise",
+    "activate": "Activar licencia",
+    "remove": "Quitar licencia",
+    "freeInfo": "Gratis para uso personal. Copias gratuitas detectadas en esta red: {{count}} (límite {{limit}}).",
+    "licensedTo": "Licenciada a {{company}}",
+    "unlicensed": "Sin licencia activa: pega aquí la clave que recibiste por correo.",
+    "seats": "Equipos",
+    "seatsValue": "{{used}} de {{seats}} en esta red",
+    "expires": "Vence",
+    "issued": "Emitida",
+    "licenseId": "ID de licencia",
+    "pasteKey": "Clave de licencia",
+    "replaceKey": "Reemplazar por otra clave",
+    "errors": {
+      "invalid": "La clave no es válida. Cópiala completa, tal como llegó en el correo.",
+      "expired": "Esa licencia ya venció. Renueva la suscripción para recibir una clave nueva.",
+      "free-edition": "Las licencias se activan en RePID Enterprise. Descárgala e instálala encima de esta versión."
+    },
+    "lanLimit": {
+      "title": "Hay {{count}} copias gratuitas de RePID en esta red.",
+      "body": "La edición gratuita es para uso personal (hasta {{limit}} equipos por red). Para empresas, instala RePID Enterprise: Automático, Servicios, Actualizaciones, Disco y Red quedan bloqueados hasta entonces."
+    },
+    "corporate": {
+      "title": "Este parece un equipo de empresa.",
+      "body": "RePID es gratis para personas; el uso en empresas requiere RePID Enterprise ($20 al año por equipo).",
+      "hide": "Ocultar durante 30 días"
+    },
+    "enterprise": {
+      "no-license": {
+        "title": "Activa tu licencia de RePID Enterprise.",
+        "body": "Hasta activarla, Automático, Servicios, Actualizaciones, Disco y Red están bloqueados."
+      },
+      "expired": {
+        "title": "Tu licencia de RePID Enterprise venció.",
+        "body": "Renueva la suscripción. Seguirá funcionando hasta el {{date}}."
+      },
+      "seats-exceeded": {
+        "title": "Esta licencia se está usando en {{used}} equipos de esta red y cubre {{seats}}.",
+        "body": "Amplía la licencia o desinstala RePID de los equipos que sobran."
+      }
+    },
+    "locked": {
+      "title": "Función de RePID Enterprise",
+      "free": "En esta red hay {{count}} copias gratuitas de RePID (el límite es {{limit}}), así que parece un uso de empresa. Instala RePID Enterprise para usar esta sección. El resto de RePID sigue funcionando.",
+      "enterprise": "Activa tu licencia para usar esta sección. El resto de RePID sigue funcionando."
+    },
+    "supportCode": "Código de soporte",
+    "support": "Soporte Voxel Enterprise",
+    "beta": "Solicitar acceso Beta",
+    "benefits": [
+      "Todas las funciones, sin límite de equipos por red",
+      "Soporte directo con Voxel Enterprise (soporte@voxel.lat)",
+      "Acceso anticipado a las versiones Beta",
+      "Licencia firmada a nombre de tu empresa, verificable sin conexión"
+    ]
   }
 }

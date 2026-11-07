@@ -4,7 +4,9 @@ import type { AppGroup, BoostProfileId, CleanResult, KillResult } from '@shared/
 import { suggestTargets } from '@shared/engine/smart'
 import { api, isDemo } from './api'
 import { formatBytes, formatPercent } from './format'
-import { useAppUpdate, useBoost, usePrefersDark, useSettings, useSnapshot } from './hooks'
+import { useAppUpdate, useBoost, useEdition, usePrefersDark, useSettings, useSnapshot } from './hooks'
+import { EditionBanner, LockedView } from './components/Edition'
+import { GATED_VIEWS } from '@shared/engine/edition'
 import { applyDocumentLanguage, resolveLanguage } from './i18n'
 import { Icon, type IconName } from './components/Icon'
 import { LogoMark, Wordmark } from './components/Logo'
@@ -88,6 +90,12 @@ export function App() {
   const { boost, setBoost } = useBoost(snapshot?.timestamp)
   const prefersDark = usePrefersDark()
   const { info: appUpdate, check: checkUpdate } = useAppUpdate(settings.checkUpdates && !isDemo)
+  const { edition, setEdition } = useEdition()
+  const locked = (v: View) => !!edition?.limited && (GATED_VIEWS as readonly string[]).includes(v)
+  const openLicense = () => {
+    setView('about')
+    window.setTimeout(() => document.getElementById('license')?.scrollIntoView({ behavior: 'smooth' }), 100)
+  }
   const showUpdate = !!appUpdate?.available && appUpdate.latest !== settings.dismissedUpdate
   const [view, setView] = useState<View>('dashboard')
   const viewRef = useRef<HTMLElement>(null)
@@ -270,6 +278,7 @@ export function App() {
                   <span>{t(`nav.${item.id}`)}</span>
                   {item.id === 'processes' && snapshot && <span className="nav-item__count">{snapshot.groups.length}</span>}
                   {item.id === 'boost' && boost.active && <span className="nav-item__dot" title={t('nav.boostActive')} />}
+                  {locked(item.id) && <Icon name="lock" size={13} className="nav-item__lock" />}
                   {item.id === 'about' && appUpdate?.available && <span className="nav-item__dot nav-item__dot--update" title={t('update.available', { version: appUpdate.latest })} />}
                 </button>
               ))}
@@ -303,6 +312,14 @@ export function App() {
           </div>
         </header>
 
+        {edition && (
+          <EditionBanner
+            state={edition}
+            corporateHiddenUntil={settings.corporateNoticeUntil}
+            onHideCorporate={(until) => update({ corporateNoticeUntil: until })}
+            onOpenLicense={openLicense}
+          />
+        )}
         {showUpdate && appUpdate && (
           <div className="update-banner" role="status">
             <Icon name="download" size={18} />
@@ -352,16 +369,17 @@ export function App() {
               <BoostView snapshot={snapshot} boost={boost} busy={busy} onApply={(p, f, e) => void applyBoost(p, f, e)} onStop={() => void stopBoost()} />
             )}
             {view === 'startup' && <StartupView notify={pushToast} />}
-            {view === 'services' && <ServicesView notify={pushToast} />}
-            {view === 'automation' && <AutomationView snapshot={snapshot} notify={pushToast} />}
-            {view === 'network' && <NetworkView notify={pushToast} />}
+            {locked(view) && edition && <LockedView state={edition} onOpenLicense={openLicense} />}
+            {view === 'services' && !locked(view) && <ServicesView notify={pushToast} />}
+            {view === 'automation' && !locked(view) && <AutomationView snapshot={snapshot} notify={pushToast} />}
+            {view === 'network' && !locked(view) && <NetworkView notify={pushToast} />}
             {view === 'health' && <HealthView notify={pushToast} />}
-            {view === 'disk' && <DiskView notify={pushToast} />}
-            {view === 'updates' && <UpdatesView notify={pushToast} />}
+            {view === 'disk' && !locked(view) && <DiskView notify={pushToast} />}
+            {view === 'updates' && !locked(view) && <UpdatesView notify={pushToast} />}
             {view === 'uninstall' && <UninstallView notify={pushToast} />}
             {view === 'cleaner' && <CleanerView onResult={(result) => reportClean(result)} />}
             {view === 'settings' && <SettingsView settings={settings} update={update} snapshot={snapshot} />}
-            {view === 'about' && <About update={appUpdate} onCheck={() => checkUpdate(true)} />}
+            {view === 'about' && <About update={appUpdate} onCheck={() => checkUpdate(true)} edition={edition} onEdition={setEdition} />}
           </main>
           {selected && (view === 'dashboard' || view === 'processes') && (
             <DetailPanel

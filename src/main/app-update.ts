@@ -1,5 +1,5 @@
 import { net } from 'electron'
-import type { AppUpdateInfo } from '../shared/types'
+import type { AppUpdateInfo, Edition } from '../shared/types'
 import { RELEASE_API_URL } from '../shared/constants'
 import { compareVersions, latestFromRelease, type ReleaseInfo } from '../shared/engine/version'
 
@@ -15,7 +15,12 @@ const TIMEOUT_MS = 10_000
 export class AppUpdateChecker {
   private last: AppUpdateInfo | null = null
 
-  constructor(private readonly current: string) {}
+  constructor(
+    private readonly current: string,
+    private readonly edition: Edition = 'free',
+    /** Receives GitHub's server time, used as a tamper-proof clock for license expiry. */
+    private readonly onServerTime?: (ms: number) => void
+  ) {}
 
   async check(force: unknown): Promise<AppUpdateInfo> {
     if (this.last && force !== true && Date.now() - this.last.checkedAt < CACHE_MS) return this.last
@@ -25,8 +30,10 @@ export class AppUpdateChecker {
         headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'RePID-Identity' },
         signal: AbortSignal.timeout(TIMEOUT_MS)
       })
+      const date = Date.parse(res.headers.get('date') ?? '')
+      if (Number.isFinite(date)) this.onServerTime?.(date)
       if (!res.ok) throw new Error(`GitHub ${res.status}`)
-      const latest = latestFromRelease((await res.json()) as ReleaseInfo)
+      const latest = latestFromRelease((await res.json()) as ReleaseInfo, this.edition)
       this.last = { ...base, latest: latest ?? undefined, available: !!latest && compareVersions(latest, this.current) > 0 }
     } catch (err) {
       // Offline or rate-limited: keep the last good answer if there is one.

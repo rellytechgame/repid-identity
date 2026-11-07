@@ -44,6 +44,7 @@ We'll credit you in the release notes unless you prefer to stay anonymous.
 - Making the disk analyzer delete the last copy of a duplicate, a file that changed since the scan, or anything under a system, program, app-data or tool folder
 - Making the updater run anything other than the package manager with an id from its own latest scan
 - Making the firewall or services modules touch a protected program, a non-curated service, or leave a change that *Undo* cannot restore
+- Forging or altering a RePID Enterprise license key, or unlocking limited sections of an official build without one
 - Making the uninstaller offer or delete a folder, key or task that belongs to another installed app or to the OS, or delete anything without a Recycle Bin move / registry backup
 
 ## Security design (summary)
@@ -58,5 +59,6 @@ We'll credit you in the release notes unless you prefer to stay anonymous.
 - Disk analyzer: file and duplicate-set ids only; deletion re-checks removability, size and modification time, keeps one copy of every set and uses the Recycle Bin.
 - Automation: the configuration is re-validated in the main process; it can only call the same guarded modules as the UI (performance mode, cleaner) and only with safe, pre-selected cleanup targets.
 - Updates / firewall / services: package ids, rule ids and service names are pattern-validated and must come from the module's latest scan; firewall rules target paths from the engine's process list; services are only switched between Automatic and Manual and are journaled for exact restore.
+- Editions: license keys are Ed25519-signed; only the public key ships in the app, the private key never enters the repository. Limited sections are refused in the main process, not only hidden in the UI. LAN announcements carry a random id, the edition and a license id only, are size-limited and strictly parsed.
 - Commands: `execFile` with argument arrays only; dynamic values reach PowerShell via environment variables; service names are taken from the engine's own lookup and validated against a strict pattern.
 - Supply chain: lockfile committed, `npm audit` and CodeQL in CI.

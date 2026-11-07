@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { AppUpdateInfo } from '@shared/types'
+import type { AppUpdateInfo, EditionState } from '@shared/types'
+import { LicenseCard } from '../components/Edition'
 import { api, isDemo } from '../api'
 import { Icon } from '../components/Icon'
 import { LogoMark, Wordmark } from '../components/Logo'
@@ -17,7 +18,17 @@ interface Supporter {
 const TIER_ORDER = { company: 0, sponsor: 1, booster: 2, coffee: 3 }
 const supporters = [...(supportersData.supporters as Supporter[])].sort((a, b) => TIER_ORDER[a.tier] - TIER_ORDER[b.tier])
 
-export function About({ update, onCheck }: { update: AppUpdateInfo | null; onCheck: () => Promise<AppUpdateInfo | null> }) {
+export function About({
+  update,
+  onCheck,
+  edition,
+  onEdition
+}: {
+  update: AppUpdateInfo | null
+  onCheck: () => Promise<AppUpdateInfo | null>
+  edition: EditionState | null
+  onEdition: (s: EditionState) => void
+}) {
   const { t, i18n } = useTranslation()
   const [checking, setChecking] = useState(false)
   const check = async () => {
@@ -62,6 +73,8 @@ export function About({ update, onCheck }: { update: AppUpdateInfo | null; onChe
           </div>
         )}
       </section>
+
+      {edition && !isDemo && <LicenseCard state={edition} onChange={onEdition} />}
 
       <section className="about__grid">
         <button className="about-card" onClick={() => void api.openRepo('stargazers')}>
