@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import type { AppGroup, ProcessDetails } from '@shared/types'
 import { isEcoEligible } from '@shared/engine/boost'
 import { api } from '../api'
-import { describeIdentity, formatBytes, formatPercent } from '../format'
+import { describeIdentity, formatBytes, formatPercent, formatRate } from '../format'
 import { Icon } from '../components/Icon'
 import { AppAvatar, CategoryBadge, ImpactBar, RiskBadge } from '../components/ui'
 
@@ -83,6 +83,8 @@ export function DetailPanel({ group, onClose, onKill, onStopService, boostRole, 
             <div><dt>RAM</dt><dd>{formatBytes(group.memBytes, lng)}</dd></div>
             <div><dt>GPU</dt><dd>{group.gpu > 0 ? formatPercent(group.gpu, lng) : '—'}</dd></div>
             <div><dt>{t('detail.processes')}</dt><dd>{group.pids.length + group.descendantPids.length}</dd></div>
+            <div><dt>{t('detail.diskRead')}</dt><dd>{formatRate(group.ioRead ?? 0, lng)}</dd></div>
+            <div><dt>{t('detail.diskWrite')}</dt><dd>{formatRate(group.ioWrite ?? 0, lng)}</dd></div>
           </dl>
           <div className="detail__impact">
             <span>{t('processes.colImpact')}</span>

@@ -90,6 +90,7 @@ RePID (*Re*-identify the *PID*) closes that gap: it **identifies** every process
 | 🗺️ **Disk analyzer** | A clickable map of what fills your disk, the biggest files (filter: untouched for a year) and **real duplicates** found by SHA-256 content hash. Always keeps one copy, never offers system, program, app-data or tool folders, and sends everything to the Recycle Bin. |
 | ⏱️ **Automatic mode** | Performance mode turns on by itself when a game (Steam, Epic, GOG, Xbox, EA, Ubisoft, Riot, Battle.net libraries) or an app you chose opens, and off when it closes; scheduled cleanup of safe items only; alerts for runaway memory and full disks; optional tray icon and start at sign-in. |
 | ⬇️ **App updates** | Lists outdated programs and updates them with the OS's own package manager (winget · Homebrew · Flatpak). Major version jumps are flagged and never pre-selected. |
+| 📊 **Per-app disk activity** | The real read/write rate of every application, so you can see which app is hammering the disk — a sortable Disk column, read/write in the detail panel, and a one-click "busiest disk app" insight on the dashboard. Read-only, no admin. |
 | 🩺 **Health** | Drive status, SSD wear, temperatures and errors, battery capacity vs. new, free space and uptime, explained in plain language; one-click Windows restore point. |
 | 🌐 **Network by app** | Which apps are online right now, how many connections and to which servers; block or unblock an app's internet with a Windows Firewall rule. |
 | 🧩 **Windows services** | A curated list of auto-start services (updaters, telemetry, remote access, databases…) that can start on demand instead. Switch to *Manual* — never disabled — with what happens explained, verified and undoable. Drivers, audio, network and security are never shown. |
@@ -365,7 +366,8 @@ The website ([repid-identity.vercel.app](https://repid-identity.vercel.app)) is 
 - [ ] Code-signed installers for Windows and macOS (**funded by donations**)
 - [ ] Auto-update through GitHub Releases
 - [x] Disk analyzer, automatic mode, app updates, health, network by app and Windows services (v1.5)
-- [ ] Per-process disk and network bandwidth
+- [x] Per-application disk I/O rate in Processes, detail and dashboard (v1.6)
+- [ ] Per-process network bandwidth
 - [ ] Custom alert rules such as "warn when Y exceeds 4 GB"
 - [ ] Quick Smart Free from the tray icon
 - [ ] Community-maintained catalog file with remote updates (opt-in)

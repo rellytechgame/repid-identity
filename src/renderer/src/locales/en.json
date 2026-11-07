@@ -56,7 +56,9 @@
     "gpu": "Graphics",
     "gpuUnknown": "GPU not detected",
     "gpuNoData": "Per-process usage not exposed by this driver",
-    "gpuLive": "Live engine utilization"
+    "gpuLive": "Live engine utilization",
+    "diskActivity": "Disk: ↓ {{read}} · ↑ {{write}}",
+    "diskTop": "Busiest disk app: {{name}} ({{rate}})"
   },
   "smart": {
     "headline_one": "{{count}} app is weighing your system down",
@@ -120,7 +122,9 @@
     "colImpact": "Impact",
     "procCount_one": "{{count}} process",
     "procCount_other": "{{count}} processes",
-    "empty": "No process matches your filters."
+    "empty": "No process matches your filters.",
+    "colDisk": "Disk",
+    "diskSplit": "Read {{read}} · Write {{write}}"
   },
   "detail": {
     "title": "Process details",
@@ -136,7 +140,9 @@
     "user": "User",
     "command": "Command line",
     "expand": "Click to expand",
-    "tree": "Process tree"
+    "tree": "Process tree",
+    "diskRead": "Disk (read)",
+    "diskWrite": "Disk (write)"
   },
   "confirm": {
     "title_one": "End {{count}} app?",

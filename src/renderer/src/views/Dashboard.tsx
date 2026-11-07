@@ -2,7 +2,8 @@ import { useTranslation } from 'react-i18next'
 import type { AppGroup, SystemSnapshot } from '@shared/types'
 import { suggestTargets } from '@shared/engine/smart'
 import type { HistoryPoint } from '../hooks'
-import { describeIdentity, formatBytes, formatPercent } from '../format'
+import { describeIdentity, formatBytes, formatPercent, formatRate } from '../format'
+import { ioTotal } from '@shared/engine/io'
 import { Icon } from '../components/Icon'
 import { AppAvatar, Gauge, ImpactBar, RiskBadge, Sparkline } from '../components/ui'
 
@@ -24,6 +25,8 @@ export function Dashboard({ snapshot, history, threshold, onSelect, onKill, onSm
   const reclaimMem = suggestions.reduce((s, g) => s + g.memBytes, 0)
   const reclaimCpu = Math.min(100, suggestions.reduce((s, g) => s + g.cpu, 0))
   const top = snapshot.groups.slice(0, 8)
+  const diskBusy = (snapshot.diskRead ?? 0) + (snapshot.diskWrite ?? 0)
+  const diskTop = [...snapshot.groups].filter((g) => ioTotal(g) > 0).sort((a, b) => ioTotal(b) - ioTotal(a))[0]
 
   return (
     <div className="dashboard">
@@ -60,6 +63,17 @@ export function Dashboard({ snapshot, history, threshold, onSelect, onKill, onSm
           </div>
         </article>
       </section>
+
+      {diskBusy > 64 * 1024 && diskTop && (
+        <button className="disk-insight" onClick={() => onSelect(diskTop)}>
+          <span className="disk-insight__icon"><Icon name="disk" size={20} /></span>
+          <span className="disk-insight__text">
+            <strong>{t('metrics.diskActivity', { read: formatRate(snapshot.diskRead ?? 0, lng), write: formatRate(snapshot.diskWrite ?? 0, lng) })}</strong>
+            <span className="muted">{t('metrics.diskTop', { name: diskTop.identity.product ?? diskTop.name, rate: formatRate(ioTotal(diskTop), lng) })}</span>
+          </span>
+          <Icon name="external" size={16} />
+        </button>
+      )}
 
       <section className={`smart-card ${suggestions.length ? '' : 'smart-card--calm'}`}>
         <div className="smart-card__icon">

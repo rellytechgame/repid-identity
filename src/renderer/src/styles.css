@@ -667,3 +667,10 @@ th.col-num { text-align: end; }
 .license-benefits li { display: flex; gap: 8px; align-items: flex-start; }
 .license-benefits svg { color: var(--success); flex: none; margin-top: 2px; }
 @media (max-width: 760px) { .license-benefits { grid-template-columns: 1fr; } }
+
+/* ───────────── Disk activity insight ───────────── */
+.disk-insight { display: flex; align-items: center; gap: 14px; width: 100%; text-align: start; padding: 14px 18px; border-radius: var(--radius); border: 1px solid color-mix(in srgb, var(--cpu) 35%, var(--border)); background: radial-gradient(120% 160% at 0% 0%, color-mix(in srgb, var(--cpu) 10%, transparent), transparent 60%), var(--bg-elev); cursor: pointer; }
+.disk-insight:hover { border-color: color-mix(in srgb, var(--cpu) 55%, var(--border)); }
+.disk-insight__icon { width: 40px; height: 40px; flex: none; display: grid; place-items: center; border-radius: 12px; background: color-mix(in srgb, var(--cpu) 16%, transparent); color: var(--cpu); }
+.disk-insight__text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.disk-insight__text strong { font-variant-numeric: tabular-nums; }

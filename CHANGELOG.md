@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [1.6.0] — 2026-11-07
+
+### Added
+- **Per-app disk activity**: real read/write rate (bytes per second) for each application, so you can finally see *which* app is pushing the disk to 100%. New sortable **Disk** column in Processes, read/write in the detail panel, and a one-click "busiest disk app" insight on the dashboard that opens that app. Read-only; no admin required.
+- Source is language-independent: Windows uses `Win32_PerfFormattedData_PerfProc_Process` (property names are not localized), Linux reads `/proc/<pid>/io` differenced between samples; macOS shows no data (same as per-process GPU).
+
 ## [1.5.0] — 2026-11-06
 
 ### Added

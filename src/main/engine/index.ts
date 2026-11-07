@@ -16,6 +16,8 @@ import { buildGroups } from '../../shared/engine/grouping'
 import { normalizeName, riskOf, type ProtectionContext } from '../../shared/engine/protection'
 import { getDetails } from './details'
 import { getGpuSample } from './gpu'
+import { getIoSample } from './io'
+import { ioByGroup } from '../../shared/engine/io'
 import { killTrees } from './killer'
 import { enrichWithMetadata } from './metadata'
 import { isElevated } from './privileges'
@@ -112,6 +114,18 @@ export class Engine {
     const controllerUtil = this.graphics.controllers.find((c) => c.utilization !== undefined)?.utilization
     const groups = buildGroups(procs, { ...this.protection(), totalMem: mem.total, services })
     enrichWithMetadata(groups)
+    const ioMap = ioByGroup(groups, getIoSample())
+    let diskRead = 0
+    let diskWrite = 0
+    for (const g of groups) {
+      const io = ioMap.get(g.id)
+      if (io) {
+        g.ioRead = io.read
+        g.ioWrite = io.write
+        diskRead += io.read
+        diskWrite += io.write
+      }
+    }
 
     return {
       timestamp: Date.now(),
@@ -122,6 +136,8 @@ export class Engine {
       mem: { total: mem.total, used: mem.total - mem.available, available: mem.available },
       gpu: { utilization: gpuSample.overall ?? controllerUtil, controllers: this.graphics.controllers },
       processCount: procs.length,
+      diskRead,
+      diskWrite,
       groups
     }
   }

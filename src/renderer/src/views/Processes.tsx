@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AppGroup, Category, SystemSnapshot } from '@shared/types'
-import { describeIdentity, formatBytes, formatPercent } from '../format'
+import { ioTotal } from '@shared/engine/io'
+import { describeIdentity, formatBytes, formatPercent, formatRate } from '../format'
 import { Icon } from '../components/Icon'
 import { AppAvatar, CategoryBadge, ImpactBar, RiskBadge } from '../components/ui'
 
-type SortKey = 'impact' | 'cpu' | 'memBytes' | 'gpu' | 'name'
+type SortKey = 'impact' | 'cpu' | 'memBytes' | 'gpu' | 'disk' | 'name'
 
 interface Props {
   snapshot: SystemSnapshot
@@ -45,8 +46,9 @@ export function Processes({ snapshot, selectedId, showProtected, onToggleProtect
           g.services.some((s) => s.name.toLowerCase().includes(q))
       )
       .sort((a, b) => {
-        const av = sort.key === 'name' ? a.name.toLowerCase() : a[sort.key]
-        const bv = sort.key === 'name' ? b.name.toLowerCase() : b[sort.key]
+        const val = (g: typeof a) => (sort.key === 'name' ? g.name.toLowerCase() : sort.key === 'disk' ? ioTotal(g) : g[sort.key])
+        const av = val(a)
+        const bv = val(b)
         return (av < bv ? -1 : av > bv ? 1 : 0) * sort.dir
       })
   }, [snapshot.groups, query, category, sort, showProtected])
@@ -114,6 +116,7 @@ export function Processes({ snapshot, selectedId, showProtected, onToggleProtect
               {header('cpu', 'CPU', 'col-num')}
               {header('memBytes', 'RAM', 'col-num')}
               {header('gpu', 'GPU', 'col-num')}
+              {header('disk', t('processes.colDisk'), 'col-num')}
               {header('impact', t('processes.colImpact'), 'col-impact')}
               <th className="col-actions" />
             </tr>
@@ -164,6 +167,7 @@ export function Processes({ snapshot, selectedId, showProtected, onToggleProtect
                 <td className="col-num">{formatPercent(g.cpu, lng)}</td>
                 <td className="col-num">{formatBytes(g.memBytes, lng)}</td>
                 <td className="col-num">{g.gpu > 0 ? formatPercent(g.gpu, lng) : '—'}</td>
+                <td className="col-num" title={ioTotal(g) ? t('processes.diskSplit', { read: formatRate(g.ioRead ?? 0, lng), write: formatRate(g.ioWrite ?? 0, lng) }) : undefined}>{formatRate(ioTotal(g), lng)}</td>
                 <td className="col-impact">
                   <ImpactBar value={g.impact} />
                 </td>

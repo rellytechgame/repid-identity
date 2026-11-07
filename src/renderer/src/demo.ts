@@ -407,7 +407,22 @@ export function createDemoApi(): RepidApi {
         mem: { total: TOTAL_MEM, used, available: TOTAL_MEM - used },
         gpu: { utilization: gpu, controllers: [{ model: 'Simulated GPU', vendor: 'Demo', memTotalMb: 8192, memUsedMb: Math.round(gpu * 50) }] },
         processCount: procs.length,
-        groups: buildGroups(procs, { ...ctx, totalMem: TOTAL_MEM, services })
+        ...(() => {
+          const groups = buildGroups(procs, { ...ctx, totalMem: TOTAL_MEM, services })
+          // Simulated disk activity: the training script and the browser do most of the I/O, with a little jitter.
+          let diskRead = 0
+          let diskWrite = 0
+          for (const g of groups) {
+            const heavy = /python|chrome|opera|code|postgres|node/i.test(g.name)
+            if (!heavy && g.cpu < 4) continue
+            const base = (g.cpu + g.memBytes / (200 * MB)) * (heavy ? 1 : 0.2)
+            g.ioRead = Math.round(base * (0.4 + Math.random() * 0.8) * MB * 0.25)
+            g.ioWrite = Math.round(base * (0.2 + Math.random() * 0.6) * MB * 0.25)
+            diskRead += g.ioRead
+            diskWrite += g.ioWrite
+          }
+          return { diskRead, diskWrite, groups }
+        })()
       }
     },
     async details(pid) {

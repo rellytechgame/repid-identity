@@ -56,7 +56,9 @@
     "gpu": "Gráficos",
     "gpuUnknown": "GPU no detectada",
     "gpuNoData": "Este controlador no expone el uso por proceso",
-    "gpuLive": "Uso del motor en tiempo real"
+    "gpuLive": "Uso del motor en tiempo real",
+    "diskActivity": "Disco: ↓ {{read}} · ↑ {{write}}",
+    "diskTop": "La app que más usa el disco: {{name}} ({{rate}})"
   },
   "smart": {
     "headline_one": "{{count}} app está ralentizando tu sistema",
@@ -120,7 +122,9 @@
     "colImpact": "Impacto",
     "procCount_one": "{{count}} proceso",
     "procCount_other": "{{count}} procesos",
-    "empty": "Ningún proceso coincide con tus filtros."
+    "empty": "Ningún proceso coincide con tus filtros.",
+    "colDisk": "Disco",
+    "diskSplit": "Lectura {{read}} · Escritura {{write}}"
   },
   "detail": {
     "title": "Detalles del proceso",
@@ -136,7 +140,9 @@
     "user": "Usuario",
     "command": "Línea de comandos",
     "expand": "Haz clic para expandir",
-    "tree": "Árbol de procesos"
+    "tree": "Árbol de procesos",
+    "diskRead": "Disco (lectura)",
+    "diskWrite": "Disco (escritura)"
   },
   "confirm": {
     "title_one": "¿Finalizar {{count}} app?",

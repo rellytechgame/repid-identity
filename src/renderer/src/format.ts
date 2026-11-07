@@ -13,6 +13,12 @@ export function formatBytes(bytes: number, locale: string): string {
   return `${value.toLocaleString(locale, { maximumFractionDigits: digits, minimumFractionDigits: digits })} ${units[i]}`
 }
 
+/** Bytes-per-second as a compact rate, e.g. "2.2 MB/s"; a dash when idle. */
+export function formatRate(bytesPerSec: number, locale: string): string {
+  if (!bytesPerSec || bytesPerSec < 1) return '—'
+  return `${formatBytes(bytesPerSec, locale)}/s`
+}
+
 export function formatPercent(value: number, locale: string): string {
   return `${value.toLocaleString(locale, { maximumFractionDigits: value < 10 ? 1 : 0 })}%`
 }

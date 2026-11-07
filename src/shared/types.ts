@@ -81,6 +81,10 @@ export interface AppGroup {
   user: string
   /** 0–100 composite impact score used for ranking and Smart Free suggestions. */
   impact: number
+  /** Disk/file read rate in bytes per second (Windows and Linux). Absent where unmeasured. */
+  ioRead?: number
+  /** Disk/file write rate in bytes per second. */
+  ioWrite?: number
 }
 
 export interface GpuController {
@@ -101,6 +105,9 @@ export interface SystemSnapshot {
   mem: { total: number; used: number; available: number }
   gpu: { utilization?: number; controllers: GpuController[] }
   processCount: number
+  /** System-wide disk read/write in bytes per second (sum across processes). */
+  diskRead?: number
+  diskWrite?: number
   groups: AppGroup[]
 }
 
