@@ -85,12 +85,13 @@ describe('network announcements', () => {
 
   it('receives real UDP announcements from other copies', async () => {
     const seen: string[] = []
-    const beacon = new LanBeacon(id(1), () => ({ edition: 'free', license: '' }), (peerId) => seen.push(peerId))
+    const PORT = 48000 + Math.floor(Math.random() * 1000)
+    const beacon = new LanBeacon(id(1), () => ({ edition: 'free', license: '' }), (peerId) => seen.push(peerId), PORT)
     beacon.start()
     await new Promise((r) => setTimeout(r, 300))
     const sender = createSocket({ type: 'udp4', reuseAddr: true })
-    for (const n of [2, 3]) sender.send(Buffer.from(JSON.stringify({ p: 'repid', v: 1, id: id(n), e: 'free', l: '' })), 47913, '127.0.0.1')
-    sender.send(Buffer.from(JSON.stringify({ p: 'repid', v: 1, id: id(1), e: 'free', l: '' })), 47913, '127.0.0.1')
+    for (const n of [2, 3]) sender.send(Buffer.from(JSON.stringify({ p: 'repid', v: 1, id: id(n), e: 'free', l: '' })), PORT, '127.0.0.1')
+    sender.send(Buffer.from(JSON.stringify({ p: 'repid', v: 1, id: id(1), e: 'free', l: '' })), PORT, '127.0.0.1')
     await new Promise((r) => setTimeout(r, 400))
     sender.close()
     beacon.stop()

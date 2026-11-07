@@ -1,5 +1,5 @@
 import { app, ipcMain, shell, type IpcMainInvokeEvent } from 'electron'
-import type { EngineSettings, KillRequest, RepoPath } from '../shared/types'
+import type { EngineSettings, KillRequest, RepoPath, SystemSnapshot } from '../shared/types'
 import { DONATE_URL, ENTERPRISE_BUY_URL, RELEASE_URL, REPO_URL } from '../shared/constants'
 import type { EditionManager } from './edition'
 import type { AppUpdateChecker } from './app-update'
@@ -72,16 +72,22 @@ export interface Modules {
   services: Services
   appUpdate: AppUpdateChecker
   edition: EditionManager
+  desktop: { setWidget: (on: boolean) => void; quickAction: (action: string) => void; cacheSnapshot: (s: SystemSnapshot) => void }
 }
 
-export function registerIpc({ engine, cleaner, startup, booster, uninstaller, disk, automation, updater, health, network, services, appUpdate, edition }: Modules, onTheme: (theme: 'dark' | 'light') => void): void {
+export function registerIpc({ engine, cleaner, startup, booster, uninstaller, disk, automation, updater, health, network, services, appUpdate, edition, desktop }: Modules, onTheme: (theme: 'dark' | 'light') => void): void {
   const handle = (channel: string, fn: (event: IpcMainInvokeEvent, arg: unknown) => unknown) =>
     ipcMain.handle(channel, (event, arg) => {
       assertTrustedSender(event)
       return fn(event, arg)
     })
 
-  handle('repid:snapshot', () => engine.snapshot())
+  handle('repid:snapshot', async () => {
+    const snap = await engine.snapshot()
+    // Cache the latest for the tray tooltip/menu and the widget (no extra sampling).
+    desktop.cacheSnapshot(snap)
+    return snap
+  })
   handle('repid:details', (_e, pid) => {
     if (!isPid(pid)) throw new Error('Invalid pid')
     return engine.details(pid)
@@ -149,6 +155,10 @@ export function registerIpc({ engine, cleaner, startup, booster, uninstaller, di
     return true
   })
   handle('repid:open-enterprise-buy', () => shell.openExternal(ENTERPRISE_BUY_URL))
+  handle('repid:widget-set', (_e, on) => desktop.setWidget(on === true))
+  handle('repid:quick-action', (_e, action) => {
+    if (typeof action === 'string' && action.length <= 40) desktop.quickAction(action)
+  })
   handle('repid:app-update-check', (_e, force) => appUpdate.check(force))
   handle('repid:open-release', () => shell.openExternal(RELEASE_URL))
   handle('repid:open-donate', () => shell.openExternal(DONATE_URL))

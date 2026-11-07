@@ -16,6 +16,8 @@ export interface Settings {
   restorePoints: boolean
   /** Ask GitHub (once at start-up, then every 6 h) whether a newer installer is available. */
   checkUpdates: boolean
+  /** Floating always-on-top desktop widget. */
+  widget: boolean
   /** Version whose banner the user closed: hidden until an even newer one appears. */
   dismissedUpdate?: string
   /** Company-computer notice (free edition) hidden until this time. */
@@ -31,7 +33,8 @@ const DEFAULTS: Settings = {
   protectedNames: [],
   showProtected: true,
   restorePoints: true,
-  checkUpdates: true
+  checkUpdates: true,
+  widget: false
 }
 
 function load(): Settings {

@@ -57,6 +57,8 @@ const api: RepidApi = {
   removeLicense: () => ipcRenderer.invoke('repid:license-remove'),
   contactEnterprise: (kind) => ipcRenderer.invoke('repid:enterprise-contact', kind),
   openEnterpriseBuy: () => ipcRenderer.invoke('repid:open-enterprise-buy'),
+  setWidget: (enabled) => ipcRenderer.invoke('repid:widget-set', enabled === true),
+  quickAction: (action) => ipcRenderer.invoke('repid:quick-action', action),
   openRepo: (path = '') => ipcRenderer.invoke('repid:open-repo', path),
   openDonate: () => ipcRenderer.invoke('repid:open-donate'),
   relaunchElevated: () => ipcRenderer.invoke('repid:relaunch-elevated'),

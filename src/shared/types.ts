@@ -834,6 +834,10 @@ export interface RepidApi {
   contactEnterprise(kind: 'support' | 'beta'): Promise<boolean>
   /** Opens the PayPal subscription page (fixed URL). */
   openEnterpriseBuy(): Promise<void>
+  /** Shows/hides the floating desktop widget (desktop only). */
+  setWidget(enabled: boolean): Promise<void>
+  /** Widget/tray/OS quick actions: 'open', 'open:<view>', 'smart-free', 'close-widget'. */
+  quickAction(action: string): Promise<void>
   openRepo(path?: RepoPath): Promise<void>
   /** Opens the project's donation page (fixed URL owned by the main process). */
   openDonate(): Promise<void>

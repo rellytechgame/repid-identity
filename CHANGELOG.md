@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [1.7.0] — 2026-11-07
+
+### Added
+- **Desktop integration**: a floating, always-on-top, draggable **widget** with live CPU / RAM / disk and one-tap Smart Free (toggle in Settings or from the tray); an **enriched tray menu** with live stats and quick actions; and native quick actions — **Windows jump list**, **macOS dock menu**, and a **Windows Explorer context-menu** entry ("Analizar con RePID Identity", added per-user by the installer). The widget reuses the app bundle at `#widget`; quick actions are a fixed, validated set of launch flags.
+
+### Not possible (by design)
+- **Mobile (Android/iOS)**: both platforms sandbox each app and forbid inspecting or ending other apps' processes or cleaning their data (Play Store also restricts listing installed apps), so RePID's core function cannot exist there and no mobile app is shipped.
+
 ## [1.6.0] — 2026-11-07
 
 ### Added

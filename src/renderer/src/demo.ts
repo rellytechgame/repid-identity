@@ -583,6 +583,8 @@ export function createDemoApi(): RepidApi {
     async contactEnterprise() {
       return false
     },
+    async setWidget() {},
+    async quickAction() {},
     async openEnterpriseBuy() {
       window.open(ENTERPRISE_BUY_URL, '_blank', 'noopener,noreferrer')
     },

@@ -126,7 +126,23 @@ export function App() {
   }, [settings.protectedNames, i18n.language])
 
   // A clicked system notification (automation alerts) opens its section.
-  useEffect(() => api.onNavigate((v) => VIEWS.has(v) && setView(v as View)), [])
+  useEffect(
+    () =>
+      api.onNavigate((v) => {
+        if (v === 'smart-free') {
+          setView('dashboard')
+          setSmartOpen(true)
+        } else if (VIEWS.has(v)) {
+          setView(v as View)
+        }
+      }),
+    []
+  )
+
+  // The floating desktop widget follows this setting (desktop only).
+  useEffect(() => {
+    if (!isDemo) void api.setWidget(settings.widget)
+  }, [settings.widget])
 
   const pushToast = useCallback((toast: Omit<Toast, 'id'>) => {
     const id = Date.now() + Math.random()

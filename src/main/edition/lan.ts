@@ -34,7 +34,9 @@ export class LanBeacon {
   constructor(
     private readonly selfId: string,
     private readonly announce: () => { edition: Edition; license: string },
-    private readonly onPeer: (id: string, peer: LanPeer) => void
+    private readonly onPeer: (id: string, peer: LanPeer) => void,
+    /** Overridable for tests so they do not contend with a real copy on the fixed port. */
+    private readonly port: number = LAN_PORT
   ) {}
 
   start(): void {
@@ -45,7 +47,7 @@ export class LanBeacon {
       const parsed = parseBeacon(msg.toString('utf8'))
       if (parsed && parsed.id !== this.selfId) this.onPeer(parsed.id, { ...parsed.peer, seen: Date.now() })
     })
-    socket.bind(LAN_PORT, () => {
+    socket.bind(this.port, () => {
       try {
         socket.setBroadcast(true)
       } catch {
@@ -69,7 +71,7 @@ export class LanBeacon {
     if (!this.socket) return
     const { edition, license } = this.announce()
     const msg = Buffer.from(JSON.stringify({ p: 'repid', v: 1, id: this.selfId, e: edition, l: license }))
-    for (const addr of broadcastAddresses()) this.socket.send(msg, LAN_PORT, addr, () => undefined)
+    for (const addr of broadcastAddresses()) this.socket.send(msg, this.port, addr, () => undefined)
   }
 }
 

@@ -1,11 +1,12 @@
 import { join } from 'node:path'
-import { app, BrowserWindow, Menu, nativeImage, Notification, session, shell, Tray } from 'electron'
-import type { AutomationConfig, TaskProgress } from '../shared/types'
+import { app, BrowserWindow, Menu, Notification, session, shell } from 'electron'
+import type { AutomationConfig, SystemSnapshot, TaskProgress } from '../shared/types'
 import { AppUpdateChecker } from './app-update'
 import { Automation } from './automation'
 import { Booster } from './boost'
 import { Cleaner } from './cleaner'
 import { DiskAnalyzer } from './disk'
+import { DesktopIntegration } from './desktop'
 import { EditionManager, editionStorePath } from './edition'
 import { Engine } from './engine'
 import { Health } from './health'
@@ -36,9 +37,10 @@ const CSP = [
 ].join('; ')
 
 let win: BrowserWindow | null = null
-let tray: Tray | null = null
 let quitting = false
 let automation: Automation | null = null
+let desktop: DesktopIntegration | null = null
+let lastSnapshot: SystemSnapshot | null = null
 /** Started by the login item: stay in the tray until the user opens the window. */
 const startHidden = process.argv.includes('--hidden')
 const ICON = join(__dirname, '../../build/icon.png')
@@ -56,29 +58,24 @@ function emitProgress(progress: TaskProgress): void {
   win?.webContents.send('repid:progress', progress)
 }
 
-/** Tray icon while "keep running in the background" is on; login item on Windows/macOS. */
+/** Opens the main window and triggers the Smart Free dialog (tray/widget/jump-list action). */
+function smartFree(): void {
+  showWindow('smart-free')
+}
+
+const RENDERER_FILE = join(__dirname, '../renderer/index.html')
+
+/** Runs a widget/quick-action string sent from the widget window. */
+function runQuickAction(action: string): void {
+  if (action === 'smart-free') smartFree()
+  else if (action === 'close-widget') desktop?.setWidget(false)
+  else if (action === 'open') showWindow()
+  else if (action.startsWith('open:')) showWindow(action.slice(5))
+}
+
+/** Tray (rich, via DesktopIntegration) while "keep running in the background" is on; login item on Windows/macOS. */
 function applyBackground(cfg: AutomationConfig['background']): void {
-  if (cfg.keepInTray && !tray) {
-    tray = new Tray(nativeImage.createFromPath(ICON).resize({ width: 16, height: 16 }))
-    tray.setToolTip('RePID Identity')
-    tray.setContextMenu(
-      Menu.buildFromTemplate([
-        { label: 'RePID Identity', click: () => showWindow() },
-        { type: 'separator' },
-        {
-          label: app.getLocale().startsWith('es') ? 'Salir' : 'Quit',
-          click: () => {
-            quitting = true
-            app.quit()
-          }
-        }
-      ])
-    )
-    tray.on('click', () => showWindow())
-  } else if (!cfg.keepInTray && tray) {
-    tray.destroy()
-    tray = null
-  }
+  desktop?.syncTray()
   if (process.platform === 'win32' || isMac) {
     app.setLoginItemSettings({ openAtLogin: cfg.launchAtLogin, args: ['--hidden'] })
   }
@@ -146,7 +143,9 @@ function createWindow(): void {
 if (!app.requestSingleInstanceLock()) {
   app.quit()
 } else {
-  app.on('second-instance', () => showWindow())
+  app.on('second-instance', (_e, argv) => {
+    if (!desktop?.handleArgs(argv)) showWindow()
+  })
 
   app.whenReady().then(() => {
     app.setAppUserModelId('com.voxelenterprise.repid-identity')
@@ -168,6 +167,22 @@ if (!app.requestSingleInstanceLock()) {
       backupRoot: join(app.getPath('userData'), 'uninstall-backups')
     })
     const edition = new EditionManager(__REPID_EDITION__, editionStorePath(app.getPath('userData')), process.execPath)
+    desktop = new DesktopIntegration({
+      icon: ICON,
+      show: showWindow,
+      smartFree,
+      diskScan: () => showWindow('disk'),
+      snapshot: () => lastSnapshot,
+      language: () => engine.language,
+      quit: () => {
+        quitting = true
+        app.quit()
+      },
+      keepInTray: () => !!automation?.keepInTray,
+      preload: join(__dirname, '../preload/index.js'),
+      rendererUrl: !app.isPackaged ? process.env.ELECTRON_RENDERER_URL : undefined,
+      rendererFile: RENDERER_FILE
+    })
     const appUpdate = new AppUpdateChecker(app.getVersion(), __REPID_EDITION__, (ms) => edition.observeTime(ms))
     // Enterprise always learns GitHub's time (even with update notices off), so a clock set back cannot extend a license.
     if (__REPID_EDITION__ === 'enterprise') {
@@ -205,13 +220,23 @@ if (!app.requestSingleInstanceLock()) {
         network: new Network(engine),
         services: new Services(join(app.getPath('userData'), 'services-journal.json')),
         appUpdate,
-        edition
+        edition,
+        desktop: {
+          setWidget: (on) => desktop?.setWidget(on),
+          quickAction: runQuickAction,
+          cacheSnapshot: (s) => {
+            lastSnapshot = s
+          }
+        }
       },
       (theme) => {
       if (!isMac) win?.setTitleBarOverlay(TITLEBAR[theme])
       win?.setBackgroundColor(TITLEBAR[theme].color)
       }
     )
+    desktop.start()
+    // Honor a quick action the app was launched with (jump list, dock, .desktop, context menu).
+    desktop.handleArgs(process.argv)
     void Promise.all([automation.start(), edition.start()]).finally(() => createWindow())
 
     // Performance mode changes live processes: put every priority back before exiting.
@@ -220,6 +245,7 @@ if (!app.requestSingleInstanceLock()) {
       quitting = true
       automation?.stop()
       edition.stop()
+      desktop?.stop()
       if (restored || !booster.active) return
       event.preventDefault()
       restored = true

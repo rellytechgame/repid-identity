@@ -31,6 +31,8 @@ nsis:
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
   shortcutName: RePID Identity
+  # Adds the "Analizar con RePID Identity" entry to the Explorer right-click menu (per-user registry).
+  include: build/installer.nsh
 
 mac:
   icon: build/icon.png

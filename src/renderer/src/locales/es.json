@@ -203,7 +203,9 @@
     "restorePoints": "Punto de restauración antes de cambios delicados",
     "restorePointsHint": "Antes de cambiar servicios, desinstalar una app o borrar Windows.old, RePID crea un punto de restauración de Windows (requiere administrador y la Protección del sistema activada). Si algo falla, Windows puede volver atrás.",
     "checkUpdates": "Avisarme cuando haya una versión nueva",
-    "checkUpdatesHint": "Al abrir RePID (y cada 6 horas) consulta la página de descargas en GitHub. No envía ningún dato tuyo; si hay una versión nueva verás un aviso con el botón Actualizar."
+    "checkUpdatesHint": "Al abrir RePID (y cada 6 horas) consulta la página de descargas en GitHub. No envía ningún dato tuyo; si hay una versión nueva verás un aviso con el botón Actualizar.",
+    "widget": "Widget flotante en el escritorio",
+    "widgetHint": "Una ventanita pequeña, siempre visible y arrastrable, con CPU, memoria y disco en vivo y acceso rápido a la liberación. También puedes mostrarla u ocultarla desde el icono de la bandeja."
   },
   "about": {
     "by": "por",

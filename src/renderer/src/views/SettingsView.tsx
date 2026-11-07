@@ -96,6 +96,18 @@ export function SettingsView({ settings, update, snapshot }: {
             <span className="switch__track" />
           </label>
         </div>
+        {window.repid?.platform && window.repid.platform !== 'web' && (
+          <div className="field">
+            <div>
+              <label htmlFor="widget">{t('settings.widget')}</label>
+              <p className="muted">{t('settings.widgetHint')}</p>
+            </div>
+            <label className="switch">
+              <input id="widget" type="checkbox" checked={settings.widget} onChange={(e) => update({ widget: e.target.checked })} />
+              <span className="switch__track" />
+            </label>
+          </div>
+        )}
         <div className="field">
           <div>
             <label htmlFor="threshold">{t('settings.threshold', { value: settings.smartThreshold })}</label>

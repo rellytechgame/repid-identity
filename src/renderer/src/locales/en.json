@@ -203,7 +203,9 @@
     "restorePoints": "Restore point before delicate changes",
     "restorePointsHint": "Before changing services, uninstalling an app or removing Windows.old, RePID creates a Windows restore point (requires administrator and System Protection turned on). If something goes wrong, Windows can roll back.",
     "checkUpdates": "Tell me when a new version is out",
-    "checkUpdatesHint": "When RePID opens (and every 6 hours) it checks the download page on GitHub. None of your data is sent; if there is a new version you will see a notice with an Update button."
+    "checkUpdatesHint": "When RePID opens (and every 6 hours) it checks the download page on GitHub. None of your data is sent; if there is a new version you will see a notice with an Update button.",
+    "widget": "Floating desktop widget",
+    "widgetHint": "A small, always-on-top, draggable window with live CPU, memory and disk and quick access to Smart Free. You can also show or hide it from the tray icon."
   },
   "about": {
     "by": "by",
