@@ -8,7 +8,7 @@
 
 A free, open-source desktop app for **Windows, macOS and Linux** that explains — in plain language — what every process and service on your computer is doing, and ends the heavy ones *together with everything they spawned*, to reclaim CPU, RAM and GPU safely.
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-6366f1.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial%20%2B%20Commercial-6366f1.svg)](LICENSE)
 [![Latest release](https://img.shields.io/github/v/release/rellytechgame/repid-identity?color=22d3ee&label=release)](https://github.com/rellytechgame/repid-identity/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/rellytechgame/repid-identity/total?color=8b5cf6)](https://github.com/rellytechgame/repid-identity/releases)
 [![CI](https://github.com/rellytechgame/repid-identity/actions/workflows/ci.yml/badge.svg)](https://github.com/rellytechgame/repid-identity/actions/workflows/ci.yml)
@@ -415,7 +415,7 @@ Write your name or GitHub username in the PayPal note so we can credit you (appl
 
 ## License & credits
 
-Released under the [MIT License](LICENSE) © 2026 Voxel Enterprise.
+Created by **RellyDev — Voxel Enterprise**. Dual-licensed: free for noncommercial use under the [PolyForm Noncommercial License 1.0.0](LICENSE); company use requires a paid commercial license (RePID Enterprise). © 2026 RellyDev — Voxel Enterprise.
 
 <div align="center">
 <br />

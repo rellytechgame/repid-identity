@@ -1,6 +1,6 @@
 appId: com.voxelenterprise.repid-identity
 productName: RePID Identity
-copyright: Copyright © 2026 Voxel Enterprise
+copyright: Copyright © 2026 RellyDev — Voxel Enterprise
 directories:
   buildResources: build
   output: release/${version}

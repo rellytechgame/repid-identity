@@ -8,7 +8,7 @@
 
 App de escritorio gratuita y de código abierto para **Windows, macOS y Linux** que explica en lenguaje humano qué está haciendo cada proceso y servicio de tu equipo, y finaliza los más pesados *junto con todo lo que crearon* para recuperar CPU, RAM y GPU de forma segura.
 
-[![Licencia: MIT](https://img.shields.io/badge/licencia-MIT-6366f1.svg)](LICENSE)
+[![Licencia](https://img.shields.io/badge/licencia-PolyForm%20Noncommercial%20%2B%20Comercial-6366f1.svg)](LICENSE)
 [![Última versión](https://img.shields.io/github/v/release/rellytechgame/repid-identity?color=22d3ee&label=versi%C3%B3n)](https://github.com/rellytechgame/repid-identity/releases/latest)
 [![Descargas](https://img.shields.io/github/downloads/rellytechgame/repid-identity/total?color=8b5cf6&label=descargas)](https://github.com/rellytechgame/repid-identity/releases)
 [![CI](https://github.com/rellytechgame/repid-identity/actions/workflows/ci.yml/badge.svg)](https://github.com/rellytechgame/repid-identity/actions/workflows/ci.yml)
@@ -255,7 +255,7 @@ Escribe tu nombre o usuario de GitHub en la nota de PayPal para acreditarte (se 
 
 ## Licencia y créditos
 
-Publicado bajo la [Licencia MIT](LICENSE) © 2026 Voxel Enterprise.
+Creado por **RellyDev — Voxel Enterprise**. Doble licencia: gratis para uso no comercial bajo la [Licencia PolyForm Noncommercial 1.0.0](LICENSE); el uso en empresas requiere una licencia comercial de pago (RePID Enterprise). © 2026 RellyDev — Voxel Enterprise.
 
 <div align="center">
 <br />

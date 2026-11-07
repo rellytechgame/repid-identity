@@ -290,7 +290,7 @@ export function App() {
             <Icon name="bolt" size={16} /> {t('smart.cta')}
           </button>
           <p className="sidebar__credit">
-            {t('about.by')} <strong>Voxel Enterprise</strong>
+            {t('about.by')} <strong>RellyDev · Voxel Enterprise</strong>
           </p>
         </div>
       </aside>

@@ -13,6 +13,8 @@ export const ENTERPRISE_BUY_URL = 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-
 export const LICENSE_PUBLIC_KEY = 'MCowBQYDK2VwAyEAvDoSHrRSXVdWFtonGXnXXmQSd2wKkn9/QSp+ezUwUKc='
 /** Voxel Enterprise support mailboxes for licensed RePID Enterprise customers. */
 export const SUPPORT_EMAIL = { es: 'soporte@voxel.lat', en: 'support@voxel.lat' } as const
+/** Original author and owner. Shown in the UI and preserved per the LICENSE/NOTICE. */
+export const AUTHOR = 'RellyDev — Voxel Enterprise'
 export const VENDOR_URL = 'https://github.com/rellytechgame'
 /** PayPal.me donation link — keep in sync with the landing's src/config.js and .github/FUNDING.yml. */
 export const DONATE_URL = 'https://paypal.me/iandasystems'

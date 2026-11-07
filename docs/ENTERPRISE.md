@@ -13,6 +13,14 @@ Everything works **without a server or database**:
 | Company computers | Domain / Azure AD join, Windows Server or MDM enrollment, read locally → a notice only (everything keeps working). |
 | Support | The app shows a support code `RPE-<LICENSE ID>-<8 signature chars>` and opens an email with a fixed subject and the full key in the body. |
 
+## Authorship & provenance (RellyDev — Voxel Enterprise)
+
+RePID is open source, so there is no secret, undeletable mark — anyone can read every line. What *does* prove origin, and cannot be forged:
+
+- **Signed releases and licenses.** Only the maintainer's Ed25519 private key (kept offline) can sign an installer or a license key that RePID verifies as genuine. A copy without that signature is provably not official.
+- **Recorded authorship.** `LICENSE`, `NOTICE`, the README and the app all state *RellyDev — Voxel Enterprise*. The license's Notices section requires these to be preserved; removing them is a license violation that gives you legal standing.
+- **Public history.** GitHub's commit history timestamps you as the original author.
+
 ## Selling a license
 
 1. The customer subscribes with PayPal (one subscription per computer, or agree a quantity by email).
@@ -61,4 +69,5 @@ Losing `~/.repid-license/private-key.pem` means no new licenses can be issued fo
 
 - The source code is public: someone able to rebuild RePID could remove the checks from their own copy. The license protects the official builds and makes forging keys impossible; it is a deterrent, not DRM.
 - Network counting only sees copies on the same subnet. Separate VLANs, guest Wi-Fi with client isolation or a firewall blocking UDP 47913 hide copies from each other.
-- Under the MIT license, versions already published can be used commercially without paying. Making payment legally binding for new versions requires changing their license.
+- This and later versions are dual-licensed: free for noncommercial use (PolyForm Noncommercial 1.0.0) and a paid commercial license for companies, so commercial payment is a license requirement, not just a request. Versions previously published under MIT stay MIT for those versions.
+- The authorship of RellyDev — Voxel Enterprise is recorded in LICENSE, NOTICE, the app and the signed releases. Someone can still edit their own copy, but removing the Required Notice or the commercial-license terms is itself a license violation, and only Voxel Enterprise's private key can sign an installer or a license that verifies as genuine — that signature is the real, unforgeable proof of origin.
