@@ -1,9 +1,15 @@
 import { app, ipcMain, shell, type IpcMainInvokeEvent } from 'electron'
 import type { EngineSettings, KillRequest, RepoPath } from '../shared/types'
 import { DONATE_URL, REPO_URL } from '../shared/constants'
+import type { Automation } from './automation'
 import type { Booster } from './boost'
 import type { Cleaner } from './cleaner'
+import type { DiskAnalyzer } from './disk'
 import type { Engine } from './engine'
+import type { Health } from './health'
+import type { Network } from './network'
+import type { Services } from './services'
+import type { Updater } from './updates'
 import { relaunchElevated } from './engine/privileges'
 import type { StartupManager } from './startup'
 import type { Uninstaller } from './uninstall'
@@ -43,8 +49,10 @@ function parseKillRequest(raw: unknown): KillRequest {
 function parseSettings(raw: unknown): EngineSettings {
   const names = (raw as Partial<EngineSettings> | null)?.protectedNames
   if (!Array.isArray(names) || names.length > MAX_PROTECTED) throw new Error('Invalid settings')
+  const language = (raw as Partial<EngineSettings>).language
   return {
-    protectedNames: names.filter((n): n is string => typeof n === 'string' && n.trim().length > 0 && n.length <= 128)
+    protectedNames: names.filter((n): n is string => typeof n === 'string' && n.trim().length > 0 && n.length <= 128),
+    language: typeof language === 'string' && /^[a-z]{2}(-[A-Za-z]{2})?$/.test(language) ? language : undefined
   }
 }
 
@@ -54,9 +62,15 @@ export interface Modules {
   startup: StartupManager
   booster: Booster
   uninstaller: Uninstaller
+  disk: DiskAnalyzer
+  automation: Automation
+  updater: Updater
+  health: Health
+  network: Network
+  services: Services
 }
 
-export function registerIpc({ engine, cleaner, startup, booster, uninstaller }: Modules, onTheme: (theme: 'dark' | 'light') => void): void {
+export function registerIpc({ engine, cleaner, startup, booster, uninstaller, disk, automation, updater, health, network, services }: Modules, onTheme: (theme: 'dark' | 'light') => void): void {
   const handle = (channel: string, fn: (event: IpcMainInvokeEvent, arg: unknown) => unknown) =>
     ipcMain.handle(channel, (event, arg) => {
       assertTrustedSender(event)
@@ -98,6 +112,23 @@ export function registerIpc({ engine, cleaner, startup, booster, uninstaller }: 
   handle('repid:uninstall-orphans', () => uninstaller.scanOrphans())
   handle('repid:uninstall-clean', (_e, req) => uninstaller.clean(req))
   handle('repid:uninstall-open-backups', () => uninstaller.openBackups())
+  // The modules below validate their own payloads: ids from their last scan only, never paths or commands.
+  handle('repid:disk-roots', () => disk.roots())
+  handle('repid:disk-scan', (_e, rootId) => disk.scan(rootId))
+  handle('repid:disk-duplicates', () => disk.duplicates())
+  handle('repid:disk-cancel', () => disk.cancel())
+  handle('repid:disk-delete', (_e, req) => disk.delete(req))
+  handle('repid:disk-reveal', (_e, id) => disk.reveal(id))
+  handle('repid:automation-get', () => automation.state())
+  handle('repid:automation-set', (_e, cfg) => automation.set(cfg))
+  handle('repid:updates-scan', () => updater.scan())
+  handle('repid:updates-apply', (_e, ids) => updater.apply(ids))
+  handle('repid:health-scan', () => health.scan())
+  handle('repid:restore-point', (_e, reason) => health.restorePoint(reason))
+  handle('repid:network-scan', () => network.scan())
+  handle('repid:network-block', (_e, req) => network.block(req))
+  handle('repid:services-scan', () => services.scan())
+  handle('repid:services-set', (_e, req) => services.set(req))
   handle('repid:open-donate', () => shell.openExternal(DONATE_URL))
   handle('repid:relaunch-elevated', async () => {
     const ok = await relaunchElevated(process.execPath, app.isPackaged ? [] : process.argv.slice(1))

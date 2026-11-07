@@ -23,6 +23,7 @@ import { boostKey, isEcoEligible, isFocusEligible } from '@shared/engine/boost'
 import { riskOf } from '@shared/engine/protection'
 import { MACHINE_SOURCES, assessStartup, matchRunning, measureImpact, parseCommand } from '@shared/engine/startup'
 import { classifyApp } from '@shared/engine/uninstall'
+import { createDemoExtras } from './demo-extra'
 
 /**
  * Simulated machine for the web demo. Browsers cannot see OS processes, so a
@@ -388,6 +389,7 @@ export function createDemoApi(): RepidApi {
   }
 
   return {
+    ...createDemoExtras(groupsNow),
     platform: 'web',
     version: 'demo',
     async snapshot(): Promise<SystemSnapshot> {

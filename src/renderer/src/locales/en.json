@@ -12,7 +12,20 @@
     "uninstall": "Uninstall",
     "cleaner": "Cleanup",
     "settings": "Settings",
-    "about": "About"
+    "about": "About",
+    "network": "Network",
+    "health": "Health",
+    "automation": "Automatic",
+    "services": "Services",
+    "disk": "Disk",
+    "updates": "Updates",
+    "boostActive": "Performance mode on",
+    "sections": {
+      "monitor": "Monitor",
+      "optimize": "Speed up",
+      "clean": "Free up space",
+      "app": "RePID"
+    }
   },
   "common": {
     "close": "Close",
@@ -180,7 +193,9 @@
       "win32": "Processes owned by other users and Windows services can only be ended with administrator rights.",
       "unix": "System services are stopped through your desktop's password prompt (polkit) when needed. Running the whole app as root is not supported."
     },
-    "relaunchAdmin": "Relaunch as administrator"
+    "relaunchAdmin": "Relaunch as administrator",
+    "restorePoints": "Restore point before delicate changes",
+    "restorePointsHint": "Before changing services, uninstalling an app or removing Windows.old, RePID creates a Windows restore point (requires administrator and System Protection turned on). If something goes wrong, Windows can roll back."
   },
   "about": {
     "by": "by",
@@ -706,5 +721,289 @@
       "toast_other": "{{count}} leftovers removed · {{size}} freed",
       "review": "contains programs or saved games, review it"
     }
+  },
+  "disk": {
+    "title": "What is filling your disk?",
+    "intro": "Analyze a folder or drive and see on a map what takes space, your biggest files and duplicates.",
+    "summary": "{{size}} in {{files}} files inside {{root}}",
+    "where": "What to analyze",
+    "home": "Your home folder ({{name}})",
+    "drive": "Drive {{path}} · {{free}} free",
+    "scan": "Analyze",
+    "rescan": "Analyze again",
+    "safeNote": "Everything you delete goes to the Recycle Bin. Windows, installed programs, app data and tool folders (.git, node_modules, .gradle…) are shown but never offered for deletion.",
+    "scanning": "Analyzing… {{count}} files",
+    "hashing": "Comparing file contents to find identical copies…",
+    "truncated": "The analysis stopped early (cancelled or too many files): sizes may be lower than the real ones.",
+    "tabs": {
+      "map": "Map",
+      "large": "Large files",
+      "duplicates": "Duplicates"
+    },
+    "deleteSelected_one": "Move {{count}} to the Recycle Bin ({{size}})",
+    "deleteSelected_other": "Move {{count}} to the Recycle Bin ({{size}})",
+    "oldOnly": "Only files not modified for more than a year",
+    "noLarge": "No files of 100 MB or more here.",
+    "dupIntro": "RePID looks for files with exactly the same content (not just the same name): first by size, then by comparing their SHA-256 fingerprint. Libraries and program files are never included.",
+    "findDuplicates": "Find duplicates",
+    "dupSummary": "{{count}} groups · {{size}} taken by copies",
+    "selectCopies": "Select suggested copies",
+    "dupTruncated": "Up to 40 GB were compared: the groups that free the most space come first.",
+    "noDuplicates": "No duplicate files of 1 MB or more were found.",
+    "dupGroup_one": "{{count}} copy of {{size}}",
+    "dupGroup_other": "{{count}} copies of {{size}}",
+    "confirm": {
+      "title": "Move to the Recycle Bin?",
+      "action_one": "Move {{count}} file",
+      "action_other": "Move {{count}} files",
+      "body_one": "{{count}} file ({{size}}) will be moved to the Recycle Bin.",
+      "body_other": "{{count}} files ({{size}}) will be moved to the Recycle Bin.",
+      "recycle": "You can restore them from the Recycle Bin. The space is really freed when you empty it. RePID always keeps at least one copy of every duplicate."
+    },
+    "toast": {
+      "done_one": "{{count}} file moved to the Recycle Bin ({{size}})",
+      "done_other": "{{count}} files moved to the Recycle Bin ({{size}})",
+      "nothing": "No file was moved",
+      "refused_one": "{{count}} was skipped because it changed since the analysis or was the last copy.",
+      "refused_other": "{{count}} were skipped because they changed since the analysis or were the last copy.",
+      "failed_one": "{{count}} could not be moved (in use or no permission).",
+      "failed_other": "{{count}} could not be moved (in use or no permission)."
+    },
+    "modified": "Modified {{date}} ({{days}} days ago)",
+    "keep": "Kept",
+    "system": "Protected",
+    "reveal": "Show in folder",
+    "path": "Path",
+    "emptyFolder": "This folder has no large subfolders.",
+    "other_one": "{{count}} small file",
+    "other_other": "{{count}} small files and folders",
+    "legendSystem": "Striped = protected (system, programs, app data)",
+    "legendZoom": "Click a folder to open it"
+  },
+  "automation": {
+    "title": "RePID working for you",
+    "intro": "Turn on what you want RePID to do by itself: speed up your games, clean what is safe and warn you before problems happen.",
+    "boostingNow": "Performance mode turned on automatically for {{name}}.",
+    "onlyWhileOpen": "All of this works while RePID is open. Turn on \"Keep running in the background\" so it works even after you close the window.",
+    "boost": {
+      "title": "Automatic performance mode",
+      "body": "When you open a game or an app from your list, RePID prioritizes it and calms what runs in the background. It turns off by itself when you close it.",
+      "games": "Detect games (Steam, Epic, GOG, Xbox, EA, Ubisoft, Riot, Battle.net)",
+      "gamesNow": "Games open now: {{names}}",
+      "pick": "Add an open app…"
+    },
+    "clean": {
+      "title": "Scheduled cleanup",
+      "body": "Cleans only what is marked safe (temporary files, caches). Never history, passwords or anything an open app is using, and never while you play.",
+      "daily": "Every day",
+      "weekly": "Every week",
+      "next": "Next cleanup: {{date}}",
+      "last": "Last: {{date}}"
+    },
+    "alerts": {
+      "title": "Alerts",
+      "body": "System notifications when something needs your attention.",
+      "memory": "An app keeps growing in memory (possible leak)",
+      "disk": "A drive goes over {{pct}}% used",
+      "threshold": "Full-disk threshold"
+    },
+    "background": {
+      "title": "Keep running in the background",
+      "body": "RePID stays in the system tray (next to the clock) so automation keeps working.",
+      "tray": "When the window closes, stay in the tray",
+      "login": "Start with Windows / macOS (minimized)"
+    },
+    "log": {
+      "title": "Recent activity",
+      "empty": "No automatic activity yet.",
+      "boost-on": "Performance mode on for {{name}} ({{count}} apps calmed)",
+      "boost-off": "{{name}} closed: performance mode off and priorities restored",
+      "clean": "Scheduled cleanup: {{size}} freed",
+      "memory-growth": "Alert: {{name}} went from {{from}} to {{to}} in 30 minutes",
+      "disk-low": "Alert: drive {{drive}} is {{pct}}% full ({{free}} free)",
+      "error": "Error: {{message}}"
+    }
+  },
+  "updates": {
+    "title": "Update your apps",
+    "intro": "Looks for new versions of your installed programs.",
+    "scanning": "Looking for updates…",
+    "summary_one": "{{count}} app has a new version",
+    "summary_other": "{{count}} apps have a new version",
+    "apply_one": "Update {{count}}",
+    "apply_other": "Update {{count}}",
+    "one": "Update",
+    "note": {
+      "win32": "Uses winget, the official Windows package manager: it downloads from each vendor's source and verifies the installer's hash. Some apps ask for permission (UAC) while updating.",
+      "darwin": "Uses Homebrew (formulae and casks installed with brew).",
+      "linux": "Uses Flatpak for apps installed with Flatpak."
+    },
+    "missing": {
+      "win32": "winget was not found. Install \"App Installer\" from the Microsoft Store to use this feature.",
+      "darwin": "Homebrew (brew.sh) was not found.",
+      "linux": "Flatpak was not found on this system."
+    },
+    "unsupported": "This feature is not available on this system.",
+    "applying": "Updating {{done}} of {{total}}: {{name}}",
+    "applyingHint": "It can take a few minutes per app. Keep RePID open.",
+    "listTitle": "Available updates ({{count}})",
+    "allCurrent": "Everything is up to date. 🎉",
+    "major": "Major version",
+    "majorHint": "Major version jump (for example 11 → 13): it may change how the app works or its data format. Review before updating; that is why it is not selected.",
+    "status": {
+      "updated": "Updated",
+      "failed": "Failed",
+      "not-found": "No longer listed",
+      "needs-admin": "Needs administrator",
+      "cancelled": "Cancelled"
+    },
+    "lastScan": "Last check: {{date}}",
+    "toast": {
+      "done_one": "{{count}} app updated",
+      "done_other": "{{count}} apps updated",
+      "none": "No app was updated",
+      "failed_one": "{{count}} could not be updated.",
+      "failed_other": "{{count}} could not be updated."
+    }
+  },
+  "health": {
+    "title": "Computer health",
+    "intro": "Your drives, battery, temperatures and space, explained simply.",
+    "scanning": "Checking your computer…",
+    "restorePoint": "Create restore point",
+    "needsAdmin": "Drive wear, temperature and errors can only be read as administrator.",
+    "drive": {
+      "healthy": "Healthy",
+      "warning": "Attention",
+      "unhealthy": "Failing",
+      "unknown": "No data"
+    },
+    "temp": "Temperature",
+    "wear": "Wear",
+    "hours": "Power-on hours",
+    "errors": "Read errors",
+    "battery": "Battery",
+    "charging": "Charging ·",
+    "capacity": "Capacity vs. new",
+    "cycles": "Charge cycles",
+    "system": "System",
+    "uptime": "Up for {{days}} d {{hours}} h",
+    "cpuTemp": "CPU",
+    "gpuTemp": "GPU",
+    "noCpuTemp": "Your computer does not expose the processor temperature without the manufacturer's tools.",
+    "space": "Disk space",
+    "free": "{{free}} free of {{total}}",
+    "findings": {
+      "allGood": "All good: no health problems found.",
+      "driveFailing": "Drive {{name}} reports it is failing. Back up your files as soon as possible.",
+      "driveWarning": "Drive {{name}} reports warnings. A backup is a good idea.",
+      "driveErrors": "Drive {{name}} had {{count}} uncorrected read errors: a sign of wear. Back up your files.",
+      "driveWorn": "SSD {{name}} has used {{pct}}% of its lifespan. Plan a replacement and back up your data.",
+      "driveWear": "SSD {{name}} has used {{pct}}% of its lifespan.",
+      "driveHot": "Drive {{name}} is at {{temp}} °C: check the ventilation.",
+      "volumeFull": "Drive {{mount}} is {{pct}}% full: almost out of space, Windows and apps may slow down. Use Disk and Cleanup.",
+      "volumeLow": "Drive {{mount}} is {{pct}}% full. Free up space with Disk or Cleanup.",
+      "batteryWorn": "The battery only holds {{pct}}% of its original charge: consider replacing it.",
+      "batteryAged": "The battery holds {{pct}}% of its original capacity: it lasts less than when it was new.",
+      "cpuHot": "The processor is at {{temp}} °C: clean the dust or check the ventilation.",
+      "gpuHot": "The graphics card is at {{temp}} °C: check the ventilation.",
+      "restart": "The computer has not restarted in {{days}} days. Restarting frees memory and applies pending updates."
+    },
+    "restore": {
+      "created": "Restore point created",
+      "recent": "There is already a restore point from the last 24 hours: you are covered",
+      "disabled": "Could not create a restore point: System Protection is turned off in Windows",
+      "needsAdmin": "Creating a restore point requires running RePID as administrator",
+      "unsupported": "Restore points only exist on Windows",
+      "failed": "Could not create the restore point"
+    }
+  },
+  "network": {
+    "title": "Who is using your internet?",
+    "scanning": "Checking connections…",
+    "summary_one": "{{count}} app connected to the internet now",
+    "summary_other": "{{count}} apps connected to the internet now",
+    "download": "Download",
+    "upload": "Upload",
+    "note": "Refreshes every 4 seconds. Shows each app's open connections and which servers it talks to. Blocking creates a Windows Firewall rule you can remove at any time.",
+    "needsAdmin": "To block an app's internet access, RePID needs administrator rights.",
+    "blockedIdle": "Programs blocked by RePID (not open now)",
+    "apps": "Apps with network activity",
+    "empty": "No app has open connections right now.",
+    "blockedBadge": "No internet",
+    "connections_one": "{{count}} active connection",
+    "connections_other": "{{count}} active connections",
+    "listening": "Listening on port {{ports}}",
+    "block": "Block internet",
+    "unblock": "Unblock",
+    "confirm": {
+      "title": "Block internet for {{name}}?",
+      "body": "RePID will create a Windows Firewall rule that stops this program from connecting to the internet. It keeps working offline (no updates, sync or online content).",
+      "undo": "You can unblock it here at any time, even when the program is closed."
+    },
+    "status": {
+      "blocked": "{{name}} can no longer connect to the internet",
+      "unblocked": "{{name}} has internet again",
+      "needs-admin": "Requires running RePID as administrator",
+      "protected": "This system component is protected",
+      "not-found": "The app is no longer open",
+      "unsupported": "Blocking is only available on Windows",
+      "failed": "Could not change the firewall rule"
+    }
+  },
+  "services": {
+    "title": "Services that start with Windows",
+    "scanning": "Reading services…",
+    "summary": "{{count}} services reviewed · {{rec}} suggested to set to manual",
+    "applySuggested_one": "Set {{count}} suggested to manual",
+    "applySuggested_other": "Set {{count}} suggested to manual",
+    "safeNote": "\"Manual\" means the service no longer starts with Windows, but it starts by itself when something needs it. RePID never disables or stops services, and never shows drivers, audio, network or security.",
+    "unsupported": "Services are only managed on Windows. On macOS and Linux use Startup.",
+    "needsAdmin": "Changing services requires running RePID as administrator.",
+    "history": "{{count}} services changed by RePID.",
+    "empty": "No services worth changing.",
+    "mode": {
+      "auto": "Automatic",
+      "delayed": "Automatic (delayed)",
+      "manual": "Manual",
+      "disabled": "Disabled"
+    },
+    "running": "Running",
+    "stopped": "Stopped",
+    "toManual": "Set to manual",
+    "undo": "Undo",
+    "nextBoot": "The effect shows from the next restart.",
+    "catalog": {
+      "telemetry": "Sends usage and diagnostic data to Microsoft. On manual, Windows works the same.",
+      "maps": "Downloads offline maps for the Maps app. If you do not use it, you will not notice.",
+      "retailDemo": "Store demo mode. Not used on personal computers.",
+      "mediaSharing": "Shares your Windows Media Player library on the local network. Starts if you use it.",
+      "fax": "Sending faxes. Starts by itself if you ever send one.",
+      "linkTracking": "Tracks files moved between computers on a company network. At home you will not notice.",
+      "search": "Indexes files for instant search. On manual, searching in Explorer and Start will be slower.",
+      "sysmain": "Preloads your most used apps into memory. Helps on slow drives (HDD); on SSDs the effect is smaller.",
+      "printing": "Print queue. If you have a printer, printing keeps working but the first job takes a bit longer.",
+      "updater": "Checks for updates for this app. On manual, the app still updates when you open it or through its scheduled task.",
+      "telemetryApp": "Collects the vendor's analytics or diagnostics. The app works the same without it at startup.",
+      "remote": "Lets others connect to this computer remotely. On manual, nobody can connect until you open the app.",
+      "database": "Local database. On manual it does not start with Windows: start the database (or the app that uses it) when you need it.",
+      "license": "Validates a program's license. If that program does not start afterwards, set it back to automatic.",
+      "thirdParty": "Another vendor's service. It may be needed by their program: change it only if you know what it does."
+    },
+    "toast": {
+      "manual_one": "{{count}} service set to manual",
+      "manual_other": "{{count}} services set to manual",
+      "restored_one": "{{count}} service restored",
+      "restored_other": "{{count}} services restored",
+      "needsAdmin": "Some require administrator."
+    },
+    "confirm": {
+      "title": "Set these services to manual?",
+      "action_one": "Set {{count}} to manual",
+      "action_other": "Set {{count}} to manual",
+      "body": "They will no longer start with Windows. They start by themselves when something needs them and you can undo it with one click.",
+      "ack": "I understand the effect of the services marked with caution."
+    },
+    "whatHappens": "What happens on manual:"
   }
 }

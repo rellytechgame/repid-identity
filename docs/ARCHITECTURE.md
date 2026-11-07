@@ -86,6 +86,21 @@ Orphans (`orphans-windows.ts`, `orphans-unix.ts`) cross every top-level folder o
 
 Pure matching rules live in `shared/engine/uninstall.ts` (`productKeys`, `vendorKeys`, `matchFolders`, `classifyApp`, `parseUninstallString`) and are unit-tested with cases taken from a real inventory.
 
+## Disk analyzer
+
+`src/main/disk/` — `DiskAnalyzer` walks a root with a bounded pool of 24 concurrent directory reads (`opendir`, symlinks and junctions skipped), sums sizes up the folder chain, folds each folder to its 40 biggest children (`foldTree`) and keeps files ≥ 100 MB and duplicate candidates ≥ 1 MB. Duplicates: size → SHA-256 of the first and last 64 KB → full streamed SHA-256 (capped at 40 GB, biggest savings first). Files and sets get session ids; `delete` re-checks removability, size and modification time, refuses any request that would empty a set (`refusedDuplicateIds`) and confirms another copy still exists before calling the injected `shell.trashItem`. Pure rules (`squarify`, `foldTree`, `suggestKeep`, `isToolPath`, `isDuplicateCandidate`) live in `shared/engine/disk.ts`; `disk.test.ts` exercises the real file system.
+
+## Automation
+
+`src/main/automation/` — a 15-second tick in the main process (so it keeps working with the window hidden in the tray). Auto-boost applies `planBoost(…, 'gaming', trigger)` through the same `Booster` the UI uses, remembers which boost it started and never touches one the user started; a manual stop suppresses the trigger until that app closes. Memory samples are taken once a minute and evaluated with `detectGrowth`; drives are checked every 10 minutes. Scheduled cleanup reuses `Cleaner.scan/clean` with only safe, pre-selected, unblocked targets. Configuration is validated by `sanitizeAutomation` (the UI can never set the schedule clock) and written atomically to `userData/automation.json`. Notifications are localized in `messages.ts` and open the relevant section on click.
+
+## Updates, health, network, services
+
+- `updates/` — `winget upgrade` parsed by column position (`parse.ts`), `brew outdated --json=v2`, `flatpak remote-ls --updates`; upgrades with `--exact` ids from the latest scan.
+- `health/` — `Get-PhysicalDisk` + `Get-StorageReliabilityCounter`, `powercfg /batteryreport /xml`, systeminformation elsewhere; findings from `shared/engine/health.ts`. Restore points with `Checkpoint-Computer`, comparing the newest sequence number before and after to tell *created* from *a recent one exists*.
+- `network/` — `si.networkConnections()` grouped per app by `summarizeConnections`; speeds measured from byte counters between scans; outbound block rules named `RePID-Block-<sha256(path)>` in the "RePID Identity" firewall group.
+- `services/` — `Win32_Service` with executable company, classified by `classifyService` (curated Microsoft list, third-party updaters/telemetry/remote/database/license, everything hardware or security excluded); `Set-Service -StartupType Manual`, restore with `Automatic` or `sc config start= delayed-auto`; journal in `userData/services-journal.json`, verified by reading the start mode back.
+
 ## Privileges
 
 - Windows: `requestedExecutionLevel: requireAdministrator` in the packaged manifest. Denied terminations retry with `taskkill /F` (which enables SeDebugPrivilege).

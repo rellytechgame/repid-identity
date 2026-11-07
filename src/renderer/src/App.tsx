@@ -10,6 +10,12 @@ import { Icon, type IconName } from './components/Icon'
 import { LogoMark, Wordmark } from './components/Logo'
 import { StarButton, Toasts, type Toast } from './components/ui'
 import { About } from './views/About'
+import { AutomationView } from './views/AutomationView'
+import { DiskView } from './views/DiskView'
+import { HealthView } from './views/HealthView'
+import { NetworkView } from './views/NetworkView'
+import { ServicesView } from './views/ServicesView'
+import { UpdatesView } from './views/UpdatesView'
 import { BoostView } from './views/BoostView'
 import { Dashboard } from './views/Dashboard'
 import { DetailPanel } from './views/DetailPanel'
@@ -20,18 +26,60 @@ import { SettingsView } from './views/SettingsView'
 import { StartupView } from './views/StartupView'
 import { UninstallView } from './views/UninstallView'
 
-type View = 'dashboard' | 'processes' | 'boost' | 'startup' | 'uninstall' | 'cleaner' | 'settings' | 'about'
+type View =
+  | 'dashboard'
+  | 'processes'
+  | 'network'
+  | 'health'
+  | 'boost'
+  | 'automation'
+  | 'startup'
+  | 'services'
+  | 'cleaner'
+  | 'disk'
+  | 'uninstall'
+  | 'updates'
+  | 'settings'
+  | 'about'
 
-const NAV: Array<{ id: View; icon: IconName }> = [
-  { id: 'dashboard', icon: 'dashboard' },
-  { id: 'processes', icon: 'list' },
-  { id: 'boost', icon: 'rocket' },
-  { id: 'startup', icon: 'power' },
-  { id: 'uninstall', icon: 'package' },
-  { id: 'cleaner', icon: 'broom' },
-  { id: 'settings', icon: 'settings' },
-  { id: 'about', icon: 'info' }
+/** Grouped by what the user wants to do: look, speed up, free space, configure. */
+const NAV: Array<{ section: string; items: Array<{ id: View; icon: IconName }> }> = [
+  {
+    section: 'monitor',
+    items: [
+      { id: 'dashboard', icon: 'dashboard' },
+      { id: 'processes', icon: 'list' },
+      { id: 'network', icon: 'wifi' },
+      { id: 'health', icon: 'pulse' }
+    ]
+  },
+  {
+    section: 'optimize',
+    items: [
+      { id: 'boost', icon: 'rocket' },
+      { id: 'automation', icon: 'clock' },
+      { id: 'startup', icon: 'power' },
+      { id: 'services', icon: 'server' }
+    ]
+  },
+  {
+    section: 'clean',
+    items: [
+      { id: 'cleaner', icon: 'broom' },
+      { id: 'disk', icon: 'disk' },
+      { id: 'uninstall', icon: 'package' },
+      { id: 'updates', icon: 'download' }
+    ]
+  },
+  {
+    section: 'app',
+    items: [
+      { id: 'settings', icon: 'settings' },
+      { id: 'about', icon: 'info' }
+    ]
+  }
 ]
+const VIEWS = new Set<string>(NAV.flatMap((s) => s.items.map((i) => i.id)))
 
 export function App() {
   const { t, i18n } = useTranslation()
@@ -64,8 +112,11 @@ export function App() {
   }, [settings.language, i18n])
 
   useEffect(() => {
-    void api.setSettings({ protectedNames: settings.protectedNames })
-  }, [settings.protectedNames])
+    void api.setSettings({ protectedNames: settings.protectedNames, language: i18n.language })
+  }, [settings.protectedNames, i18n.language])
+
+  // A clicked system notification (automation alerts) opens its section.
+  useEffect(() => api.onNavigate((v) => VIEWS.has(v) && setView(v as View)), [])
 
   const pushToast = useCallback((toast: Omit<Toast, 'id'>) => {
     const id = Date.now() + Math.random()
@@ -203,17 +254,23 @@ export function App() {
           <Wordmark />
         </div>
         <nav className="sidebar__nav" aria-label={t('nav.label')}>
-          {NAV.map((item) => (
-            <button
-              key={item.id}
-              className={`nav-item ${view === item.id ? 'is-active' : ''}`}
-              onClick={() => setView(item.id)}
-              aria-current={view === item.id ? 'page' : undefined}
-            >
-              <Icon name={item.icon} />
-              <span>{t(`nav.${item.id}`)}</span>
-              {item.id === 'processes' && snapshot && <span className="nav-item__count">{snapshot.groups.length}</span>}
-            </button>
+          {NAV.map((group) => (
+            <div key={group.section} className="nav-section">
+              <span className="nav-section__label">{t(`nav.sections.${group.section}`)}</span>
+              {group.items.map((item) => (
+                <button
+                  key={item.id}
+                  className={`nav-item ${view === item.id ? 'is-active' : ''}`}
+                  onClick={() => setView(item.id)}
+                  aria-current={view === item.id ? 'page' : undefined}
+                >
+                  <Icon name={item.icon} />
+                  <span>{t(`nav.${item.id}`)}</span>
+                  {item.id === 'processes' && snapshot && <span className="nav-item__count">{snapshot.groups.length}</span>}
+                  {item.id === 'boost' && boost.active && <span className="nav-item__dot" title={t('nav.boostActive')} />}
+                </button>
+              ))}
+            </div>
           ))}
         </nav>
         <div className="sidebar__footer">
@@ -277,6 +334,12 @@ export function App() {
               <BoostView snapshot={snapshot} boost={boost} busy={busy} onApply={(p, f, e) => void applyBoost(p, f, e)} onStop={() => void stopBoost()} />
             )}
             {view === 'startup' && <StartupView notify={pushToast} />}
+            {view === 'services' && <ServicesView notify={pushToast} />}
+            {view === 'automation' && <AutomationView snapshot={snapshot} notify={pushToast} />}
+            {view === 'network' && <NetworkView notify={pushToast} />}
+            {view === 'health' && <HealthView notify={pushToast} />}
+            {view === 'disk' && <DiskView notify={pushToast} />}
+            {view === 'updates' && <UpdatesView notify={pushToast} />}
             {view === 'uninstall' && <UninstallView notify={pushToast} />}
             {view === 'cleaner' && <CleanerView onResult={(result) => reportClean(result)} />}
             {view === 'settings' && <SettingsView settings={settings} update={update} snapshot={snapshot} />}

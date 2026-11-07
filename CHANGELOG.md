@@ -2,6 +2,23 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [1.5.0] — 2026-11-06
+
+### Added
+- **Disk analyzer**: clickable treemap of your home folder or any drive, the biggest files (with a "not touched for a year" filter) and duplicates confirmed by SHA-256 content hash. Deletions go to the Recycle Bin, always keep one copy per duplicate set and are refused if the file changed since the scan.
+- **Automatic mode**: performance mode turns on by itself for games (Steam, Epic, GOG, Xbox, EA, Ubisoft, Riot, Battle.net libraries) and apps you choose, and off when they close; daily/weekly cleanup of safe items only; system notifications for apps whose memory keeps growing and for nearly full drives; optional tray icon and start minimized at sign-in.
+- **App updates** through winget, Homebrew or Flatpak, with major-version jumps flagged and never pre-selected.
+- **Health**: drive status (wear, temperature, errors and hours when elevated), battery capacity vs. design, temperatures, free space and uptime, with plain-language findings.
+- **Restore points** on Windows: on demand, and automatically before changing services, uninstalling an app or removing `Windows.old` (can be turned off in Settings).
+- **Network by app**: open connections and remote servers per app, download/upload speed, and per-program internet blocking with Windows Firewall rules that can be removed at any time.
+- **Windows services**: curated list of auto-start services that can start on demand instead; switched to *Manual* (never disabled), journaled, verified and restorable exactly (including delayed start).
+- Sidebar grouped into Monitor, Speed up, Free up space and RePID.
+
+### Security
+- Disk: ids only from the last scan; Windows, `Program Files` on any drive, `ProgramData`, AppData, the Recycle Bin, dot-folders, `node_modules`/`venv`/`vendor`/build outputs are never offered; libraries are never offered as duplicates. Rules come from a real dry run where a naive scan flagged Gradle caches and Android emulator images.
+- Updates: package ids are pattern-validated, must appear in the latest scan and are passed as separate arguments with `--exact`.
+- Firewall and services: program paths come from the engine's own process list; rule ids and service names are pattern-validated; values reach PowerShell through environment variables; drivers, audio, network, security and uncurated Windows internals are never offered.
+
 ## [1.4.0] — 2026-11-06
 
 ### Added

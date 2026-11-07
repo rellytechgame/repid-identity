@@ -144,6 +144,8 @@ export interface ProcessDetails {
 export interface EngineSettings {
   /** Extra process names the user never wants touched (case-insensitive). */
   protectedNames: string[]
+  /** UI language, for the system notifications raised by the main process. */
+  language?: string
 }
 
 // ───────────── Cleanup ─────────────
@@ -437,6 +439,297 @@ export interface LeftoverCleanResult {
   backupDir?: string
 }
 
+// ───────────── Disk analyzer ─────────────
+
+export interface DiskRoot {
+  /** Session id; scans are requested by id, never by path. */
+  id: string
+  path: string
+  label: string
+  kind: 'home' | 'drive'
+  totalBytes?: number
+  freeBytes?: number
+}
+
+export interface DiskNode {
+  name: string
+  sizeBytes: number
+  fileCount: number
+  /** Largest children only; smaller ones are folded into one "other files" entry. */
+  children?: DiskNode[]
+  /** Folded remainder (many small files/folders). */
+  other?: boolean
+  /** Folder RePID will never offer to delete (system, programs, app data). */
+  system?: boolean
+}
+
+export interface DiskFile {
+  /** Session id; deletion and "show in folder" carry ids only. */
+  id: string
+  path: string
+  sizeBytes: number
+  modified: number
+  /** False inside system/program folders: shown, never deletable. */
+  removable: boolean
+}
+
+export interface DuplicateGroup {
+  id: string
+  sizeBytes: number
+  /** Content hash prefix (SHA-256) shared by every copy. */
+  hash: string
+  files: DiskFile[]
+  /** Copy RePID suggests keeping (oldest, outside Downloads/temp folders). */
+  keepId: string
+}
+
+export interface DiskScanResult {
+  rootId: string
+  root: string
+  scannedAt: number
+  durationMs: number
+  totalBytes: number
+  fileCount: number
+  tree: DiskNode
+  /** Files ≥ 100 MB, biggest first. */
+  largeFiles: DiskFile[]
+  /** True when the scan stopped at its file limit or was cancelled. */
+  truncated: boolean
+}
+
+export interface DuplicateScanResult {
+  groups: DuplicateGroup[]
+  wastedBytes: number
+  hashedBytes: number
+  truncated: boolean
+}
+
+export interface DiskDeleteRequest {
+  ids: string[]
+}
+
+export interface DiskDeleteResult {
+  removed: number
+  recycledBytes: number
+  failed: Array<{ id: string; error: string }>
+  /** Ids refused because they would delete every copy of a duplicate group or changed since the scan. */
+  refused: string[]
+}
+
+export interface TaskProgress {
+  task: 'disk-scan' | 'duplicates' | 'updates'
+  done: number
+  total?: number
+  current?: string
+}
+
+// ───────────── Automation ─────────────
+
+export interface AutomationConfig {
+  autoBoost: {
+    enabled: boolean
+    /** Also boost apps detected as games (gaming category). */
+    games: boolean
+    /** Extra apps chosen by the user, by process name (lower-case). */
+    apps: string[]
+  }
+  scheduledClean: {
+    enabled: boolean
+    frequency: 'daily' | 'weekly'
+    lastRun?: number
+  }
+  alerts: {
+    memoryGrowth: boolean
+    diskLow: boolean
+    /** Used-space percentage that triggers the low-disk alert. */
+    diskThreshold: number
+  }
+  background: {
+    /** Closing the window keeps RePID in the tray so automation keeps working. */
+    keepInTray: boolean
+    launchAtLogin: boolean
+  }
+}
+
+export interface AutomationEvent {
+  at: number
+  kind: 'boost-on' | 'boost-off' | 'clean' | 'memory-growth' | 'disk-low' | 'error'
+  /** Values for the localized message (app name, size, drive…). */
+  params: Record<string, string>
+}
+
+export interface AutomationState {
+  config: AutomationConfig
+  events: AutomationEvent[]
+  /** App currently boosted by automation (not by the user). */
+  autoBoosting?: string
+  nextCleanAt?: number
+  loginItemSupported: boolean
+}
+
+// ───────────── App updates ─────────────
+
+export type UpdateSource = 'winget' | 'brew' | 'brew-cask' | 'flatpak'
+
+export interface AppUpdate {
+  /** Package id in its manager (winget id, brew name, flatpak ref). */
+  id: string
+  name: string
+  current: string
+  available: string
+  source: UpdateSource
+  /** New major version (11 → 13): may change behavior or data formats, never pre-selected. */
+  major?: boolean
+}
+
+export interface UpdateReport {
+  supported: boolean
+  /** Package manager missing (winget not installed, no Homebrew…). */
+  managerMissing?: boolean
+  updates: AppUpdate[]
+  scannedAt: number
+}
+
+export interface UpdateOutcome {
+  id: string
+  status: 'updated' | 'failed' | 'not-found' | 'needs-admin' | 'cancelled'
+  error?: string
+}
+
+// ───────────── Health ─────────────
+
+export interface DriveHealth {
+  name: string
+  media: 'SSD' | 'HDD' | 'NVMe' | 'Unknown'
+  sizeBytes: number
+  status: 'healthy' | 'warning' | 'unhealthy' | 'unknown'
+  temperatureC?: number
+  /** SSD wear used, 0–100 %. */
+  wearPct?: number
+  powerOnHours?: number
+  readErrors?: number
+}
+
+export interface VolumeUsage {
+  mount: string
+  sizeBytes: number
+  usedBytes: number
+}
+
+export interface BatteryHealth {
+  /** Full-charge capacity versus design capacity, 0–100 %. */
+  capacityPct?: number
+  designMWh?: number
+  fullMWh?: number
+  cycles?: number
+  percent?: number
+  charging?: boolean
+}
+
+export interface HealthFinding {
+  severity: 'ok' | 'info' | 'warning' | 'critical'
+  key: string
+  params?: Record<string, string>
+}
+
+export interface HealthReport {
+  drives: DriveHealth[]
+  volumes: VolumeUsage[]
+  battery?: BatteryHealth
+  cpuTempC?: number
+  gpuTempC?: number
+  uptimeSec: number
+  /** Reliability counters (wear, temperature) need administrator rights on Windows. */
+  elevated: boolean
+  findings: HealthFinding[]
+  scannedAt: number
+}
+
+export interface RestorePointResult {
+  status: 'created' | 'recent-exists' | 'disabled' | 'needs-admin' | 'unsupported' | 'failed'
+  error?: string
+}
+
+export type RestoreReason = 'manual' | 'services' | 'uninstall' | 'cleanup'
+
+// ───────────── Network ─────────────
+
+export interface NetworkApp {
+  groupId: string
+  name: string
+  product?: string
+  connections: number
+  listening: number[]
+  /** Distinct remote hosts (IP:port), busiest first, at most 8. */
+  remotes: string[]
+  risk: Risk
+  blocked: boolean
+  /** Has an executable path, so a firewall rule can target it. */
+  blockable: boolean
+}
+
+export interface NetworkReport {
+  apps: NetworkApp[]
+  /** Programs blocked by RePID that are not running right now. */
+  blockedIdle: Array<{ id: string; path: string }>
+  rxBytesPerSec: number
+  txBytesPerSec: number
+  blockSupported: boolean
+  elevated: boolean
+  scannedAt: number
+}
+
+export interface NetworkBlockRequest {
+  /** Running app to block (re-resolved in the main process). */
+  groupId?: string
+  /** Existing RePID rule to remove. */
+  ruleId?: string
+  block: boolean
+}
+
+export interface NetworkBlockResult {
+  status: 'blocked' | 'unblocked' | 'needs-admin' | 'protected' | 'not-found' | 'unsupported' | 'failed'
+  error?: string
+}
+
+// ───────────── Windows services ─────────────
+
+export interface ServiceEntry {
+  name: string
+  displayName: string
+  /** Curated catalog key (what it does / what happens), or a generic third-party note. */
+  catalogKey?: string
+  vendor?: string
+  thirdParty: boolean
+  startMode: 'auto' | 'delayed' | 'manual' | 'disabled'
+  running: boolean
+  risk: 'safe' | 'caution'
+  recommended: boolean
+  changedByRepid: boolean
+  /** What RePID found before changing it (for undo). */
+  originalMode?: 'auto' | 'delayed'
+}
+
+export interface ServicesReport {
+  supported: boolean
+  elevated: boolean
+  services: ServiceEntry[]
+  scannedAt: number
+}
+
+export interface ServiceChangeRequest {
+  names: string[]
+  /** true = put back as RePID found it, false = set to manual. */
+  restore: boolean
+  allowCaution: boolean
+}
+
+export interface ServiceChangeOutcome {
+  name: string
+  status: 'changed' | 'needs-admin' | 'not-allowed' | 'not-found' | 'failed'
+  error?: string
+}
+
 /** API exposed on `window.repid` by the preload script. */
 export interface RepidApi {
   platform: Platform
@@ -465,6 +758,27 @@ export interface RepidApi {
   uninstallClean(request: LeftoverCleanRequest): Promise<LeftoverCleanResult>
   /** Opens the folder with registry/task backups (fixed location owned by the main process). */
   uninstallOpenBackups(): Promise<void>
+  diskRoots(): Promise<DiskRoot[]>
+  diskScan(rootId: string): Promise<DiskScanResult>
+  /** Finds identical files (same size, then same SHA-256) under the last scanned root. */
+  diskDuplicates(): Promise<DuplicateScanResult>
+  diskCancel(): Promise<void>
+  diskDelete(request: DiskDeleteRequest): Promise<DiskDeleteResult>
+  diskReveal(id: string): Promise<void>
+  /** Progress of long tasks (disk scan, duplicates, updates). Returns an unsubscribe function. */
+  onProgress(listener: (progress: TaskProgress) => void): () => void
+  /** A system notification was clicked: the main process asks the UI to open this section. */
+  onNavigate(listener: (view: string) => void): () => void
+  automationGet(): Promise<AutomationState>
+  automationSet(config: AutomationConfig): Promise<AutomationState>
+  updatesScan(): Promise<UpdateReport>
+  updatesApply(ids: string[]): Promise<UpdateOutcome[]>
+  healthScan(): Promise<HealthReport>
+  restorePoint(reason: RestoreReason): Promise<RestorePointResult>
+  networkScan(): Promise<NetworkReport>
+  networkBlock(request: NetworkBlockRequest): Promise<NetworkBlockResult>
+  servicesScan(): Promise<ServicesReport>
+  servicesSet(request: ServiceChangeRequest): Promise<ServiceChangeOutcome[]>
   openRepo(path?: RepoPath): Promise<void>
   /** Opens the project's donation page (fixed URL owned by the main process). */
   openDonate(): Promise<void>

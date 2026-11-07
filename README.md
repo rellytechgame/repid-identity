@@ -48,6 +48,10 @@ A free, open-source desktop app for **Windows, macOS and Linux** that explains �
   - [Smart uninstaller](#smart-uninstaller)
     - [Leftovers of apps you already uninstalled](#leftovers-of-apps-you-already-uninstalled)
   - [Deep cleanup](#deep-cleanup)
+  - [Disk analyzer](#disk-analyzer)
+  - [Automatic mode](#automatic-mode)
+  - [App updates](#app-updates)
+  - [Health, network and services](#health-network-and-services)
   - [Privacy](#privacy)
   - [Development](#development)
   - [Project structure](#project-structure)
@@ -82,6 +86,12 @@ RePID (*Re*-identify the *PID*) closes that gap: it **identifies** every process
 | ⏻ **Startup manager** | Every program that opens at sign-in (Registry Run keys, Startup folders, Microsoft Store apps, logon scheduled tasks · LaunchAgents and login items · XDG autostart) with its real name, publisher and **live measured impact**. Disable reversibly with the OS's own mechanism, see what will happen first, and restore everything RePID changed in one click. |
 | 📦 **Smart uninstaller** | Runs each app's **own uninstaller**, then finds what it left behind — install folder, AppData/ProgramData folders, caches, registry keys, Run entries, scheduled tasks and shortcuts (macOS: `~/Library` by bundle id · Linux: Flatpak). Leftovers are matched by **exact name**, never other apps' folders; files go to the **Recycle Bin** and registry keys are **backed up** first. Also finds **leftovers of apps you already uninstalled**: unclaimed folders, broken shortcuts, startup entries and “Installed apps” entries. |
 | 🧹 **Deep cleanup** | Temp files, system temp, update cache, Recycle Bin/Trash, DNS cache, package-manager caches and the **cache, history and cookies of every browser** (Chrome, Edge, Firefox, Brave, Opera, Opera GX, Vivaldi, Chromium, Safari). Every item says *exactly what will happen* before you delete it; irreversible items need explicit confirmation. Passwords, bookmarks and documents are never touched. |
+| 🗺️ **Disk analyzer** | A clickable map of what fills your disk, the biggest files (filter: untouched for a year) and **real duplicates** found by SHA-256 content hash. Always keeps one copy, never offers system, program, app-data or tool folders, and sends everything to the Recycle Bin. |
+| ⏱️ **Automatic mode** | Performance mode turns on by itself when a game (Steam, Epic, GOG, Xbox, EA, Ubisoft, Riot, Battle.net libraries) or an app you chose opens, and off when it closes; scheduled cleanup of safe items only; alerts for runaway memory and full disks; optional tray icon and start at sign-in. |
+| ⬇️ **App updates** | Lists outdated programs and updates them with the OS's own package manager (winget · Homebrew · Flatpak). Major version jumps are flagged and never pre-selected. |
+| 🩺 **Health** | Drive status, SSD wear, temperatures and errors, battery capacity vs. new, free space and uptime, explained in plain language; one-click Windows restore point. |
+| 🌐 **Network by app** | Which apps are online right now, how many connections and to which servers; block or unblock an app's internet with a Windows Firewall rule. |
+| 🧩 **Windows services** | A curated list of auto-start services (updaters, telemetry, remote access, databases…) that can start on demand instead. Switch to *Manual* — never disabled — with what happens explained, verified and undoable. Drivers, audio, network and security are never shown. |
 | 🔑 **Full privileges** | Windows builds run as administrator (UAC prompt at launch) to end any process, stop services and clean system folders. macOS/Linux ask for your password only for the actions that need it (one prompt per action). Critical processes stay blocked regardless. |
 | 🌍 **Multilingual** | Spanish and English built in. Adding a language is adding **one JSON file** — the UI discovers it automatically. |
 | 🎨 **Polished UX** | Dark/light/system themes, keyboard accessible, reduced-motion aware, native-feeling title bar on every OS. |
@@ -96,6 +106,12 @@ RePID (*Re*-identify the *PID*) closes that gap: it **identifies** every process
 | <img src="assets/screenshots/boost.png" alt="Performance mode active with the Gaming profile: a priority app and background apps in efficiency mode" /> | <img src="assets/screenshots/startup.png" alt="Startup manager listing programs that open at sign-in with impact, suggestions and what happens if disabled" /> |
 | **Smart uninstaller: every leftover, reviewed** | **Deep cleanup with clear consequences** |
 | <img src="assets/screenshots/uninstall.png" alt="Uninstall wizard listing the leftovers an app left behind: folders, registry keys and a scheduled task, each with the reason it was matched" /> | <img src="assets/screenshots/cleanup.png" alt="Cleanup module listing temp files, recycle bin, DNS and per-browser cache, history and cookies with what happens if deleted" /> |
+| **Disk map: what fills your disk** | **Automatic mode** |
+| <img src="assets/screenshots/disk.png" alt="Disk analyzer showing a treemap of the home folder with protected folders striped" /> | <img src="assets/screenshots/automation.png" alt="Automatic mode: performance mode for games, scheduled cleanup, alerts and background options" /> |
+| **App updates with winget, Homebrew or Flatpak** | **Health in plain language** |
+| <img src="assets/screenshots/updates.png" alt="List of apps with new versions, major versions flagged" /> | <img src="assets/screenshots/health.png" alt="Health: drives, battery capacity, temperatures and disk space" /> |
+| **Who is using your internet** | **Services that start with Windows** |
+| <img src="assets/screenshots/network.png" alt="Apps with network connections and a button to block internet access" /> | <img src="assets/screenshots/services.png" alt="Curated Windows services with suggestions to switch to manual" /> |
 | **Your language, your rules** | |
 | <img src="assets/screenshots/settings.png" alt="Settings: language, theme, safety and protected processes" /> | |
 
@@ -236,9 +252,37 @@ Safety rules learned from a dry run over 69 real installed apps: names shorter t
 
 Open browsers lock their files: RePID shows which ones are open and offers to close them (warning about unsaved work) or skips them. Deletion is confined to each target folder, never follows symbolic links or junctions, refuses over-broad roots (a misconfigured `%TEMP%` such as `C:\`) and only accepts target ids from the UI — never paths.
 
+## Disk analyzer
+
+1. **Map.** Pick your home folder or a drive. RePID walks it in parallel (about 1.5 million files in 80 seconds on a laptop SSD), never follows symbolic links or junctions, and draws a squarified treemap you can click into.
+2. **Large files.** Files of 100 MB or more, with a filter for the ones untouched for over a year.
+3. **Duplicates.** Same size → same first and last 64 KB → same full **SHA-256**. Identical names are not enough.
+
+What is never offered for deletion (shown striped in the map): Windows and `Program Files` on any drive, `ProgramData`, AppData, the Recycle Bin, and **tool folders** — any dot-folder (`.git`, `.gradle`, `.android`, `.nuget`…), `node_modules`, `venv`, `vendor`, Go module cache, build outputs. Libraries (`.dll`, `.jar`, `.so`…) are never offered as duplicates; programs only when they sit in Downloads. A duplicate set always keeps one copy (the engine refuses a request that would remove all of them), files that changed since the scan are refused, and everything goes to the Recycle Bin. These rules came from a real dry run, where a naive scan flagged Gradle caches and Android emulator images as "duplicates".
+
+## Automatic mode
+
+| | What it does | Safety |
+|---|---|---|
+| **Performance mode for games** | When a game from a store library or an app on your list opens, applies the Gaming profile (focus on it, background apps in efficiency mode). Off when it closes. | Never overrides a boost you started; if you stop it by hand it stays off until that app closes. Launchers, anti-cheat and crash reporters are not games. |
+| **Scheduled cleanup** | Daily or weekly. | Only targets RePID marks safe and pre-selected; never sensitive data, never anything an open app is using, never admin-only targets without admin, never during a game. First run is one full interval after turning it on. |
+| **Alerts** | An app whose memory keeps climbing (+1 GB and +50 % in 30 min, above 1.5 GB, without settling), a drive above your threshold. | System notifications; clicking one opens the right section. |
+| **Background** | Keep running in the tray when the window closes; start minimized at sign-in (Windows/macOS). | Off by default. |
+
+## App updates
+
+RePID runs the platform's package manager — `winget upgrade` on Windows, `brew outdated` on macOS, `flatpak remote-ls --updates` on Linux — and installs the updates you choose with `--exact` ids passed as separate arguments. winget output is parsed by column position, so it works in any Windows language. Major version jumps (MariaDB 11 → 13, WinRAR 6 → 7) can change how an app or its data works, so they are flagged and never pre-selected.
+
+## Health, network and services
+
+- **Health:** drive health from Windows Storage (with wear, temperature, read errors and power-on hours when RePID runs as administrator) or SMART elsewhere; battery full-charge vs. design capacity from `powercfg /batteryreport` (no admin needed); CPU/GPU temperature when the hardware exposes it; space per drive; days since the last restart. Findings are ordered worst first.
+- **Restore points:** on Windows (administrator, System Protection on) RePID can create a restore point by hand, and — unless you turn it off in Settings — automatically before changing services, uninstalling an app or removing `Windows.old`. Windows allows one point per 24 hours; RePID tells you when a recent one already covers you.
+- **Network:** open connections per app (loopback ignored), the servers it talks to and the ports it listens on, refreshed every 4 seconds. On Windows, *Block internet* adds an outbound Windows Firewall rule (group "RePID Identity") for that program; rules are listed even when the program is closed and removed with one click. System components cannot be blocked.
+- **Services (Windows):** only services that start automatically and match a curated list: Microsoft telemetry, Maps, link tracking, fax and demo mode (suggested); Search, SysMain and Print Spooler (caution); third-party updaters and analytics (suggested); remote access, databases and license managers (caution, never pre-selected). Drivers, audio, touchpad, GPU, network, security and any other Windows internal are never shown. RePID only switches *Automatic → Manual* (Windows still starts the service on demand), records the original mode (including *delayed*), verifies the change and restores it exactly.
+
 ## Privacy
 
-RePID makes **no network requests** except one optional, anonymous call to the public GitHub API to show the star count on the *About* screen. It has no analytics, no crash reporting service and no accounts. Settings live in the app's local storage.
+RePID makes **no network requests of its own** except one optional, anonymous call to the public GitHub API to show the star count on the *About* screen. The *Updates* section runs your system's package manager (winget, Homebrew or Flatpak), which contacts its own repositories — only when you open that section. It has no analytics, no crash reporting service and no accounts. Settings live in the app's local storage.
 
 ## Development
 
@@ -259,7 +303,7 @@ npm run dev          # Electron app with hot reload
 | `npm run build:web` | Builds the web demo into `dist-web/` (deployable to Vercel). |
 | `npm run dist` / `dist:win` / `dist:mac` / `dist:linux` | Produces installers in `release/` with electron-builder. |
 | `npm run typecheck` | TypeScript strict type checking. |
-| `npm test` | Unit tests (Vitest) for grouping, classification, protection and Smart Free. |
+| `npm test` | Unit tests (Vitest): engine logic, cleaner, uninstaller, disk analyzer (real temp files), automation scheduler, parsers. |
 | `npm run i18n:check` | Verifies every language has every key and every catalog entry has a description. |
 | `npm run icons` | Regenerates the app icon and social preview from `assets/brand/repid-mark.svg`. |
 
@@ -274,6 +318,9 @@ repid-identity/
 │  ├─ main/                 # Electron main process (privileged)
 │  │  ├─ engine/            # sampling, services, GPU, metadata, killer, privileges
 │  │  ├─ cleaner/           # cleanup targets, safe deletion, Firefox history (+ tests)
+│  │  ├─ startup/ boost/ uninstall/   # startup manager, performance mode, uninstaller
+│  │  ├─ disk/ automation/ updates/   # disk analyzer, background automation, package managers
+│  │  ├─ health/ network/ services/   # health & restore points, firewall, Windows services
 │  │  ├─ ipc.ts             # validated IPC surface
 │  │  └─ index.ts           # window, CSP, lifecycle
 │  ├─ preload/              # contextBridge → window.repid (typed, minimal)
@@ -307,9 +354,10 @@ The website ([repid-identity.vercel.app](https://repid-identity.vercel.app)) is 
 - [x] Leftovers of already-uninstalled apps, app caches, crash dumps and Windows.old cleanup (v1.4)
 - [ ] Code-signed installers for Windows and macOS (**funded by donations**)
 - [ ] Auto-update through GitHub Releases
-- [ ] Per-process disk and network I/O
-- [ ] Watchdog: alerts for memory leaks and runaway processes; rules such as "warn when Y exceeds 4 GB"
-- [ ] Tray icon with quick Smart Free
+- [x] Disk analyzer, automatic mode, app updates, health, network by app and Windows services (v1.5)
+- [ ] Per-process disk and network bandwidth
+- [ ] Custom alert rules such as "warn when Y exceeds 4 GB"
+- [ ] Quick Smart Free from the tray icon
 - [ ] Community-maintained catalog file with remote updates (opt-in)
 - [ ] More languages: Português, Français, Deutsch, Italiano…
 

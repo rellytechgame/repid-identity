@@ -38,8 +38,16 @@ export class Engine {
 
   constructor(private readonly selfPids: () => Set<number>) {}
 
+  private lang = 'en'
+
   setSettings(settings: EngineSettings): void {
     this.userProtected = new Set(settings.protectedNames.map(normalizeName))
+    if (settings.language) this.lang = settings.language
+  }
+
+  /** UI language (notifications are raised here, outside the renderer). */
+  get language(): string {
+    return this.lang
   }
 
   private protection(): ProtectionContext {

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { CleanOutcome, CleanResult, CleanerReport, CleanerTarget } from '@shared/types'
 import { api, isDemo } from '../api'
+import { readSetting } from '../hooks'
 import { formatBytes } from '../format'
 import { Icon } from '../components/Icon'
 import { AppAvatar, Modal } from '../components/ui'
@@ -63,6 +64,8 @@ export function CleanerView({ onResult }: Props) {
     setConfirming(false)
     setCleaning(true)
     try {
+      // Removing Windows.old ends the way back to the previous Windows: take a restore point first when possible.
+      if (chosen.some((x) => x.id === 'windows-old') && readSetting('restorePoints') && !isDemo) await api.restorePoint('cleanup').catch(() => undefined)
       const result = await api.cleanerClean({ ids: chosen.map((x) => x.id), closeBlocking, acknowledgedSensitive })
       setLastOutcomes(new Map(result.outcomes.map((o) => [o.id, o])))
       onResult(result, report)

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { InstalledApp, Leftover, LeftoverCleanResult, UninstallReport, UninstallResult } from '@shared/types'
+import { readSetting } from '../hooks'
+import { announceRestorePoint } from './HealthView'
 import { api, isDemo } from '../api'
 import { formatBytes } from '../format'
 import { Icon } from '../components/Icon'
@@ -189,6 +191,8 @@ function UninstallWizard({ app, notify, onClose }: { app: InstalledApp; notify: 
   const start = async () => {
     setStep('running')
     try {
+      // Windows restore point first (needs admin; skipped silently otherwise): undoes registry/driver changes of the uninstaller.
+      if (!app.uninstallerMissing && readSetting('restorePoints') && !isDemo) announceRestorePoint(await api.restorePoint('uninstall'), notify, t, false)
       receive(
         app.uninstallerMissing
           ? await api.uninstallForceScan(app.id)

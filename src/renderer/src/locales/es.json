@@ -12,7 +12,20 @@
     "uninstall": "Desinstalar",
     "cleaner": "Limpieza",
     "settings": "Ajustes",
-    "about": "Acerca de"
+    "about": "Acerca de",
+    "network": "Red",
+    "health": "Salud",
+    "automation": "Automático",
+    "services": "Servicios",
+    "disk": "Disco",
+    "updates": "Actualizaciones",
+    "boostActive": "Modo rendimiento activo",
+    "sections": {
+      "monitor": "Monitorear",
+      "optimize": "Acelerar",
+      "clean": "Liberar espacio",
+      "app": "RePID"
+    }
   },
   "common": {
     "close": "Cerrar",
@@ -180,7 +193,9 @@
       "win32": "Los procesos de otros usuarios y los servicios de Windows solo se pueden finalizar con permisos de administrador.",
       "unix": "Los servicios del sistema se detienen mediante la ventana de contraseña de tu escritorio (polkit) cuando hace falta. No se admite ejecutar toda la app como root."
     },
-    "relaunchAdmin": "Reiniciar como administrador"
+    "relaunchAdmin": "Reiniciar como administrador",
+    "restorePoints": "Punto de restauración antes de cambios delicados",
+    "restorePointsHint": "Antes de cambiar servicios, desinstalar una app o borrar Windows.old, RePID crea un punto de restauración de Windows (requiere administrador y la Protección del sistema activada). Si algo falla, Windows puede volver atrás."
   },
   "about": {
     "by": "por",
@@ -706,5 +721,289 @@
       "toast_other": "{{count}} rastros eliminados · {{size}} liberados",
       "review": "contiene programas o partidas guardadas, revísalo"
     }
+  },
+  "disk": {
+    "title": "¿Qué está llenando tu disco?",
+    "intro": "Analiza una carpeta o unidad y mira en un mapa qué ocupa espacio, los archivos más grandes y los duplicados.",
+    "summary": "{{size}} en {{files}} archivos dentro de {{root}}",
+    "where": "Qué analizar",
+    "home": "Tu carpeta personal ({{name}})",
+    "drive": "Unidad {{path}} · {{free}} libres",
+    "scan": "Analizar",
+    "rescan": "Analizar de nuevo",
+    "safeNote": "Todo lo que borres va a la Papelera de reciclaje. Windows, los programas instalados, los datos de apps y las carpetas de herramientas (.git, node_modules, .gradle…) se muestran pero nunca se ofrecen para borrar.",
+    "scanning": "Analizando… {{count}} archivos",
+    "hashing": "Comparando contenido de archivos para encontrar copias idénticas…",
+    "truncated": "El análisis se detuvo antes de terminar (cancelado o demasiados archivos): los tamaños pueden ser menores que los reales.",
+    "tabs": {
+      "map": "Mapa",
+      "large": "Archivos grandes",
+      "duplicates": "Duplicados"
+    },
+    "deleteSelected_one": "Enviar {{count}} a la Papelera ({{size}})",
+    "deleteSelected_other": "Enviar {{count}} a la Papelera ({{size}})",
+    "oldOnly": "Solo los que no se modifican hace más de un año",
+    "noLarge": "No hay archivos de 100 MB o más aquí.",
+    "dupIntro": "RePID busca archivos con exactamente el mismo contenido (no solo el mismo nombre): primero por tamaño y luego comparando su huella SHA-256. Las librerías y archivos de programas nunca se incluyen.",
+    "findDuplicates": "Buscar duplicados",
+    "dupSummary": "{{count}} grupos · {{size}} ocupados por copias",
+    "selectCopies": "Marcar copias sugeridas",
+    "dupTruncated": "Se comparó un máximo de 40 GB: se muestran primero los grupos que más espacio liberan.",
+    "noDuplicates": "No se encontraron archivos duplicados de 1 MB o más.",
+    "dupGroup_one": "{{count}} copia de {{size}}",
+    "dupGroup_other": "{{count}} copias de {{size}}",
+    "confirm": {
+      "title": "¿Enviar a la Papelera?",
+      "action_one": "Enviar {{count}} archivo",
+      "action_other": "Enviar {{count}} archivos",
+      "body_one": "Se moverá {{count}} archivo ({{size}}) a la Papelera de reciclaje.",
+      "body_other": "Se moverán {{count}} archivos ({{size}}) a la Papelera de reciclaje.",
+      "recycle": "Puedes recuperarlos desde la Papelera. El espacio se libera de verdad al vaciarla. RePID siempre deja al menos una copia de cada duplicado."
+    },
+    "toast": {
+      "done_one": "{{count}} archivo enviado a la Papelera ({{size}})",
+      "done_other": "{{count}} archivos enviados a la Papelera ({{size}})",
+      "nothing": "No se movió ningún archivo",
+      "refused_one": "{{count}} se omitió porque cambió desde el análisis o era la última copia.",
+      "refused_other": "{{count}} se omitieron porque cambiaron desde el análisis o eran la última copia.",
+      "failed_one": "{{count}} no se pudo mover (en uso o sin permiso).",
+      "failed_other": "{{count}} no se pudieron mover (en uso o sin permiso)."
+    },
+    "modified": "Modificado el {{date}} (hace {{days}} días)",
+    "keep": "Se conserva",
+    "system": "Protegido",
+    "reveal": "Mostrar en la carpeta",
+    "path": "Ruta",
+    "emptyFolder": "Esta carpeta no tiene subcarpetas grandes.",
+    "other_one": "{{count}} archivo pequeño",
+    "other_other": "{{count}} archivos y carpetas pequeños",
+    "legendSystem": "Rayado = protegido (sistema, programas, datos de apps)",
+    "legendZoom": "Haz clic en una carpeta para entrar"
+  },
+  "automation": {
+    "title": "RePID trabajando por ti",
+    "intro": "Activa lo que quieras que RePID haga solo: acelerar tus juegos, limpiar lo seguro y avisarte antes de que haya problemas.",
+    "boostingNow": "Modo rendimiento activado automáticamente para {{name}}.",
+    "onlyWhileOpen": "Todo esto funciona mientras RePID está abierto. Activa \"Seguir en segundo plano\" para que funcione aunque cierres la ventana.",
+    "boost": {
+      "title": "Modo rendimiento automático",
+      "body": "Al abrir un juego o una app de tu lista, RePID le da prioridad y calma lo que está en segundo plano. Se desactiva solo al cerrarlo.",
+      "games": "Detectar juegos (Steam, Epic, GOG, Xbox, EA, Ubisoft, Riot, Battle.net)",
+      "gamesNow": "Juegos abiertos ahora: {{names}}",
+      "pick": "Agregar una app abierta…"
+    },
+    "clean": {
+      "title": "Limpieza programada",
+      "body": "Limpia solo lo marcado como seguro (temporales, cachés). Nunca historial, contraseñas ni lo que una app abierta esté usando, y nunca mientras juegas.",
+      "daily": "Cada día",
+      "weekly": "Cada semana",
+      "next": "Próxima limpieza: {{date}}",
+      "last": "Última: {{date}}"
+    },
+    "alerts": {
+      "title": "Avisos",
+      "body": "Notificaciones del sistema cuando algo necesita tu atención.",
+      "memory": "Una app no deja de crecer en memoria (posible fuga)",
+      "disk": "Un disco supera el {{pct}} % de uso",
+      "threshold": "Umbral de disco lleno"
+    },
+    "background": {
+      "title": "Seguir en segundo plano",
+      "body": "RePID queda en la bandeja del sistema (junto al reloj) para que lo automático siga funcionando.",
+      "tray": "Al cerrar la ventana, seguir en la bandeja",
+      "login": "Iniciar con Windows / macOS (minimizado)"
+    },
+    "log": {
+      "title": "Actividad reciente",
+      "empty": "Aún no hay actividad automática.",
+      "boost-on": "Modo rendimiento activado para {{name}} ({{count}} apps calmadas)",
+      "boost-off": "{{name}} se cerró: modo rendimiento desactivado y prioridades restauradas",
+      "clean": "Limpieza programada: {{size}} liberados",
+      "memory-growth": "Aviso: {{name}} pasó de {{from}} a {{to}} en 30 minutos",
+      "disk-low": "Aviso: el disco {{drive}} está al {{pct}} % ({{free}} libres)",
+      "error": "Error: {{message}}"
+    }
+  },
+  "updates": {
+    "title": "Actualiza tus apps",
+    "intro": "Busca versiones nuevas de los programas instalados.",
+    "scanning": "Buscando actualizaciones…",
+    "summary_one": "{{count}} app tiene una versión nueva",
+    "summary_other": "{{count}} apps tienen una versión nueva",
+    "apply_one": "Actualizar {{count}}",
+    "apply_other": "Actualizar {{count}}",
+    "one": "Actualizar",
+    "note": {
+      "win32": "Usa winget, el instalador oficial de Windows: descarga desde la fuente de cada fabricante y comprueba la huella (hash) del instalador antes de ejecutarlo. Algunas apps piden permiso (UAC) al actualizarse.",
+      "darwin": "Usa Homebrew (fórmulas y casks instalados con brew).",
+      "linux": "Usa Flatpak para las apps instaladas con Flatpak."
+    },
+    "missing": {
+      "win32": "No se encontró winget. Instala \"Instalador de aplicación\" desde Microsoft Store para usar esta función.",
+      "darwin": "No se encontró Homebrew (brew.sh).",
+      "linux": "No se encontró Flatpak en este sistema."
+    },
+    "unsupported": "Esta función no está disponible en este sistema.",
+    "applying": "Actualizando {{done}} de {{total}}: {{name}}",
+    "applyingHint": "Puede tardar varios minutos por app. No cierres RePID.",
+    "listTitle": "Actualizaciones disponibles ({{count}})",
+    "allCurrent": "Todo está al día. 🎉",
+    "major": "Versión mayor",
+    "majorHint": "Salto de versión principal (por ejemplo 11 → 13): puede cambiar cómo funciona la app o el formato de sus datos. Revisa antes de actualizar; por eso no viene marcada.",
+    "status": {
+      "updated": "Actualizada",
+      "failed": "Falló",
+      "not-found": "Ya no aparece",
+      "needs-admin": "Requiere administrador",
+      "cancelled": "Cancelada"
+    },
+    "lastScan": "Última búsqueda: {{date}}",
+    "toast": {
+      "done_one": "{{count}} app actualizada",
+      "done_other": "{{count}} apps actualizadas",
+      "none": "No se actualizó ninguna app",
+      "failed_one": "{{count}} no se pudo actualizar.",
+      "failed_other": "{{count}} no se pudieron actualizar."
+    }
+  },
+  "health": {
+    "title": "Salud del equipo",
+    "intro": "Estado de tus discos, batería, temperaturas y espacio, explicado en simple.",
+    "scanning": "Revisando el equipo…",
+    "restorePoint": "Crear punto de restauración",
+    "needsAdmin": "El desgaste, la temperatura y los errores de los discos solo se pueden leer como administrador.",
+    "drive": {
+      "healthy": "Saludable",
+      "warning": "Atención",
+      "unhealthy": "Fallando",
+      "unknown": "Sin datos"
+    },
+    "temp": "Temperatura",
+    "wear": "Desgaste",
+    "hours": "Horas encendido",
+    "errors": "Errores de lectura",
+    "battery": "Batería",
+    "charging": "Cargando ·",
+    "capacity": "Capacidad vs. nueva",
+    "cycles": "Ciclos de carga",
+    "system": "Sistema",
+    "uptime": "Encendido hace {{days}} d {{hours}} h",
+    "cpuTemp": "CPU",
+    "gpuTemp": "GPU",
+    "noCpuTemp": "Tu equipo no expone la temperatura del procesador sin herramientas del fabricante.",
+    "space": "Espacio en disco",
+    "free": "{{free}} libres de {{total}}",
+    "findings": {
+      "allGood": "Todo en orden: no encontramos problemas de salud.",
+      "driveFailing": "El disco {{name}} reporta que está fallando. Haz una copia de seguridad de tus archivos cuanto antes.",
+      "driveWarning": "El disco {{name}} reporta advertencias. Conviene hacer una copia de seguridad.",
+      "driveErrors": "El disco {{name}} tuvo {{count}} errores de lectura sin corregir: señal de desgaste. Haz una copia de seguridad.",
+      "driveWorn": "El SSD {{name}} usó el {{pct}} % de su vida útil. Planea reemplazarlo y respalda tus datos.",
+      "driveWear": "El SSD {{name}} usó el {{pct}} % de su vida útil.",
+      "driveHot": "El disco {{name}} está a {{temp}} °C: revisa la ventilación.",
+      "volumeFull": "La unidad {{mount}} está al {{pct}} %: casi sin espacio, Windows y las apps pueden ir lentos. Usa Disco y Limpieza.",
+      "volumeLow": "La unidad {{mount}} está al {{pct}} %. Libera espacio con Disco o Limpieza.",
+      "batteryWorn": "La batería solo carga el {{pct}} % de lo que cargaba nueva: conviene reemplazarla.",
+      "batteryAged": "La batería carga el {{pct}} % de su capacidad original: dura menos que cuando era nueva.",
+      "cpuHot": "El procesador está a {{temp}} °C: limpia el polvo o revisa la ventilación.",
+      "gpuHot": "La tarjeta gráfica está a {{temp}} °C: revisa la ventilación.",
+      "restart": "El equipo lleva {{days}} días sin reiniciarse. Reiniciar libera memoria y aplica actualizaciones pendientes."
+    },
+    "restore": {
+      "created": "Punto de restauración creado",
+      "recent": "Ya hay un punto de restauración de las últimas 24 horas: estás cubierto",
+      "disabled": "No se pudo crear un punto de restauración: la Protección del sistema está desactivada en Windows",
+      "needsAdmin": "Crear un punto de restauración requiere ejecutar RePID como administrador",
+      "unsupported": "Los puntos de restauración solo existen en Windows",
+      "failed": "No se pudo crear el punto de restauración"
+    }
+  },
+  "network": {
+    "title": "¿Quién usa tu internet?",
+    "scanning": "Revisando conexiones…",
+    "summary_one": "{{count}} app conectada a internet ahora",
+    "summary_other": "{{count}} apps conectadas a internet ahora",
+    "download": "Descarga",
+    "upload": "Subida",
+    "note": "Se actualiza cada 4 segundos. Muestra las conexiones abiertas de cada app y con qué servidores habla. Bloquear crea una regla en el Firewall de Windows que puedes quitar cuando quieras.",
+    "needsAdmin": "Para bloquear el acceso a internet de una app, RePID necesita permisos de administrador.",
+    "blockedIdle": "Programas bloqueados por RePID (no abiertos ahora)",
+    "apps": "Apps con actividad de red",
+    "empty": "Ninguna app tiene conexiones abiertas en este momento.",
+    "blockedBadge": "Sin internet",
+    "connections_one": "{{count}} conexión activa",
+    "connections_other": "{{count}} conexiones activas",
+    "listening": "Escucha en el puerto {{ports}}",
+    "block": "Bloquear internet",
+    "unblock": "Desbloquear",
+    "confirm": {
+      "title": "¿Bloquear internet para {{name}}?",
+      "body": "RePID creará una regla en el Firewall de Windows que impide que este programa se conecte a internet. Seguirá funcionando sin conexión (sin actualizaciones, sincronización ni contenido en línea).",
+      "undo": "Puedes desbloquearlo aquí en cualquier momento, aunque el programa esté cerrado."
+    },
+    "status": {
+      "blocked": "{{name}} ya no puede conectarse a internet",
+      "unblocked": "{{name}} vuelve a tener internet",
+      "needs-admin": "Requiere ejecutar RePID como administrador",
+      "protected": "Este componente del sistema está protegido",
+      "not-found": "La app ya no está abierta",
+      "unsupported": "Bloquear solo está disponible en Windows",
+      "failed": "No se pudo cambiar la regla del firewall"
+    }
+  },
+  "services": {
+    "title": "Servicios que arrancan con Windows",
+    "scanning": "Leyendo servicios…",
+    "summary": "{{count}} servicios revisados · {{rec}} sugeridos para pasar a manual",
+    "applySuggested_one": "Pasar {{count}} sugerido a manual",
+    "applySuggested_other": "Pasar {{count}} sugeridos a manual",
+    "safeNote": "\"Manual\" significa que el servicio ya no arranca con Windows, pero se inicia solo cuando algo lo necesita. RePID no deshabilita ni detiene servicios, y no muestra drivers, audio, red ni seguridad.",
+    "unsupported": "Los servicios solo se gestionan en Windows. En macOS y Linux usa Arranque.",
+    "needsAdmin": "Cambiar servicios requiere ejecutar RePID como administrador.",
+    "history": "{{count}} servicios cambiados por RePID.",
+    "empty": "No hay servicios que convenga cambiar.",
+    "mode": {
+      "auto": "Automático",
+      "delayed": "Automático (retrasado)",
+      "manual": "Manual",
+      "disabled": "Deshabilitado"
+    },
+    "running": "En ejecución",
+    "stopped": "Detenido",
+    "toManual": "Pasar a manual",
+    "undo": "Deshacer",
+    "nextBoot": "El efecto se nota desde el próximo reinicio.",
+    "catalog": {
+      "telemetry": "Envía datos de uso y diagnóstico a Microsoft. En manual, Windows funciona igual.",
+      "maps": "Descarga mapas sin conexión de la app Mapas. Si no la usas, no se nota.",
+      "retailDemo": "Modo demostración para tiendas. No se usa en equipos personales.",
+      "mediaSharing": "Comparte tu biblioteca del Reproductor de Windows Media en la red local. Arranca si lo usas.",
+      "fax": "Envío de faxes. Se inicia solo si alguna vez envías uno.",
+      "linkTracking": "Sigue archivos movidos entre equipos de una red de empresa. En casa no se nota.",
+      "search": "Indexa archivos para búsquedas instantáneas. En manual, buscar en el Explorador y en Inicio será más lento.",
+      "sysmain": "Precarga las apps que más usas en memoria. En discos lentos (HDD) ayuda; en SSD su efecto es menor.",
+      "printing": "Cola de impresión. Si tienes impresora, imprimir seguirá funcionando pero el primer trabajo tardará un poco más.",
+      "updater": "Busca actualizaciones de esta app. En manual, la app sigue actualizándose cuando la abres o con su tarea programada.",
+      "telemetryApp": "Recopila analíticas o diagnósticos del fabricante. La app funciona igual sin él al arrancar.",
+      "remote": "Permite conectarse a este equipo de forma remota. En manual, nadie podrá entrar sin que abras la app primero.",
+      "database": "Base de datos local. En manual no arranca con Windows: inicia la base de datos (o la app que la usa) cuando la necesites.",
+      "license": "Valida la licencia de un programa. Si ese programa no arranca después, vuelve a ponerlo en automático.",
+      "thirdParty": "Servicio de otro fabricante. Puede ser necesario para su programa: cámbialo solo si sabes para qué sirve."
+    },
+    "toast": {
+      "manual_one": "{{count}} servicio pasado a manual",
+      "manual_other": "{{count}} servicios pasados a manual",
+      "restored_one": "{{count}} servicio restaurado",
+      "restored_other": "{{count}} servicios restaurados",
+      "needsAdmin": "Algunos requieren administrador."
+    },
+    "confirm": {
+      "title": "¿Pasar estos servicios a manual?",
+      "action_one": "Pasar {{count}} a manual",
+      "action_other": "Pasar {{count}} a manual",
+      "body": "Dejarán de arrancar con Windows. Se iniciarán solos cuando algo los necesite y puedes deshacerlo con un clic.",
+      "ack": "Entiendo el efecto de los servicios marcados con precaución."
+    },
+    "whatHappens": "Qué pasa en manual:"
   }
 }

@@ -74,6 +74,18 @@ export function SettingsView({ settings, update, snapshot }: {
             <span className="switch__track" />
           </label>
         </div>
+        {(window.repid?.platform ?? 'win32') === 'win32' && (
+          <div className="field">
+            <div>
+              <label htmlFor="restore-points">{t('settings.restorePoints')}</label>
+              <p className="muted">{t('settings.restorePointsHint')}</p>
+            </div>
+            <label className="switch">
+              <input id="restore-points" type="checkbox" checked={settings.restorePoints} onChange={(e) => update({ restorePoints: e.target.checked })} />
+              <span className="switch__track" />
+            </label>
+          </div>
+        )}
         <div className="field">
           <div>
             <label htmlFor="threshold">{t('settings.threshold', { value: settings.smartThreshold })}</label>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { BoostState, SystemSnapshot } from '@shared/types'
+import type { BoostState, SystemSnapshot, TaskProgress } from '@shared/types'
 import { api } from './api'
 
 export type Theme = 'system' | 'dark' | 'light'
@@ -12,6 +12,8 @@ export interface Settings {
   smartThreshold: number
   protectedNames: string[]
   showProtected: boolean
+  /** Windows: create a System Restore point before services, uninstall and Windows-update cleanup changes. */
+  restorePoints: boolean
 }
 
 const STORAGE_KEY = 'repid.settings.v1'
@@ -21,7 +23,8 @@ const DEFAULTS: Settings = {
   confirmKill: true,
   smartThreshold: 30,
   protectedNames: [],
-  showProtected: true
+  showProtected: true,
+  restorePoints: true
 }
 
 function load(): Settings {
@@ -120,4 +123,22 @@ export function useBoost(tick: number | undefined) {
     void refresh()
   }, [tick, refresh])
   return { boost, setBoost }
+}
+
+/** Latest progress event of one long task (disk scan, duplicates, updates); null when idle. */
+export function useProgress(task: TaskProgress['task'] | null) {
+  const [progress, setProgress] = useState<TaskProgress | null>(null)
+  useEffect(() => {
+    setProgress(null)
+    if (!task) return
+    return api.onProgress((p) => {
+      if (p.task === task) setProgress(p)
+    })
+  }, [task])
+  return progress
+}
+
+/** Settings live in the renderer; modules that need one flag outside React read it here. */
+export function readSetting<K extends keyof Settings>(key: K): Settings[K] {
+  return load()[key]
 }
