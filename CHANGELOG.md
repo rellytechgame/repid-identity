@@ -13,6 +13,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - **Network by app**: open connections and remote servers per app, download/upload speed, and per-program internet blocking with Windows Firewall rules that can be removed at any time.
 - **Windows services**: curated list of auto-start services that can start on demand instead; switched to *Manual* (never disabled), journaled, verified and restorable exactly (including delayed start).
 - Sidebar grouped into Monitor, Speed up, Free up space and RePID.
+- **New version notice**: at start-up and every 6 hours RePID reads the installer version on the download page; when it is newer, a banner with an *Update* button opens that page. Can be hidden per version or turned off in Settings.
 
 ### Security
 - Disk: ids only from the last scan; Windows, `Program Files` on any drive, `ProgramData`, AppData, the Recycle Bin, dot-folders, `node_modules`/`venv`/`vendor`/build outputs are never offered; libraries are never offered as duplicates. Rules come from a real dry run where a naive scan flagged Gradle caches and Android emulator images.

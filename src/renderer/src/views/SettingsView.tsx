@@ -88,6 +88,16 @@ export function SettingsView({ settings, update, snapshot }: {
         )}
         <div className="field">
           <div>
+            <label htmlFor="check-updates">{t('settings.checkUpdates')}</label>
+            <p className="muted">{t('settings.checkUpdatesHint')}</p>
+          </div>
+          <label className="switch">
+            <input id="check-updates" type="checkbox" checked={settings.checkUpdates} onChange={(e) => update({ checkUpdates: e.target.checked })} />
+            <span className="switch__track" />
+          </label>
+        </div>
+        <div className="field">
+          <div>
             <label htmlFor="threshold">{t('settings.threshold', { value: settings.smartThreshold })}</label>
             <p className="muted">{t('settings.thresholdHint')}</p>
           </div>

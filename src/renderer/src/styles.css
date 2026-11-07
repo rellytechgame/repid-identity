@@ -629,3 +629,18 @@ th.col-num { text-align: end; }
   .nav-section { flex-direction: row; }
   .nav-section + .nav-section { margin-top: 0; }
 }
+
+/* ───────────── New version notice ───────────── */
+.update-banner {
+  display: flex; align-items: center; gap: 12px; margin: 12px 24px 0; padding: 10px 14px; border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in srgb, var(--brand-2) 45%, var(--border));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--brand-2) 16%, transparent), color-mix(in srgb, var(--brand-1) 8%, transparent)), var(--bg-elev);
+  font-size: 13px;
+}
+.update-banner > svg { color: var(--brand-1); flex: none; }
+.update-banner > span { flex: 1; min-width: 0; }
+.update-banner .icon-btn--sm { margin-inline-start: 0; }
+.nav-item__dot--update { background: var(--brand-1); box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-1) 25%, transparent); }
+.about__update { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; font-size: 13px; }
+.about__update--new { padding: 8px 14px; border-radius: var(--radius-sm); background: color-mix(in srgb, var(--brand-2) 14%, transparent); font-weight: 600; }
+@media (max-width: 760px) { .update-banner { margin: 8px 12px 0; flex-wrap: wrap; } }

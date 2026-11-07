@@ -556,6 +556,12 @@ export function createDemoApi(): RepidApi {
       }
       window.open(REPO_URL + (suffix[path] ?? ''), '_blank', 'noopener,noreferrer')
     },
+    async checkAppUpdate() {
+      return { current: '1.5.0', latest: '1.5.0', available: false, checkedAt: Date.now() }
+    },
+    async openRelease() {
+      window.open(`${REPO_URL}/releases/tag/win-release`, '_blank', 'noopener,noreferrer')
+    },
     async openDonate() {
       window.open(DONATE_URL, '_blank', 'noopener,noreferrer')
     },

@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { api } from '../api'
+import type { AppUpdateInfo } from '@shared/types'
+import { api, isDemo } from '../api'
 import { Icon } from '../components/Icon'
 import { LogoMark, Wordmark } from '../components/Logo'
 import { StarButton } from '../components/ui'
@@ -15,8 +17,14 @@ interface Supporter {
 const TIER_ORDER = { company: 0, sponsor: 1, booster: 2, coffee: 3 }
 const supporters = [...(supportersData.supporters as Supporter[])].sort((a, b) => TIER_ORDER[a.tier] - TIER_ORDER[b.tier])
 
-export function About() {
-  const { t } = useTranslation()
+export function About({ update, onCheck }: { update: AppUpdateInfo | null; onCheck: () => Promise<AppUpdateInfo | null> }) {
+  const { t, i18n } = useTranslation()
+  const [checking, setChecking] = useState(false)
+  const check = async () => {
+    setChecking(true)
+    await onCheck()
+    setChecking(false)
+  }
   return (
     <div className="about">
       <section className="about__hero">
@@ -26,10 +34,33 @@ export function About() {
         <p className="about__tagline">{t('about.tagline')}</p>
         <div className="about__actions">
           <StarButton />
-          <button className="btn btn--secondary" onClick={() => void api.openRepo('releases')}>
-            <Icon name="external" size={16} /> {t('about.releases')}
+          <button className="btn btn--secondary" onClick={() => void api.openRelease()}>
+            <Icon name="download" size={16} /> {t('about.releases')}
           </button>
         </div>
+        {!isDemo && (
+          <div className={`about__update ${update?.available ? 'about__update--new' : ''}`} role="status">
+            {update?.available ? (
+              <>
+                <span><Icon name="download" size={16} /> {t('update.available', { version: update.latest })}</span>
+                <button className="btn btn--primary btn--sm" onClick={() => void api.openRelease()}>{t('update.cta')}</button>
+              </>
+            ) : (
+              <>
+                <span className="muted">
+                  {update?.error && !update.latest
+                    ? t('update.error')
+                    : update
+                      ? t('update.upToDate', { time: new Date(update.checkedAt).toLocaleTimeString(i18n.language, { timeStyle: 'short' }) })
+                      : t('update.notChecked')}
+                </span>
+                <button className="btn btn--ghost btn--sm" onClick={() => void check()} disabled={checking}>
+                  {checking ? <span className="spinner spinner--sm" /> : <Icon name="refresh" size={14} />} {t('update.check')}
+                </button>
+              </>
+            )}
+          </div>
+        )}
       </section>
 
       <section className="about__grid">

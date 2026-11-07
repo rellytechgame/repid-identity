@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { BoostState, SystemSnapshot, TaskProgress } from '@shared/types'
+import type { AppUpdateInfo, BoostState, SystemSnapshot, TaskProgress } from '@shared/types'
 import { api } from './api'
 
 export type Theme = 'system' | 'dark' | 'light'
@@ -14,6 +14,10 @@ export interface Settings {
   showProtected: boolean
   /** Windows: create a System Restore point before services, uninstall and Windows-update cleanup changes. */
   restorePoints: boolean
+  /** Ask GitHub (once at start-up, then every 6 h) whether a newer installer is available. */
+  checkUpdates: boolean
+  /** Version whose banner the user closed: hidden until an even newer one appears. */
+  dismissedUpdate?: string
 }
 
 const STORAGE_KEY = 'repid.settings.v1'
@@ -24,7 +28,8 @@ const DEFAULTS: Settings = {
   smartThreshold: 30,
   protectedNames: [],
   showProtected: true,
-  restorePoints: true
+  restorePoints: true,
+  checkUpdates: true
 }
 
 function load(): Settings {
@@ -141,4 +146,27 @@ export function useProgress(task: TaskProgress['task'] | null) {
 /** Settings live in the renderer; modules that need one flag outside React read it here. */
 export function readSetting<K extends keyof Settings>(key: K): Settings[K] {
   return load()[key]
+}
+
+const UPDATE_EVERY_MS = 6 * 3600_000
+
+/** New version on the download page: checked at start-up and every 6 hours while RePID stays open. */
+export function useAppUpdate(enabled: boolean) {
+  const [info, setInfo] = useState<AppUpdateInfo | null>(null)
+  const check = useCallback(async (force = false) => {
+    try {
+      const next = await api.checkAppUpdate(force)
+      setInfo(next)
+      return next
+    } catch {
+      return null
+    }
+  }, [])
+  useEffect(() => {
+    if (!enabled) return
+    void check()
+    const id = window.setInterval(() => void check(), UPDATE_EVERY_MS)
+    return () => window.clearInterval(id)
+  }, [enabled, check])
+  return { info, check }
 }

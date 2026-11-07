@@ -282,7 +282,7 @@ RePID runs the platform's package manager — `winget upgrade` on Windows, `brew
 
 ## Privacy
 
-RePID makes **no network requests of its own** except one optional, anonymous call to the public GitHub API to show the star count on the *About* screen. The *Updates* section runs your system's package manager (winget, Homebrew or Flatpak), which contacts its own repositories — only when you open that section. It has no analytics, no crash reporting service and no accounts. Settings live in the app's local storage.
+RePID makes **no network requests of its own** except anonymous calls to the public GitHub API: the star count on the *About* screen and, at start-up and every 6 hours, a look at the [download page](https://github.com/rellytechgame/repid-identity/releases/tag/win-release) to tell you when a newer version exists (turn it off in Settings). Nothing about you or your computer is sent. The *Updates* section runs your system's package manager (winget, Homebrew or Flatpak), which contacts its own repositories — only when you open that section. It has no analytics, no crash reporting service and no accounts. Settings live in the app's local storage.
 
 ## Development
 

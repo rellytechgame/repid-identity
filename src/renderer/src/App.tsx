@@ -4,7 +4,7 @@ import type { AppGroup, BoostProfileId, CleanResult, KillResult } from '@shared/
 import { suggestTargets } from '@shared/engine/smart'
 import { api, isDemo } from './api'
 import { formatBytes, formatPercent } from './format'
-import { useBoost, usePrefersDark, useSettings, useSnapshot } from './hooks'
+import { useAppUpdate, useBoost, usePrefersDark, useSettings, useSnapshot } from './hooks'
 import { applyDocumentLanguage, resolveLanguage } from './i18n'
 import { Icon, type IconName } from './components/Icon'
 import { LogoMark, Wordmark } from './components/Logo'
@@ -87,6 +87,8 @@ export function App() {
   const { snapshot, history, error, refresh } = useSnapshot(settings.refreshMs)
   const { boost, setBoost } = useBoost(snapshot?.timestamp)
   const prefersDark = usePrefersDark()
+  const { info: appUpdate, check: checkUpdate } = useAppUpdate(settings.checkUpdates && !isDemo)
+  const showUpdate = !!appUpdate?.available && appUpdate.latest !== settings.dismissedUpdate
   const [view, setView] = useState<View>('dashboard')
   const viewRef = useRef<HTMLElement>(null)
   // Every section shares one scroll container: start each one at the top.
@@ -268,6 +270,7 @@ export function App() {
                   <span>{t(`nav.${item.id}`)}</span>
                   {item.id === 'processes' && snapshot && <span className="nav-item__count">{snapshot.groups.length}</span>}
                   {item.id === 'boost' && boost.active && <span className="nav-item__dot" title={t('nav.boostActive')} />}
+                  {item.id === 'about' && appUpdate?.available && <span className="nav-item__dot nav-item__dot--update" title={t('update.available', { version: appUpdate.latest })} />}
                 </button>
               ))}
             </div>
@@ -299,6 +302,21 @@ export function App() {
             <StarButton compact />
           </div>
         </header>
+
+        {showUpdate && appUpdate && (
+          <div className="update-banner" role="status">
+            <Icon name="download" size={18} />
+            <span>
+              <strong>{t('update.available', { version: appUpdate.latest })}</strong> {t('update.current', { version: appUpdate.current })}
+            </span>
+            <button className="btn btn--primary btn--sm" onClick={() => void api.openRelease()}>
+              <Icon name="external" size={14} /> {t('update.cta')}
+            </button>
+            <button className="icon-btn icon-btn--sm" aria-label={t('update.later')} title={t('update.later')} onClick={() => update({ dismissedUpdate: appUpdate.latest })}>
+              <Icon name="close" size={14} />
+            </button>
+          </div>
+        )}
 
         <div className={`content ${selected && (view === 'dashboard' || view === 'processes') ? 'has-detail' : ''}`}>
           <main className="view" ref={viewRef}>
@@ -343,7 +361,7 @@ export function App() {
             {view === 'uninstall' && <UninstallView notify={pushToast} />}
             {view === 'cleaner' && <CleanerView onResult={(result) => reportClean(result)} />}
             {view === 'settings' && <SettingsView settings={settings} update={update} snapshot={snapshot} />}
-            {view === 'about' && <About />}
+            {view === 'about' && <About update={appUpdate} onCheck={() => checkUpdate(true)} />}
           </main>
           {selected && (view === 'dashboard' || view === 'processes') && (
             <DetailPanel

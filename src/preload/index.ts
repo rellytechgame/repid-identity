@@ -50,6 +50,8 @@ const api: RepidApi = {
   networkBlock: (request) => ipcRenderer.invoke('repid:network-block', request),
   servicesScan: () => ipcRenderer.invoke('repid:services-scan'),
   servicesSet: (request) => ipcRenderer.invoke('repid:services-set', request),
+  checkAppUpdate: (force) => ipcRenderer.invoke('repid:app-update-check', force === true),
+  openRelease: () => ipcRenderer.invoke('repid:open-release'),
   openRepo: (path = '') => ipcRenderer.invoke('repid:open-repo', path),
   openDonate: () => ipcRenderer.invoke('repid:open-donate'),
   relaunchElevated: () => ipcRenderer.invoke('repid:relaunch-elevated'),

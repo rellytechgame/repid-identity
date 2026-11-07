@@ -1,6 +1,7 @@
 import { join } from 'node:path'
 import { app, BrowserWindow, Menu, nativeImage, Notification, session, shell, Tray } from 'electron'
 import type { AutomationConfig, TaskProgress } from '../shared/types'
+import { AppUpdateChecker } from './app-update'
 import { Automation } from './automation'
 import { Booster } from './boost'
 import { Cleaner } from './cleaner'
@@ -193,7 +194,8 @@ if (!app.requestSingleInstanceLock()) {
         updater: new Updater(emitProgress),
         health: new Health(),
         network: new Network(engine),
-        services: new Services(join(app.getPath('userData'), 'services-journal.json'))
+        services: new Services(join(app.getPath('userData'), 'services-journal.json')),
+        appUpdate: new AppUpdateChecker(app.getVersion())
       },
       (theme) => {
       if (!isMac) win?.setTitleBarOverlay(TITLEBAR[theme])

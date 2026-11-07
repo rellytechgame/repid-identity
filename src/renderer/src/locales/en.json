@@ -195,7 +195,9 @@
     },
     "relaunchAdmin": "Relaunch as administrator",
     "restorePoints": "Restore point before delicate changes",
-    "restorePointsHint": "Before changing services, uninstalling an app or removing Windows.old, RePID creates a Windows restore point (requires administrator and System Protection turned on). If something goes wrong, Windows can roll back."
+    "restorePointsHint": "Before changing services, uninstalling an app or removing Windows.old, RePID creates a Windows restore point (requires administrator and System Protection turned on). If something goes wrong, Windows can roll back.",
+    "checkUpdates": "Tell me when a new version is out",
+    "checkUpdatesHint": "When RePID opens (and every 6 hours) it checks the download page on GitHub. None of your data is sent; if there is a new version you will see a notice with an Update button."
   },
   "about": {
     "by": "by",
@@ -1005,5 +1007,15 @@
       "ack": "I understand the effect of the services marked with caution."
     },
     "whatHappens": "What happens on manual:"
+  },
+  "update": {
+    "available": "New version {{version}} available",
+    "current": "You have {{version}}. Download the installer and run it: it installs over this one and keeps your settings.",
+    "cta": "Update",
+    "later": "Hide until the next version",
+    "check": "Check for updates",
+    "upToDate": "You have the latest version (checked at {{time}})",
+    "notChecked": "Not checked for a new version yet",
+    "error": "Could not check right now (offline?)"
   }
 }

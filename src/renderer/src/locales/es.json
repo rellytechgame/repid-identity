@@ -195,7 +195,9 @@
     },
     "relaunchAdmin": "Reiniciar como administrador",
     "restorePoints": "Punto de restauración antes de cambios delicados",
-    "restorePointsHint": "Antes de cambiar servicios, desinstalar una app o borrar Windows.old, RePID crea un punto de restauración de Windows (requiere administrador y la Protección del sistema activada). Si algo falla, Windows puede volver atrás."
+    "restorePointsHint": "Antes de cambiar servicios, desinstalar una app o borrar Windows.old, RePID crea un punto de restauración de Windows (requiere administrador y la Protección del sistema activada). Si algo falla, Windows puede volver atrás.",
+    "checkUpdates": "Avisarme cuando haya una versión nueva",
+    "checkUpdatesHint": "Al abrir RePID (y cada 6 horas) consulta la página de descargas en GitHub. No envía ningún dato tuyo; si hay una versión nueva verás un aviso con el botón Actualizar."
   },
   "about": {
     "by": "por",
@@ -1005,5 +1007,15 @@
       "ack": "Entiendo el efecto de los servicios marcados con precaución."
     },
     "whatHappens": "Qué pasa en manual:"
+  },
+  "update": {
+    "available": "Nueva versión {{version}} disponible",
+    "current": "Tienes la {{version}}. Descarga el instalador y ejecútalo: se instala encima y conserva tus ajustes.",
+    "cta": "Actualizar",
+    "later": "Ocultar hasta la próxima versión",
+    "check": "Buscar actualizaciones",
+    "upToDate": "Tienes la última versión (comprobado a las {{time}})",
+    "notChecked": "Aún no se ha comprobado si hay una versión nueva",
+    "error": "No se pudo comprobar ahora (¿sin conexión?)"
   }
 }

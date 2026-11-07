@@ -730,6 +730,16 @@ export interface ServiceChangeOutcome {
   error?: string
 }
 
+export interface AppUpdateInfo {
+  current: string
+  /** Version of the installer on the download page, when it could be read. */
+  latest?: string
+  available: boolean
+  checkedAt: number
+  /** Last check failed (offline, rate limit): the answer may be stale or empty. */
+  error?: string
+}
+
 /** API exposed on `window.repid` by the preload script. */
 export interface RepidApi {
   platform: Platform
@@ -779,6 +789,10 @@ export interface RepidApi {
   networkBlock(request: NetworkBlockRequest): Promise<NetworkBlockResult>
   servicesScan(): Promise<ServicesReport>
   servicesSet(request: ServiceChangeRequest): Promise<ServiceChangeOutcome[]>
+  /** Compares this build with the installer on the download page (cached 30 min unless forced). */
+  checkAppUpdate(force?: boolean): Promise<AppUpdateInfo>
+  /** Opens the fixed download page in the browser. */
+  openRelease(): Promise<void>
   openRepo(path?: RepoPath): Promise<void>
   /** Opens the project's donation page (fixed URL owned by the main process). */
   openDonate(): Promise<void>

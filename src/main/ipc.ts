@@ -1,6 +1,7 @@
 import { app, ipcMain, shell, type IpcMainInvokeEvent } from 'electron'
 import type { EngineSettings, KillRequest, RepoPath } from '../shared/types'
-import { DONATE_URL, REPO_URL } from '../shared/constants'
+import { DONATE_URL, RELEASE_URL, REPO_URL } from '../shared/constants'
+import type { AppUpdateChecker } from './app-update'
 import type { Automation } from './automation'
 import type { Booster } from './boost'
 import type { Cleaner } from './cleaner'
@@ -68,9 +69,10 @@ export interface Modules {
   health: Health
   network: Network
   services: Services
+  appUpdate: AppUpdateChecker
 }
 
-export function registerIpc({ engine, cleaner, startup, booster, uninstaller, disk, automation, updater, health, network, services }: Modules, onTheme: (theme: 'dark' | 'light') => void): void {
+export function registerIpc({ engine, cleaner, startup, booster, uninstaller, disk, automation, updater, health, network, services, appUpdate }: Modules, onTheme: (theme: 'dark' | 'light') => void): void {
   const handle = (channel: string, fn: (event: IpcMainInvokeEvent, arg: unknown) => unknown) =>
     ipcMain.handle(channel, (event, arg) => {
       assertTrustedSender(event)
@@ -129,6 +131,8 @@ export function registerIpc({ engine, cleaner, startup, booster, uninstaller, di
   handle('repid:network-block', (_e, req) => network.block(req))
   handle('repid:services-scan', () => services.scan())
   handle('repid:services-set', (_e, req) => services.set(req))
+  handle('repid:app-update-check', (_e, force) => appUpdate.check(force))
+  handle('repid:open-release', () => shell.openExternal(RELEASE_URL))
   handle('repid:open-donate', () => shell.openExternal(DONATE_URL))
   handle('repid:relaunch-elevated', async () => {
     const ok = await relaunchElevated(process.execPath, app.isPackaged ? [] : process.argv.slice(1))
